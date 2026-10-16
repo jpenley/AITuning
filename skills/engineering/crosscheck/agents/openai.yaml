@@ -1,0 +1,5 @@
+interface:
+  display_name: "Crosscheck"
+  short_description: "Other engine reviews a spec against the code"
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,7 @@
+{
+  "name": "signup",
+  "private": true,
+  "type": "commonjs",
+  "scripts": { "test": "node test.js" },
+  "dependencies": { "flatpickr": "^4.6.13" }
+}

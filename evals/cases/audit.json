@@ -1,0 +1,26 @@
+{
+  "skill_name": "audit",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Review my branch against main before I merge it"
+      },
+      {
+        "prompt": "Audit the changes since the last release tag"
+      },
+      {
+        "prompt": "Can you review this PR for our coding standards and whether it matches the ticket?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The reviewer left comments on my pull request, can you work through them?",
+        "owner": "feedback"
+      },
+      {
+        "prompt": "Write a failing test for this bug before we touch the code",
+        "owner": "tdd"
+      }
+    ]
+  }
+}

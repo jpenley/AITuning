@@ -1,0 +1,17 @@
+{
+  "skill_name": "guards-rust",
+  "trigger": {
+    "positive": [
+      { "prompt": "This Rust workspace has no CI or pre-commit checks, set up guardrails" },
+      { "prompt": "Make clippy warnings fail the build and add a GitHub Actions workflow that runs cargo fmt and cargo test" },
+      { "prompt": "Add a pre-commit hook that runs cargo fmt and clippy on this crate" },
+      { "prompt": "We have 40 clippy warnings in this Rust repo, stop new ones getting in without fixing them all today" },
+      { "prompt": "Pin the Rust toolchain with rust-toolchain.toml and check our MSRV in CI" }
+    ],
+    "negative": [
+      { "prompt": "cargo test started failing this morning with a panic in the parser, debug it", "owner": "diagnose" },
+      { "prompt": "Write a failing Rust unit test for this parser bug before we fix it", "owner": "tdd" },
+      { "prompt": "Find the module cycles in this Rust crate", "owner": "seams-rust" }
+    ]
+  }
+}

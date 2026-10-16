@@ -1,0 +1,5 @@
+interface:
+  display_name: "Flow"
+  short_description: "Which skill fits this situation"
+policy:
+  allow_implicit_invocation: false

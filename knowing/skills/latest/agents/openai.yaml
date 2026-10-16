@@ -1,0 +1,3 @@
+interface:
+  display_name: "Latest"
+  short_description: "What's new on a topic from arXiv, Hacker News, GitHub, and OpenAlex"

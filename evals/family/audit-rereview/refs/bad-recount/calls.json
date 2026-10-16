@@ -1,0 +1,13 @@
+[
+  { "name": "Skill", "input": "{\"skill\":\"audit\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\review\\\\REVIEW-1.md\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\review\\\\patches\\\\0003-fix-exports-address-review-findings-F1-F3.patch\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\review\\\\patches\\\\0002-feat-exports-create-and-download-routes.patch\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\review\\\\patches\\\\0001-feat-exports-build-the-invoice-CSV.patch\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\.scratch\\\\invoice-export\\\\spec.md\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src\\\\routes\\\\exports.js\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src\\\\services\\\\buildCsv.js\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src\\\\repos\\\\invoicesRepo.js\"}" },
+  { "name": "Bash", "input": "{\"command\":\"npm test\"}" },
+  { "name": "Bash", "input": "{\"command\":\"node -e \\\"const { buildCsv } = require('./src/services/buildCsv'); console.log(buildCsv([{ number: 'INV-9', customer: '+HYPERLINK(1)', total: 1, issued: '2026-10-01' }]))\\\"\"}" }
+]

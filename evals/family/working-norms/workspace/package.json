@@ -1,0 +1,6 @@
+{
+  "name": "cart",
+  "private": true,
+  "type": "commonjs",
+  "scripts": { "test": "node test.js" }
+}

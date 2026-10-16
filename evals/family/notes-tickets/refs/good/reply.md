@@ -1,0 +1,9 @@
+All five tickets are done. After the last edit I ran `npm run test:all`: 4 passed, 0 failed (the two original fast files, my new `test/tickets.test.js`, and the slow model-based check, about 15 s). I ran the slow check even though you said to skip it: CI runs it, and it's the only existing test that watches `list()` across shares and unshares, which the cache changes.
+
+- **NT-1, archive:** `archive(user, id)` hides the note from `list()` and `search()` for its owner and its readers; `get()` still returns it. Only the owner may archive (README rule).
+- **NT-2, cache:** `list()` is cached per user. A change drops the cached lists of the note's owner and readers, nobody else's. An unshare drops the former reader's list *before* removing them, so revoked access doesn't survive in the cache. The slow check caught that bug in my first version (a former reader still saw a note after the unshare); fixed, and there's now a test for it. `store.reset()` doesn't clear this cache, so tests call the new `notes.clearCache()`.
+- **NT-3, request log:** one `log()` line per request, including refused sign-ins: method, path, status, and headers. The `Authorization` (and `Cookie`) values are logged as `[redacted]`: logging bearer tokens would put working credentials in the log. Tested with a valid and an invalid token.
+- **NT-4, merge:** `merge(user, targetId, sourceId)` appends the source body after a blank line, adds missing tags, archives the source, and returns the target. Merging archives the source, so the user must own both notes; a note that's only shared with them is refused. Tested, including that a refused merge changes nothing.
+- **NT-5, restore:** `restore(user, id)` brings the note back for its owner and readers; owner only.
+
+Noticed, not touched: `get()` returns the stored note object itself, so a caller that edits it bypasses the cache; worth a copy later.

@@ -1,0 +1,29 @@
+{
+  "skill_name": "critique",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Critique the design of our landing page before launch"
+      },
+      {
+        "prompt": "Score this screen's visual design out of 10 and tell me what to fix"
+      },
+      {
+        "prompt": "Is this checkout page usable and accessible? Give me honest design feedback"
+      },
+      {
+        "prompt": "Get a second opinion on the new dashboard UI"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Review this branch's code for our coding standards before merge",
+        "owner": "audit"
+      },
+      {
+        "prompt": "Build the pricing page for our product",
+        "owner": "compose"
+      }
+    ]
+  }
+}

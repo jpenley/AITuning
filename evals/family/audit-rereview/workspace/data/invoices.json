@@ -1,0 +1,5 @@
+[
+  { "number": "INV-1001", "orgId": "org-a", "customer": "Northwind Traders", "total": 1250, "issued": "2026-09-02" },
+  { "number": "INV-1002", "orgId": "org-a", "customer": "Acme, \"Ltd\"", "total": 89.5, "issued": "2026-09-14" },
+  { "number": "INV-1003", "orgId": "org-b", "customer": "Contoso", "total": 410, "issued": "2026-09-20" }
+]

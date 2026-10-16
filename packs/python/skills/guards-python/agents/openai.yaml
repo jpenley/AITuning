@@ -1,0 +1,3 @@
+interface:
+  display_name: "Guards (Python)"
+  short_description: "Lint, types, tests, pre-commit, and CI for Python"

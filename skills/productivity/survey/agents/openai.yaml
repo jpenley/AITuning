@@ -1,0 +1,5 @@
+interface:
+  display_name: "Survey"
+  short_description: "Questionnaire to gather missing knowledge"
+policy:
+  allow_implicit_invocation: false

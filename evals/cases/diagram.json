@@ -1,0 +1,36 @@
+{
+  "skill_name": "diagram",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Draw a sequence diagram of how a login request moves between the browser, the API and the database"
+      },
+      {
+        "prompt": "Make a flowchart of the customer onboarding process from signup to the first payment"
+      },
+      {
+        "prompt": "I need an ER diagram for the tables in schema.sql"
+      },
+      {
+        "prompt": "Diagram how the modules in src/ depend on each other so I can see the structure at a glance"
+      },
+      {
+        "prompt": "Can you turn this description of the order lifecycle into a state machine diagram?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Explain how the auth flow in this repo works and where to start reading",
+        "owner": "trace"
+      },
+      {
+        "prompt": "Mock up two different layouts for the settings page so I can compare them",
+        "owner": "sketch"
+      },
+      {
+        "prompt": "Make the dashboard page look less generic and restyle it",
+        "owner": "compose"
+      }
+    ]
+  }
+}

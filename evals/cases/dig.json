@@ -1,0 +1,47 @@
+{
+  "skill_name": "dig",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Why is the retry limit in the payment client set to 5?"
+      },
+      {
+        "prompt": "Who added this weird sleep in the export job, and what was it for?"
+      },
+      {
+        "prompt": "What was the reasoning behind this feature flag check? I want to rip it out"
+      },
+      {
+        "prompt": "Find the PR that introduced this null check and tell me why it's there"
+      },
+      {
+        "prompt": "Before I delete this workaround, find out why somebody added it"
+      },
+      {
+        "prompt": "Why do we cache sessions in both Redis and memory? Dig through the history"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Check the official Polly docs for why the retry policy defaults to three attempts",
+        "owner": "research"
+      },
+      {
+        "prompt": "Payments started failing after this morning's deploy, debug it",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Record an ADR for why we chose Postgres over Mongo",
+        "owner": "domain"
+      },
+      {
+        "prompt": "This retry code works but it's hard to read, tidy it up",
+        "owner": "refine"
+      },
+      {
+        "prompt": "Review the changes on this branch since main",
+        "owner": "audit"
+      }
+    ]
+  }
+}

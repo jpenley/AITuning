@@ -1,0 +1,15 @@
+{
+  "skill_name": "image-assets",
+  "trigger": {
+    "positive": [
+      { "prompt": "Generate a raster illustration for our landing page" },
+      { "prompt": "Edit this photo into a transparent cutout image asset" },
+      { "prompt": "Find imagegen and set up its CLI fallback" },
+      { "prompt": "Generate textures and sprites for our game" }
+    ],
+    "negative": [
+      { "prompt": "Build the onboarding screen for the mobile web app", "owner": "compose" },
+      { "prompt": "Review this UI for contrast and tap targets", "owner": "craft" }
+    ]
+  }
+}

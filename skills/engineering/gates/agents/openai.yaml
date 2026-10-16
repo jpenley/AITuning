@@ -1,0 +1,3 @@
+interface:
+  display_name: "Gates"
+  short_description: "Lint, type, test, hook, CI, and boundary checks proven to bite"

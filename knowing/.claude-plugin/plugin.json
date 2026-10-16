@@ -1,0 +1,16 @@
+{
+  "name": "knowing",
+  "version": "0.2.6",
+  "description": "knowing, a learning and research skill set: make sense of a body of material such as notes, papers, or a wiki (understand), a sourced deep investigation (investigate), what's new on a topic from arXiv, Hacker News, GitHub, and OpenAlex (latest), interactive lessons with spaced practice for the user (learn), and teaching a learner, a child from their schoolwork or someone new to programming (tutor). Independent of flowstate. Ideas adapted from mvanhorn/last30days-skill and Egonex-AI/Understand-Anything (MIT).",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/investigate",
+    "./skills/latest",
+    "./skills/learn",
+    "./skills/tutor",
+    "./skills/understand"
+  ]
+}

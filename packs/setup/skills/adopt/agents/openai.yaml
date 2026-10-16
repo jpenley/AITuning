@@ -1,0 +1,5 @@
+interface:
+  display_name: "Adopt"
+  short_description: "Bring existing plans and tracking into the flow"
+policy:
+  allow_implicit_invocation: false

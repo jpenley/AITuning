@@ -1,0 +1,46 @@
+{
+  "skill_name": "audition",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Throw the partner webhook payload schema in the arena"
+      },
+      {
+        "prompt": "Have three agents each try the rate limiter interface and take the best one"
+      },
+      {
+        "prompt": "This cache key format is expensive to change, try a few before we commit"
+      },
+      {
+        "prompt": "I don't trust the first shape for the event log record format. Get several independent attempts and pick the strongest"
+      },
+      {
+        "prompt": "Run parallel attempts at the ranking algorithm on different models and merge the best ideas into one"
+      },
+      {
+        "prompt": "Once the SDK surface ships we're stuck with it, so let a few agents compete on it before we lock it in"
+      },
+      {
+        "prompt": "Have a couple of agents each draft the CLI's upgrade warning and keep the best parts"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Get a second opinion that tries to disprove this decision to shard by tenant",
+        "owner": "doubt"
+      },
+      {
+        "prompt": "Mock up a few layouts for the checkout page so I can compare them",
+        "owner": "sketch"
+      },
+      {
+        "prompt": "Stress-test my plan for the queue migration",
+        "owner": "grill"
+      },
+      {
+        "prompt": "Design the payment module's interface so it's easy to test",
+        "owner": "modules"
+      }
+    ]
+  }
+}

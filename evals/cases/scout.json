@@ -1,0 +1,29 @@
+{
+  "skill_name": "scout",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Check the Greenhouse boards for Stripe and Shopify for new backend openings"
+      },
+      {
+        "prompt": "Add this job link to my inbox so I can look at it later"
+      },
+      {
+        "prompt": "Which companies' careers pages should I watch for platform engineering roles, and add them"
+      },
+      {
+        "prompt": "Find new data engineering postings at the companies I'm watching"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Should I apply to this Norrvik posting or skip it?",
+        "owner": "evaluate"
+      },
+      {
+        "prompt": "Mark my Acme application as rejected, they emailed today",
+        "owner": "track"
+      }
+    ]
+  }
+}

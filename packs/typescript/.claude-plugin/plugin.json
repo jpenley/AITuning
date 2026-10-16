@@ -1,0 +1,13 @@
+{
+  "name": "flowstate-typescript",
+  "version": "0.2.2",
+  "description": "flowstate TypeScript/Node stack pack: guards-typescript (typecheck, lint, tests, CI guardrails) and seams-typescript (module boundaries). Needs the core flowstate plugin.",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/guards-typescript",
+    "./skills/seams-typescript"
+  ]
+}

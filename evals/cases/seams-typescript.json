@@ -1,0 +1,17 @@
+{
+  "skill_name": "seams-typescript",
+  "trigger": {
+    "positive": [
+      { "prompt": "Find the circular imports between our TypeScript packages" },
+      { "prompt": "Stop the web app importing packages/billing/src/internal directly, only the package entry point should be allowed" },
+      { "prompt": "Which modules in this Node project have the most importers? Show me the dependency graph" },
+      { "prompt": "Set up dependency-cruiser so the orders package can never import from the ui folder" },
+      { "prompt": "Add an exports map to our package.json so nobody can deep import our internals" }
+    ],
+    "negative": [
+      { "prompt": "Design the public interface for the new billing package", "owner": "modules" },
+      { "prompt": "Survey the codebase for shallow modules worth deepening", "owner": "refine" },
+      { "prompt": "Add ESLint and a typecheck to CI for our TypeScript app", "owner": "guards-typescript" }
+    ]
+  }
+}

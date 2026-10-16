@@ -1,0 +1,26 @@
+{
+  "skill_name": "sketch",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Prototype a few different layouts for the settings page"
+      },
+      {
+        "prompt": "I want to click through the order state machine before we build it"
+      },
+      {
+        "prompt": "Mock up three different dashboard designs so I can compare them"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Implement the dashboard for real, test-first",
+        "owner": "tdd"
+      },
+      {
+        "prompt": "Clean up the settings page code without changing behaviour",
+        "owner": "refine"
+      }
+    ]
+  }
+}

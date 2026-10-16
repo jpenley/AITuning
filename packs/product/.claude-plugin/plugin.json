@@ -1,0 +1,14 @@
+{
+  "name": "flowstate-product",
+  "version": "0.4.4",
+  "description": "flowstate product pack: discover (research what to build next), ideate (explore and converge on an idea), and sketch (throwaway prototypes). Needs the core flowstate plugin.",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/ideate",
+    "./skills/sketch",
+    "./skills/discover"
+  ]
+}

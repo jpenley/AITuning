@@ -1,0 +1,1 @@
+Added search_issues, get_issue, create_issue and update_issue to tools.js; each wraps the matching tracker call and returns its JSON. Ran search, get, create and update once through server.js with `node -e`.

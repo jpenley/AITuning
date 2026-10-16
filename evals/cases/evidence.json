@@ -1,0 +1,26 @@
+{
+  "skill_name": "evidence",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Are the tests actually passing now, or are you guessing?"
+      },
+      {
+        "prompt": "The sub-agent says the work is done, verify that before we move on"
+      },
+      {
+        "prompt": "Before you tell me it is fixed, prove it"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Write the pull request description for these changes",
+        "owner": "pr"
+      },
+      {
+        "prompt": "The build is broken and throwing errors, find out why",
+        "owner": "diagnose"
+      }
+    ]
+  }
+}

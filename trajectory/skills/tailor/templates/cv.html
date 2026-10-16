@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{title}}</title>
+<style>
+  /* One column, real text, system fonts: what applicant tracking systems parse reliably. No icons, tables, or
+     text in images; contact details stay as plain text. */
+  @page { size: {{paper}}; margin: 16mm 18mm; }
+  html { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.38; color: #111; }
+  body { margin: 0; }
+  h1 { font-size: 20pt; margin: 0 0 2pt; letter-spacing: 0.2pt; }
+  h1 + p { margin: 0 0 10pt; color: #333; }
+  h2 { font-size: 11pt; text-transform: uppercase; letter-spacing: 0.8pt; border-bottom: 0.75pt solid #999; padding-bottom: 2pt; margin: 12pt 0 6pt; }
+  h3 { font-size: 10.5pt; margin: 8pt 0 2pt; }
+  p { margin: 0 0 6pt; }
+  ul { margin: 2pt 0 6pt; padding-left: 14pt; }
+  li { margin: 0 0 2pt; }
+  a { color: inherit; text-decoration: none; }
+  h2, h3 { break-after: avoid; }
+  li { break-inside: avoid; }
+</style>
+</head>
+<body>
+{{body}}
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "flowstate-data",
+  "version": "0.1.1",
+  "description": "flowstate data pack: validate (check an analysis, report, or query result before it's shared, with a verdict on every claim, including when asked only to check the arithmetic). Ideas from Anthropic's data plugin (Apache-2.0).",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/validate"
+  ]
+}

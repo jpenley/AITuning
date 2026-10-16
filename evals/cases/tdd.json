@@ -1,0 +1,26 @@
+{
+  "skill_name": "tdd",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Write a failing test for this bug before fixing it"
+      },
+      {
+        "prompt": "Let us build this feature test-first"
+      },
+      {
+        "prompt": "Red green refactor on the new parser"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "This test is flaky and fails randomly, debug it",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Review whether the tests in this PR are any good before merge",
+        "owner": "audit"
+      }
+    ]
+  }
+}

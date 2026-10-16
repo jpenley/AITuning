@@ -1,0 +1,17 @@
+{
+  "skill_name": "seams-dotnet",
+  "trigger": {
+    "positive": [
+      { "prompt": "Find the dependency cycles and deep reaches in this .NET solution and make the boundary between Orders and Billing enforced" },
+      { "prompt": "Map the project reference graph of our sln and show fan-in and fan-out per csproj" },
+      { "prompt": "Add an ArchUnitNET test so the Web project can't reference Infrastructure directly" },
+      { "prompt": "Which C# projects reach into another module's internals, and who has InternalsVisibleTo?" },
+      { "prompt": "Enforce with NetArchTest that nothing outside Billing uses Billing.Internal namespaces" }
+    ],
+    "negative": [
+      { "prompt": "Set up dotnet format, analyzers and CI for this C# solution", "owner": "guards-dotnet" },
+      { "prompt": "Design the interface for the new payments module before we write it", "owner": "modules" },
+      { "prompt": "Survey the codebase for shallow modules worth deepening", "owner": "refine" }
+    ]
+  }
+}

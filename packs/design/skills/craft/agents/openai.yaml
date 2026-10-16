@@ -1,0 +1,3 @@
+interface:
+  display_name: "Craft"
+  short_description: "UI quality floor, plus rendered-page checks and screenshots"

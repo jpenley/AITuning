@@ -1,0 +1,29 @@
+{
+  "skill_name": "offer",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Acme sent me an offer letter, here it is. Anything I should worry about?"
+      },
+      {
+        "prompt": "Is the non-compete in this contract normal?"
+      },
+      {
+        "prompt": "The recruiter promised a signing bonus on the phone but it's not in the letter"
+      },
+      {
+        "prompt": "Help me prepare to negotiate this offer"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Prepare me for my final-round interview at Acme",
+        "owner": "interview"
+      },
+      {
+        "prompt": "I accepted the Acme offer, record it in my tracker",
+        "owner": "track"
+      }
+    ]
+  }
+}

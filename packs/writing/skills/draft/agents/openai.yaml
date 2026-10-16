@@ -1,0 +1,5 @@
+interface:
+  display_name: "Draft"
+  short_description: "Write a new piece with the author, block by block"
+policy:
+  allow_implicit_invocation: false

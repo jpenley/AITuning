@@ -1,0 +1,9 @@
+[
+  {"name": "Skill", "input": "{\"skill\": \"flowstate:modules\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Plugins\\\\flowstate\\\\skills\\\\engineering\\\\modules\\\\AGENT-TOOLS.md\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\tracker.js\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\registry.js\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\server.js\"}"},
+  {"name": "Write", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\tools.js\", \"content\": \"// Tracker tools for the agent host (see registry.js for the shape).\\nconst tracker = require('./tracker');\\n...\"}"},
+  {"name": "Bash", "input": "{\"command\": \"node -e \\\"const s = require('./server'); (async () => { console.log((await s.callTool('search_issues', { q: 'checkout' })).content[0].text.split('\\\\n')[0]); console.log((await s.callTool('get_issue', { id: 'TRK-5' })).content[0].text.split('\\\\n')[0]); const made = await s.callTool('create_issue', { title: 'Smoke' }); console.log(made.content[0].text); const id = made.structuredContent.id; console.log(await s.callTool('update_issue', { id, status: 'done' })); console.log((await s.callTool('update_issue', { id, status: 'in_progress' })).content[0].text); })()\\\"\"}"}
+]

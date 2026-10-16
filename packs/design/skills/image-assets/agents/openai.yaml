@@ -1,0 +1,3 @@
+interface:
+  display_name: "Image assets"
+  short_description: "Generate or edit images; locate imagegen and run its API fallback"

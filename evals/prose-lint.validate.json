@@ -1,0 +1,4 @@
+{
+  "disable": ["u13-em-dash", "u14-colon", "u16-inline-header", "u17-title-case", "u18-emoji", "u19-curly-quotes", "u26-metaphor-noun", "u29-passive-by"],
+  "words": { "allow": ["harness", "harnesses", "leverage"] }
+}

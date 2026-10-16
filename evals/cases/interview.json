@@ -1,0 +1,29 @@
+{
+  "skill_name": "interview",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I have a second-round interview at Acme on Thursday, help me prepare"
+      },
+      {
+        "prompt": "What questions will a hiring manager ask me for this staff engineer role?"
+      },
+      {
+        "prompt": "Help me build a story about the outage I handled for my interview"
+      },
+      {
+        "prompt": "The interview went badly on system design, update my prep for the next round"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "I got the offer letter from Acme, can you read it?",
+        "owner": "offer"
+      },
+      {
+        "prompt": "Is this posting a good match for my background?",
+        "owner": "evaluate"
+      }
+    ]
+  }
+}

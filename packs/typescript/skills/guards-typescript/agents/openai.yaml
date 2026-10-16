@@ -1,0 +1,3 @@
+interface:
+  display_name: "Guards (TypeScript)"
+  short_description: "Typecheck, lint, format, and test gates for TypeScript/Node"

@@ -1,0 +1,14 @@
+{
+  "name": "aituning-public-evals",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "validate": "node validate.mjs",
+    "triggers": "node triggers.mjs --min-rank1 85",
+    "selftest": "node ../tools/readiness.mjs --selftest && node validate.mjs --selftest && node micro.mjs --selftest && node behave.mjs --selftest --no-judge && node --test test/ablation.test.mjs test/routing.test.mjs test/toolkit.test.mjs",
+    "test": "npm run selftest --silent && node validate.mjs && node triggers.mjs --min-rank1 85",
+    "plan": "node behave.mjs --no-judge",
+    "micro:plan": "node micro.mjs examples/wording 5 --plan"
+  }
+}

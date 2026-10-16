@@ -1,0 +1,3 @@
+interface:
+  display_name: "Trace"
+  short_description: "How code works, mapped and explained in reading order"

@@ -1,0 +1,33 @@
+{
+  "skill_name": "trace",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I just joined this team, where should I start reading in this repo?"
+      },
+      {
+        "prompt": "How does the checkout flow work in this codebase, end to end?"
+      },
+      {
+        "prompt": "What does changing the Session class touch?"
+      },
+      {
+        "prompt": "Walk me through how this repo handles auth, I've never seen it before"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Why is the retry limit in the payment client set to 5?",
+        "owner": "dig"
+      },
+      {
+        "prompt": "Why is the checkout test failing since yesterday?",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Review this branch against main before I merge it",
+        "owner": "audit"
+      }
+    ]
+  }
+}

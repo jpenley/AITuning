@@ -1,0 +1,3 @@
+interface:
+  display_name: "Guards (.NET)"
+  short_description: "Format, analyzer, build, and test gates for .NET/C#"

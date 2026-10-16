@@ -1,0 +1,3 @@
+interface:
+  display_name: "Seams (TypeScript)"
+  short_description: "Measure and enforce TypeScript/Node module boundaries"

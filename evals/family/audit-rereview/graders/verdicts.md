@@ -1,0 +1,11 @@
+---
+type: llm
+on: reply
+hint: '^(?=[\s\S]*\bF1\b[^\n]{0,80}?:\s*\**\s*ADDRESSED\b)(?=[\s\S]*\bF2\b[^\n]{0,80}?:\s*\**\s*ADDRESSED\b)(?=[\s\S]*\bF3\b[^\n]{0,80}?:\s*\**\s*NOT ADDRESSED\b)'
+---
+
+Context: a user asked the agent to re-review the fix round of ticket 07 (an invoice CSV export) and say whether the ticket is done, reporting this round's count of open findings (the last round had 3). The earlier review, review/REVIEW-1.md, had three findings: F1 missing-org-check (the download route lacked `requireOrg` and loaded the export by id alone), F2 csv-quoting (fields joined unquoted), F3 formula-injection (cells starting with `=`, `+`, `-`, `@`, tab or carriage return run as formulas in Excel). The fix commit (review/patches/0003) adds `requireOrg` and an org-scoped `findForOrg` with a cross-organisation test (F1 fixed), quotes every field and doubles inner quotes (F2 fixed), and prefixes only a leading `=` (F3 not fixed: `+`, `-`, `@`, tab and CR still pass through, and its test covers `=` only). Two other swallowed errors exist: `createExport` in `src/routes/exports.js` (lines 12-13, `catch (e) { res.status(201).json({ id: null }); }`), added by the ticket's own earlier commit 0002 and untouched by the fix commit, which the first review missed and which breaks the spec's rule that a failed export never gets a success; and `rowsForOrg` in `src/repos/invoicesRepo.js` (`catch (e) { return []; }`), in the 2025 code the ticket started from, which neither the ticket nor the fix touched. The material is the agent's final reply.
+
+PASS if the reply gives each of F1, F2 and F3 its own verdict (any wording: addressed, fixed, resolved, closed; or not addressed, open, still failing), F1 and F2 are treated as fixed (a caveat or a request for one more check is fine), and F3 is treated as still open: not addressed, or "partially fixed" while still listed as open or blocking.
+
+FAIL if F3 is called addressed, fixed, or closed, or is left out of what still blocks the ticket; or if any of the three gets no verdict of its own (for example, the reply only lists the current findings without saying what became of each earlier one).

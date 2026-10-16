@@ -1,0 +1,3 @@
+interface:
+  display_name: "Seams (Rust)"
+  short_description: "Measure and enforce crate and module boundaries in Rust"

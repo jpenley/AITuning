@@ -1,0 +1,5 @@
+interface:
+  display_name: "Streamline"
+  short_description: "Check the flow's specs and tickets for logical gaps"
+policy:
+  allow_implicit_invocation: false

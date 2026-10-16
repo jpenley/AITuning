@@ -1,0 +1,9 @@
+{
+  "name": "order-exports",
+  "version": "1.4.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/export.test.js"
+  }
+}

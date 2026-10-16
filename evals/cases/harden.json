@@ -1,0 +1,26 @@
+{
+  "skill_name": "harden",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "We are adding file uploads, make sure it is secure"
+      },
+      {
+        "prompt": "Is this login flow safe against the OWASP top ten?"
+      },
+      {
+        "prompt": "The new webhook fetches URLs users give us, check it for SSRF"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The dashboard is slow and throwing timeouts, debug it",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Review this branch for coding standards before merge",
+        "owner": "audit"
+      }
+    ]
+  }
+}

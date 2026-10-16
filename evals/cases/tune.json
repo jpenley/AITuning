@@ -1,0 +1,26 @@
+{
+  "skill_name": "tune",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Improve the description of my skill so it triggers reliably"
+      },
+      {
+        "prompt": "Rewrite this CLAUDE.md, it is bloated"
+      },
+      {
+        "prompt": "Test whether this prompt wording actually changes the agent behaviour"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Write the pull request description",
+        "owner": "pr"
+      },
+      {
+        "prompt": "Record this architecture decision as an ADR",
+        "owner": "domain"
+      }
+    ]
+  }
+}

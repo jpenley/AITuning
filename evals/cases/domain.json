@@ -1,0 +1,26 @@
+{
+  "skill_name": "domain",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Update CONTEXT.md, we keep mixing up customer and account"
+      },
+      {
+        "prompt": "Record an ADR for choosing event sourcing for orders"
+      },
+      {
+        "prompt": "The terminology in this project is inconsistent, help me pin down what each term means"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Stress-test my plan for the new billing module",
+        "owner": "grill"
+      },
+      {
+        "prompt": "Design the interface for the payments module",
+        "owner": "modules"
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Setup"
+  short_description: "Prepare a project for the skill flow"
+policy:
+  allow_implicit_invocation: false

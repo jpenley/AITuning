@@ -1,0 +1,3 @@
+interface:
+  display_name: "Evaluate"
+  short_description: "Judge one posting: gates, requirements, anomalies, verdict"

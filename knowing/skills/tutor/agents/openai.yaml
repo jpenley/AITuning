@@ -1,0 +1,3 @@
+interface:
+  display_name: "Tutor"
+  short_description: "Teach a learner from their own work: a child's schoolwork or a new programmer"

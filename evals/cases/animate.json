@@ -1,0 +1,29 @@
+{
+  "skill_name": "animate",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Add hover and entrance animations to the cards"
+      },
+      {
+        "prompt": "The modal transition feels janky, fix the animation"
+      },
+      {
+        "prompt": "Make the FAQ open and close smoothly"
+      },
+      {
+        "prompt": "Add scroll-triggered reveals to the features section"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The page loads slowly, find out why and make it faster",
+        "owner": "optimize"
+      },
+      {
+        "prompt": "Build a throwaway prototype to test the onboarding flow",
+        "owner": "sketch"
+      }
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Track"
+  short_description: "Application tracker, follow-up drafts, and search stats"

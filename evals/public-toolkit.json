@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "optional": true,
+  "offlineDefault": true,
+  "fixtureKind": "synthetic evaluation inputs",
+  "sourceFiles": 432,
+  "entrypoints": [
+    "validate.mjs",
+    "triggers.mjs",
+    "behave.mjs",
+    "micro.mjs"
+  ],
+  "omitted": [
+    "recorded runs",
+    "transcripts",
+    "judge caches",
+    "fingerprints",
+    "rejection ledger",
+    "private model and engine configuration"
+  ]
+}

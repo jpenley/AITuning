@@ -1,0 +1,8 @@
+{
+  "name": "notes",
+  "private": true,
+  "scripts": {
+    "test": "node test/run.js",
+    "test:all": "node test/run.js --all"
+  }
+}

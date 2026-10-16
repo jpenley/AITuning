@@ -1,0 +1,29 @@
+{
+  "skill_name": "tutor",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Here's my daughter's marked spelling test; what should we practise?"
+      },
+      {
+        "prompt": "My son keeps getting long division wrong, here's his homework"
+      },
+      {
+        "prompt": "I'm teaching a friend to code and their loop keeps printing one too many times; how do I explain it?"
+      },
+      {
+        "prompt": "I'm a teacher; how do I explain photosynthesis to a class of 10-year-olds from this worksheet?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "I want to learn Go myself, start me off",
+        "owner": "learn"
+      },
+      {
+        "prompt": "Review this PR for bugs",
+        "owner": "audit"
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "What"
+  short_description: "Re-explain the last message plainly"
+policy:
+  allow_implicit_invocation: false

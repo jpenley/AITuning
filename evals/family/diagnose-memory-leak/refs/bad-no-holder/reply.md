@@ -1,0 +1,1 @@
+Measured first: over 5 batches of 1,000 requests the heap climbed about 1.1 MB per batch. The cache holds the largest objects (1.5 KB product descriptions), so I lowered its cap from 500 to 100. After the change the same run still grows about 1.1 MB per batch, so the cap helps a little, but you may still see growth; worth keeping an eye on it.

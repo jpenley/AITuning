@@ -1,0 +1,1 @@
+Four tools in tools.js (`search_issues`, `get_issue`, `create_issue`, `update_issue`) with read-only and write annotations, an id pattern, a status enum, a bounded limit, and errors that name the next step. update_issue checks the workflow but isn't wired to the tracker's write path yet. Not run.

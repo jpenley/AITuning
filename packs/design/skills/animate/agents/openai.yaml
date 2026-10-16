@@ -1,0 +1,3 @@
+interface:
+  display_name: "Animate"
+  short_description: "UI motion with a job: durations, easing, reduced motion"

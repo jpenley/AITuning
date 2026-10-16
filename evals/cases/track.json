@@ -1,0 +1,29 @@
+{
+  "skill_name": "track",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I sent the Acme application today, record it"
+      },
+      {
+        "prompt": "Which of my applications have gone quiet for two weeks?"
+      },
+      {
+        "prompt": "Draft a follow-up to the recruiter at Beta Retail"
+      },
+      {
+        "prompt": "How's my job search going, are my 'apply' picks getting responses?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Find new backend openings at Shopify",
+        "owner": "scout"
+      },
+      {
+        "prompt": "Is this posting a good match for my background?",
+        "owner": "evaluate"
+      }
+    ]
+  }
+}

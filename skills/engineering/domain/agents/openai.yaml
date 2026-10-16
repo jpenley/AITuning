@@ -1,0 +1,3 @@
+interface:
+  display_name: "Domain"
+  short_description: "Glossary and ADRs for the project"

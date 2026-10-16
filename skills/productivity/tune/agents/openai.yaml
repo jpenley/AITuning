@@ -1,0 +1,3 @@
+interface:
+  display_name: "Tune"
+  short_description: "Write and test skills and agent docs"

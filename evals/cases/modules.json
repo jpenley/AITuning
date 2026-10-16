@@ -1,0 +1,26 @@
+{
+  "skill_name": "modules",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Design the interface for the new payments module"
+      },
+      {
+        "prompt": "Where should the seam go so this is easier to test?"
+      },
+      {
+        "prompt": "Our queue consumer might process the same message twice, how do we make it idempotent?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "This function works but it is hard to read, tidy it up",
+        "owner": "refine"
+      },
+      {
+        "prompt": "Write tests first for this feature, red then green",
+        "owner": "tdd"
+      }
+    ]
+  }
+}

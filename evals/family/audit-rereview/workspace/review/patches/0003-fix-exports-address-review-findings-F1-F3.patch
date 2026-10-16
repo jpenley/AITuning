@@ -1,0 +1,109 @@
+From a1cba182b4660afa20ff622a3ef808637e6a1cca Mon Sep 17 00:00:00 2001
+From: Sam Ortiz <sam@ledgerly.test>
+Date: Sat, 3 Oct 2026 11:45:00 +0000
+Subject: [PATCH 3/3] fix(exports): address review findings F1-F3
+
+F1: download requires the organisation and loads the export scoped to it.
+F2: every CSV field is quoted, inner quotes doubled.
+F3: a leading = is prefixed with a quote.
+---
+ src/repos/exportsRepo.js | 6 +++---
+ src/routes/exports.js    | 4 ++--
+ src/services/buildCsv.js | 8 +++++++-
+ test/buildCsv.test.js    | 8 ++++++++
+ test/exports.test.js     | 8 +++++++-
+ 5 files changed, 27 insertions(+), 7 deletions(-)
+
+diff --git a/src/repos/exportsRepo.js b/src/repos/exportsRepo.js
+index dab32fc..ffe28e5 100644
+--- a/src/repos/exportsRepo.js
++++ b/src/repos/exportsRepo.js
+@@ -6,8 +6,8 @@ async function create({ orgId, csv, createdBy }) {
+   return db.insert('exports', { id: `exp-${nextId++}`, orgId, csv, createdBy, createdAt: new Date().toISOString() });
+ }
+ 
+-async function findById(id) {
+-  return (await db.all('exports')).find((e) => e.id === id) ?? null;
++async function findForOrg(orgId, id) {
++  return (await db.all('exports')).find((e) => e.id === id && e.orgId === orgId) ?? null;
+ }
+ 
+-module.exports = { create, findById };
++module.exports = { create, findForOrg };
+diff --git a/src/routes/exports.js b/src/routes/exports.js
+index e677f05..732544c 100644
+--- a/src/routes/exports.js
++++ b/src/routes/exports.js
+@@ -15,12 +15,12 @@ async function createExport(req, res) {
+ }
+ 
+ async function downloadExport(req, res) {
+-  const exp = await exportsRepo.findById(req.params.id);
++  const exp = await exportsRepo.findForOrg(req.org.id, req.params.id);
+   if (!exp) return res.status(404).end();
+   res.type('text/csv').attachment(`invoices-${exp.id}.csv`).send(exp.csv);
+ }
+ 
+ module.exports = [
+   route('POST', '/exports', requireAuth, requireOrg, createExport),
+-  route('GET', '/exports/:id/download', requireAuth, downloadExport),
++  route('GET', '/exports/:id/download', requireAuth, requireOrg, downloadExport),
+ ];
+diff --git a/src/services/buildCsv.js b/src/services/buildCsv.js
+index 731ea2f..692a1a6 100644
+--- a/src/services/buildCsv.js
++++ b/src/services/buildCsv.js
+@@ -1,8 +1,14 @@
+ // Invoice rows to CSV for Excel: a header line, then one line per invoice, CRLF line ends.
+ const HEADER = 'number,customer,total,issued';
+ 
++// Quotes a field (RFC 4180) and stops Excel reading it as a formula.
++function cell(value) {
++  const safe = value.startsWith('=') ? `'${value}` : value;
++  return `"${safe.replace(/"/g, '""')}"`;
++}
++
+ function buildCsv(rows) {
+-  const lines = rows.map((r) => [r.number, r.customer, r.total.toFixed(2), r.issued].join(','));
++  const lines = rows.map((r) => [r.number, r.customer, r.total.toFixed(2), r.issued].map(cell).join(','));
+   return [HEADER, ...lines].join('\r\n');
+ }
+ 
+diff --git a/test/buildCsv.test.js b/test/buildCsv.test.js
+index b5fd6d8..ef2fad4 100644
+--- a/test/buildCsv.test.js
++++ b/test/buildCsv.test.js
+@@ -11,3 +11,11 @@ test('writes a header and one CRLF line per invoice', () => {
+ test('starts with the header', () => {
+   assert.ok(buildCsv([]).startsWith('number,customer,total,issued'));
+ });
++
++test('quotes commas and doubles quotes', () => {
++  assert.ok(buildCsv([row({ customer: 'Acme, "Ltd"' })]).includes('"Acme, ""Ltd"""'));
++});
++
++test('neutralises a leading =', () => {
++  assert.ok(buildCsv([row({ customer: '=HYPERLINK("http://x")' })]).includes(`"'=HYPERLINK(""http://x"")"`));
++});
+diff --git a/test/exports.test.js b/test/exports.test.js
+index 16c6eba..15af7e3 100644
+--- a/test/exports.test.js
++++ b/test/exports.test.js
+@@ -10,10 +10,16 @@ test('creates an export and downloads it', async () => {
+   const res = await call('GET', `/exports/${created.body.id}/download`);
+   assert.equal(res.statusCode, 200);
+   assert.equal(res.headers['content-type'], 'text/csv');
+-  assert.match(res.body, /^number,customer,total,issued\r\nINV-1001,/);
++  assert.match(res.body, /^number,customer,total,issued\r\n"INV-1001",/);
+ });
+ 
+ test('answers 404 for an unknown export', async () => {
+   const res = await call('GET', '/exports/exp-999/download');
+   assert.equal(res.statusCode, 404);
+ });
++
++test('does not serve another organisation its export', async () => {
++  const created = await call('POST', '/exports', { body: {} });
++  const res = await call('GET', `/exports/${created.body.id}/download`, { org: 'org-b', user: { id: 'u2', orgIds: ['org-b'] } });
++  assert.equal(res.statusCode, 404);
++});

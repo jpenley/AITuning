@@ -1,0 +1,3 @@
+interface:
+  display_name: "Compose"
+  short_description: "Build or restyle a screen: purpose, structure, system, check"

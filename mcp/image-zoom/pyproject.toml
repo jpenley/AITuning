@@ -1,0 +1,9 @@
+[project]
+name = "image-zoom-mcp"
+version = "0.1.0"
+description = "MCP server for inspecting large or dense images: overview grid, crop, and tile in original pixel coordinates."
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp<3",
+    "pillow>=11",
+]

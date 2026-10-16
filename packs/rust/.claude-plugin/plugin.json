@@ -1,0 +1,13 @@
+{
+  "name": "flowstate-rust",
+  "version": "0.2.3",
+  "description": "flowstate Rust stack pack: guards-rust (format, lint, tests, CI guardrails) and seams-rust (crate and module boundaries). Needs the core flowstate plugin.",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/guards-rust",
+    "./skills/seams-rust"
+  ]
+}

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Refine"
+  short_description: "Clean up code without changing behaviour"

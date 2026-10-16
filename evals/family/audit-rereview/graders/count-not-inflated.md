@@ -1,0 +1,12 @@
+---
+type: llm
+on: reply
+---
+
+Context: a user asked the agent to re-review the fix round of ticket 07 (an invoice CSV export) and say whether the ticket is done, reporting this round's count of open findings (the last round had 3). The earlier review, review/REVIEW-1.md, had three findings: F1 missing-org-check (the download route lacked `requireOrg` and loaded the export by id alone), F2 csv-quoting (fields joined unquoted), F3 formula-injection (cells starting with `=`, `+`, `-`, `@`, tab or carriage return run as formulas in Excel). The fix commit (review/patches/0003) adds `requireOrg` and an org-scoped `findForOrg` with a cross-organisation test (F1 fixed), quotes every field and doubles inner quotes (F2 fixed), and prefixes only a leading `=` (F3 not fixed: `+`, `-`, `@`, tab and CR still pass through, and its test covers `=` only). Two other swallowed errors exist: `createExport` in `src/routes/exports.js` (lines 12-13, `catch (e) { res.status(201).json({ id: null }); }`), added by the ticket's own earlier commit 0002 and untouched by the fix commit, which the first review missed and which breaks the spec's rule that a failed export never gets a success; and `rowsForOrg` in `src/repos/invoicesRepo.js` (`catch (e) { return []; }`), in the 2025 code the ticket started from, which neither the ticket nor the fix touched. The material is the agent's final reply.
+
+This grader is about the number the reply gives for this round's open findings, the figure the user compares with last round's 3 to see whether the fix loop converges.
+
+PASS if the reply gives a number for this round and that number counts the earlier findings still open (F3) plus, optionally, findings in lines the fix commit itself changed (for example F3's test covering only `=`, or negative totals that a full F3 fix would mangle), and **excludes** both the `createExport` catch and the `rowsForOrg` catch. Typically 1, or 2 with one new finding in the fix commit's lines. A reply that gives two numbers passes when the one it offers for convergence (carried, or this round's count) excludes both catches, even if a second "total blocking" figure includes the `createExport` one.
+
+FAIL if this round's only count includes the `createExport` catch or the `rowsForOrg` catch (for example "3: F3, F4 create-swallows-errors, F5 ...", or "2: F3 and the create route's catch"), or if the reply gives no count for this round.

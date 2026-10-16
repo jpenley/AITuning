@@ -1,0 +1,29 @@
+{
+  "skill_name": "tailor",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Tailor my CV for this posting and make the PDF"
+      },
+      {
+        "prompt": "Rewrite my experience bullets so they match this job's requirements"
+      },
+      {
+        "prompt": "Write a cover letter for the Norrvik data engineer role"
+      },
+      {
+        "prompt": "Will my résumé PDF parse in applicant tracking systems?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Is this job worth applying to at all?",
+        "owner": "evaluate"
+      },
+      {
+        "prompt": "Edit my newsletter draft so it doesn't read like AI wrote it",
+        "owner": "prose"
+      }
+    ]
+  }
+}

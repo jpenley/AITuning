@@ -1,0 +1,26 @@
+{
+  "skill_name": "doubt",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Before we run this data migration, challenge whether it is really safe"
+      },
+      {
+        "prompt": "I am confident this cache is thread-safe, try to prove me wrong"
+      },
+      {
+        "prompt": "Get a fresh adversarial second opinion on this decision before it stands"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Review the whole branch against main before merging",
+        "owner": "audit"
+      },
+      {
+        "prompt": "Grill me about the requirements for this feature",
+        "owner": "grill"
+      }
+    ]
+  }
+}

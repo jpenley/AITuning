@@ -1,0 +1,24 @@
+{
+  "skill_name": "prose",
+  "trigger": {
+    "positive": [
+      { "prompt": "Write the README for this CLI so a new user can install it and run their first command" },
+      { "prompt": "Our docs page on configuring webhooks confuses people, rewrite it so it reads clearly" },
+      { "prompt": "Draft the release notes and changelog entry for version 2.3" },
+      { "prompt": "Turn these notes into a how-to page for rotating API keys" },
+      { "prompt": "Edit my newsletter draft so it doesn't sound like ChatGPT wrote it" },
+      { "prompt": "Is this LinkedIn post AI slop?" },
+      { "prompt": "Clean up this AI-written blog post but keep my voice" },
+      { "prompt": "Tighten this essay before I send it to the editor" },
+      { "prompt": "Does this cover letter sound like a bot wrote it?" },
+      { "prompt": "Punch up my long email to the team about the reorg without making it sound robotic" }
+    ],
+    "negative": [
+      { "prompt": "Write the pull request description for this branch", "owner": "pr" },
+      { "prompt": "Update AGENTS.md so coding agents stop skipping the test step", "owner": "tune" },
+      { "prompt": "Tighten up this PR description, it reads like AI wrote it", "owner": "pr" },
+      { "prompt": "Rewrite the system prompt so the agent's replies stop sounding robotic", "owner": "tune" },
+      { "prompt": "That last answer was confusing, say it again plainly" }
+    ]
+  }
+}

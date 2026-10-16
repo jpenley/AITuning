@@ -1,0 +1,26 @@
+{
+  "skill_name": "wizard",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Walk me through setting up the Stripe keys and CI secrets"
+      },
+      {
+        "prompt": "I have to click through a third-party dashboard to create credentials, script the steps for me"
+      },
+      {
+        "prompt": "Create a step-by-step script for the manual database cutover"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Research how the payment provider dashboard API works",
+        "owner": "research"
+      },
+      {
+        "prompt": "Resolve the merge conflicts on my branch",
+        "owner": "merge"
+      }
+    ]
+  }
+}

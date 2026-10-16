@@ -1,0 +1,29 @@
+{
+  "skill_name": "profile",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I'm starting a job search, set up somewhere to keep my CV facts and targets"
+      },
+      {
+        "prompt": "Here's my old résumé and LinkedIn export, turn them into my fact file"
+      },
+      {
+        "prompt": "Add to my profile that I ran the on-call rotation for the payments team in 2024"
+      },
+      {
+        "prompt": "Update my job targets: remote only, salary floor 140k CAD"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Rewrite my experience bullets for this Stripe backend role",
+        "owner": "tailor"
+      },
+      {
+        "prompt": "Is this data engineer posting a good fit for me?",
+        "owner": "evaluate"
+      }
+    ]
+  }
+}

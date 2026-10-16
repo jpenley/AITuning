@@ -1,0 +1,79 @@
+{
+  "name": "aituning",
+  "owner": {
+    "name": "Jason Penley"
+  },
+  "description": "Agent skills: flowstate and its optional packs, trajectory, and knowing.",
+  "plugins": [
+    {
+      "name": "flowstate",
+      "source": "./",
+      "description": "flowstate, the core pack: the idea-to-release flow (grill, spec, ticket, build, refine, integrate, release) plus review, security, debugging, optimisation, and skill-tuning skills."
+    },
+    {
+      "name": "flowstate-product",
+      "source": "./packs/product",
+      "description": "Product pack: discover, ideate, and sketch."
+    },
+    {
+      "name": "flowstate-setup",
+      "source": "./packs/setup",
+      "description": "Setup pack: setup, adopt, and rig."
+    },
+    {
+      "name": "flowstate-writing",
+      "source": "./packs/writing",
+      "description": "Writing pack: prose, for long-form text people read, and draft, for writing a new piece with its author."
+    },
+    {
+      "name": "flowstate-design",
+      "source": "./packs/design",
+      "description": "Design pack: craft, compose, critique, codify, animate, and image-assets."
+    },
+    {
+      "name": "flowstate-diagram",
+      "source": "./packs/diagram",
+      "description": "Diagram pack (optional): diagram, Mermaid diagrams checked with the Mermaid CLI and tied to source lines."
+    },
+    {
+      "name": "flowstate-data",
+      "source": "./packs/data",
+      "description": "Data pack: validate, a verdict on every claim in an analysis before it's shared."
+    },
+    {
+      "name": "flowstate-dotnet",
+      "source": "./packs/dotnet",
+      "description": ".NET stack pack: guards-dotnet and seams-dotnet."
+    },
+    {
+      "name": "flowstate-typescript",
+      "source": "./packs/typescript",
+      "description": "TypeScript/Node stack pack: guards-typescript and seams-typescript."
+    },
+    {
+      "name": "flowstate-python",
+      "source": "./packs/python",
+      "description": "Python stack pack: guards-python and seams-python."
+    },
+    {
+      "name": "flowstate-jev",
+      "source": "./packs/jev",
+      "description": "Jev pack: jev, for the Jev judgment tools."
+    },
+    {
+      "name": "flowstate-rust",
+      "source": "./packs/rust",
+      "description": "Rust stack pack: guards-rust and seams-rust."
+    },
+    {
+      "name": "trajectory",
+      "source": "./trajectory",
+      "description": "trajectory: career and job-search skills (profile, scout, evaluate, tailor, track, interview, offer). Independent of flowstate."
+    },
+    {
+      "name": "knowing",
+      "source": "./knowing",
+      "description": "knowing: learning and research skills (understand, investigate, latest, learn, tutor). Independent of flowstate."
+    }
+  ]
+}

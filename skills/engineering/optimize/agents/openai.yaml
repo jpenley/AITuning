@@ -1,0 +1,3 @@
+interface:
+  display_name: "Optimize"
+  short_description: "Speed up an algorithm behind a golden master"

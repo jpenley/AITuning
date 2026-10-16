@@ -1,0 +1,17 @@
+{
+  "skill_name": "guards-typescript",
+  "trigger": {
+    "positive": [
+      { "prompt": "Our TypeScript project has no CI at all, set up lint, typecheck and tests so broken code can't be merged" },
+      { "prompt": "Add a pre-commit hook and a GitHub Actions workflow that run tsc and eslint on this Node repo" },
+      { "prompt": "Set up husky and lint-staged with prettier for our package.json project" },
+      { "prompt": "Someone merged code that failed tsc again, wire up checks in our TypeScript app that block it" },
+      { "prompt": "Turn on strict mode in tsconfig and make CI fail on type errors" }
+    ],
+    "negative": [
+      { "prompt": "Write a failing vitest test for the discount calculation before changing it", "owner": "tdd" },
+      { "prompt": "The GitHub Actions build started failing on npm ci this morning, find out why", "owner": "diagnose" },
+      { "prompt": "Find the circular imports between our TypeScript packages", "owner": "seams-typescript" }
+    ]
+  }
+}

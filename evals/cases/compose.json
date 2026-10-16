@@ -1,0 +1,29 @@
+{
+  "skill_name": "compose",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Design and build the pricing page for our product"
+      },
+      {
+        "prompt": "Restyle the dashboard so it looks less like a generic template"
+      },
+      {
+        "prompt": "Turn this wireframe into a finished, polished page"
+      },
+      {
+        "prompt": "Build the onboarding screen for the mobile web app"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Mock up three rough layouts for the settings page so we can pick one",
+        "owner": "sketch"
+      },
+      {
+        "prompt": "Write a DESIGN.md for our brand colours and type",
+        "owner": "codify"
+      }
+    ]
+  }
+}

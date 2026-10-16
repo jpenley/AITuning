@@ -1,0 +1,29 @@
+{
+  "skill_name": "optimize",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "This CSV parser is our hot path, make it faster but it has to return exactly the same rows"
+      },
+      {
+        "prompt": "The image resize routine allocates way too much memory, can you optimize it"
+      },
+      {
+        "prompt": "Speed up the pathfinding algorithm in the route planner without changing the routes it picks"
+      },
+      {
+        "prompt": "Our dedupe function is O(n^2), rewrite it to be quicker while keeping its output identical"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The reports page got really slow after the last deploy",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "This module is a tangle, clean it up without changing behaviour",
+        "owner": "refine"
+      }
+    ]
+  }
+}

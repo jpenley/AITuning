@@ -1,0 +1,26 @@
+{
+  "skill_name": "grill",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Stress-test my plan for the billing rewrite"
+      },
+      {
+        "prompt": "Grill me on this design"
+      },
+      {
+        "prompt": "Poke holes in this idea before we start any work"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Update the glossary so the terms are consistent",
+        "owner": "domain"
+      },
+      {
+        "prompt": "Challenge whether this data migration is safe before we run it",
+        "owner": "doubt"
+      }
+    ]
+  }
+}

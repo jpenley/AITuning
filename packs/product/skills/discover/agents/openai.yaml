@@ -1,0 +1,5 @@
+interface:
+  display_name: "Discover"
+  short_description: "Research what to build next, ranked from evidence"
+policy:
+  allow_implicit_invocation: false

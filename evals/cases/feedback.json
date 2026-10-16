@@ -1,0 +1,26 @@
+{
+  "skill_name": "feedback",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "The reviewer left twelve comments on my PR, work through them"
+      },
+      {
+        "prompt": "Here is code review feedback from a colleague, some of it seems wrong"
+      },
+      {
+        "prompt": "How should I respond to these review comments before changing anything?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Review my branch against main before I merge",
+        "owner": "audit"
+      },
+      {
+        "prompt": "Challenge this design decision with a fresh adversarial review",
+        "owner": "doubt"
+      }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Build"
+  short_description: "Implement a ticket or a whole spec"
+policy:
+  allow_implicit_invocation: false

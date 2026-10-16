@@ -1,0 +1,30 @@
+{
+  "skill_name": "understand",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I've been handed a folder of 40 papers on soil carbon; help me make sense of them"
+      },
+      {
+        "prompt": "I inherited the team wiki and I'm new to all of it. What does it say, and where should I start reading?"
+      },
+      {
+        "prompt": "Go through my folder of meeting notes from the last year and tell me what the main ideas are and where they disagree"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Why is the checkout test failing since yesterday?",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "What's new in Rust async this month?",
+        "owner": "latest"
+      },
+      {
+        "prompt": "Is it true that intermittent fasting extends lifespan? Weigh the evidence.",
+        "owner": "investigate"
+      }
+    ]
+  }
+}

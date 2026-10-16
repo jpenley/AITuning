@@ -1,0 +1,6 @@
+[
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\form.js\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\index.html\",\"old_string\":\"    <p id=\\\"errors\\\"\",\"new_string\":\"    <label for=\\\"dob\\\">Date of birth</label>\\n    <input id=\\\"dob\\\" name=\\\"dob\\\" type=\\\"date\\\" required>\\n\\n    <p id=\\\"errors\\\"\"}" },
+  { "name": "Bash", "input": "{\"command\":\"npm test\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\form.js\",\"old_string\":\"  return errors;\",\"new_string\":\"  const thirteenYearsAgo = new Date();\\n  thirteenYearsAgo.setFullYear(thirteenYearsAgo.getFullYear() - 13);\\n  if (!data.dob || new Date(data.dob) > thirteenYearsAgo) errors.push('You must be at least 13.');\\n  return errors;\"}" }
+]

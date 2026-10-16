@@ -1,0 +1,17 @@
+{
+  "skill_name": "guards-python",
+  "trigger": {
+    "positive": [
+      { "prompt": "This Python service has no CI or pre-commit checks, set up guardrails" },
+      { "prompt": "Add ruff and mypy to pre-commit for our Python repo and make sure the hooks actually fail on bad code" },
+      { "prompt": "Wire pytest, ruff, and pyright into a GitHub Actions workflow for this pyproject.toml project" },
+      { "prompt": "Our Poetry project's lint and type checks only run when someone remembers, make them run on every commit" },
+      { "prompt": "Set up pre-commit hooks for a uv Python package with ruff format and pytest" }
+    ],
+    "negative": [
+      { "prompt": "This pytest test is flaky and fails randomly in CI, figure out why", "owner": "diagnose" },
+      { "prompt": "Write the tests first for this new Python endpoint, red then green", "owner": "tdd" },
+      { "prompt": "Check our Python dependencies for known vulnerabilities and secrets in source", "owner": "harden" }
+    ]
+  }
+}

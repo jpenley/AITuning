@@ -1,0 +1,4 @@
+[
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\cart.js\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\cart.js\",\"old_string\":\"(discounted + sub * TAX_RATE)\",\"new_string\":\"(discounted + discounted * TAX_RATE)\"}" }
+]

@@ -1,0 +1,8 @@
+[
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\form.js\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\index.html\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\index.html\",\"old_string\":\"    <p id=\\\"errors\\\"\",\"new_string\":\"    <label for=\\\"dob\\\">Date of birth</label>\\n    <input id=\\\"dob\\\" name=\\\"dob\\\" type=\\\"date\\\" required>\\n\\n    <p id=\\\"errors\\\"\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\form.js\",\"old_string\":\"  return errors;\",\"new_string\":\"  const thirteenYearsAgo = new Date();\\n  thirteenYearsAgo.setFullYear(thirteenYearsAgo.getFullYear() - 13);\\n  if (!data.dob || new Date(data.dob) > thirteenYearsAgo) errors.push('You must be at least 13.');\\n  return errors;\"}" },
+  { "name": "Bash", "input": "{\"command\":\"node -e \\\"const { validateSignup } = require('./form'); const ago = (n) => { const d = new Date(); d.setFullYear(d.getFullYear() - n); return d.toISOString().slice(0, 10); }; const b = { name: 'Ada', email: 'ada@example.com' }; console.log(validateSignup({ ...b, dob: ago(10) }), validateSignup({ ...b, dob: '' }), validateSignup({ ...b, dob: ago(30) }))\\\"\"}" },
+  { "name": "Bash", "input": "{\"command\":\"npm test\"}" }
+]

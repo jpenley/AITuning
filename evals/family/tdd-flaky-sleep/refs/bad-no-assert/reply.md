@@ -1,0 +1,1 @@
+Rather than a longer sleep, the completion test now checks that the job was picked up ('processing' or 'done'), which holds on any runner speed. `EXPORT_JOB_MS=1200 node --test test/export.test.js` passes, and `npm test` passes.

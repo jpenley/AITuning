@@ -1,0 +1,3 @@
+interface:
+  display_name: "Critique"
+  short_description: "Review a UI with evidence: fix before launch, then taste"

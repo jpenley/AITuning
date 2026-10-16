@@ -1,0 +1,12 @@
+{
+  "name": "flowstate-jev",
+  "version": "0.2.3",
+  "description": "flowstate jev pack: when and how to use the Jev judgment tools (jkudish/jev-mcp). Needs the jev MCP server and a provider key.",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/jev"
+  ]
+}

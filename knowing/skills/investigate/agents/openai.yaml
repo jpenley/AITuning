@@ -1,0 +1,3 @@
+interface:
+  display_name: "Investigate"
+  short_description: "A sourced deep investigation with claims kept apart from guesses"

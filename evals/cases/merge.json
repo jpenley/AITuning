@@ -1,0 +1,26 @@
+{
+  "skill_name": "merge",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "My rebase stopped with conflicts in three files"
+      },
+      {
+        "prompt": "Resolve these merge conflicts"
+      },
+      {
+        "prompt": "git merge failed because both branches changed the same function"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Write the pull request body for this branch",
+        "owner": "pr"
+      },
+      {
+        "prompt": "The build broke after the merge and a test is failing, debug it",
+        "owner": "diagnose"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+[
+  {"name": "Skill", "input": "{\"skill\": \"flowstate:modules\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Plugins\\\\flowstate\\\\skills\\\\engineering\\\\modules\\\\AGENT-TOOLS.md\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\tracker.js\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\registry.js\"}"},
+  {"name": "Read", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\server.js\"}"},
+  {"name": "Write", "input": "{\"file_path\": \"C:\\\\Temp\\\\ws\\\\tools.js\", \"content\": \"// Tracker tools for the agent host (see registry.js for the shape).\\nconst tracker = require('./tracker');\\n...\"}"}
+]

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Wizard"
+  short_description: "Script the steps only a human can take"

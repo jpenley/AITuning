@@ -1,0 +1,26 @@
+{
+  "skill_name": "refine",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "This function works but it is hard to read, tidy it up"
+      },
+      {
+        "prompt": "Clean up the code on this branch without changing behaviour"
+      },
+      {
+        "prompt": "Survey the codebase for shallow modules worth deepening"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The endpoint is throwing errors since this morning, debug it",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Design a new module interface for notifications",
+        "owner": "modules"
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "skill_name": "guards-dotnet",
+  "trigger": {
+    "positive": [
+      { "prompt": "This .NET solution has no CI or pre-commit checks, set up guardrails" },
+      { "prompt": "Turn on warnings as errors and nullable across all our csproj files" },
+      { "prompt": "Add a GitHub Actions workflow that runs dotnet format, dotnet build and dotnet test for our C# repo" },
+      { "prompt": "Make dotnet format and the analyzers run in a pre-commit hook for this sln" },
+      { "prompt": "Our C# project lets style violations and analyzer warnings through, enforce the .editorconfig on build" }
+    ],
+    "negative": [
+      { "prompt": "Find the dependency cycles between the projects in this .NET solution", "owner": "seams-dotnet" },
+      { "prompt": "Our C# tests throw a NullReferenceException since this morning, debug it", "owner": "diagnose" },
+      { "prompt": "Write a failing xUnit test for this bug before we fix it", "owner": "tdd" }
+    ]
+  }
+}

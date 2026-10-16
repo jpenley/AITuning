@@ -1,0 +1,29 @@
+{
+  "skill_name": "codify",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Write a design system document for our app"
+      },
+      {
+        "prompt": "Extract the design tokens from our existing site's CSS"
+      },
+      {
+        "prompt": "Create a style guide with our colours, type scale, and spacing"
+      },
+      {
+        "prompt": "Check which colours in the code aren't in our design tokens"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Define the terms in our glossary and keep them consistent",
+        "owner": "domain"
+      },
+      {
+        "prompt": "Build the pricing page using our brand",
+        "owner": "compose"
+      }
+    ]
+  }
+}

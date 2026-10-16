@@ -1,0 +1,6 @@
+[
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src\\\\invoice.js\"}" },
+  { "name": "Bash", "input": "{\"command\":\"npm run export\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src\\\\invoice.js\",\"old_string\":\"Math.floor\",\"new_string\":\"Math.round\"}" },
+  { "name": "Bash", "input": "{\"command\":\"npm run export\"}" }
+]

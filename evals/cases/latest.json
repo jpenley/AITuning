@@ -1,0 +1,29 @@
+{
+  "skill_name": "latest",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "What's new in WebAssembly lately?"
+      },
+      {
+        "prompt": "What have people been releasing for local LLM inference in the last few weeks?"
+      },
+      {
+        "prompt": "Catch me up on recent papers about protein folding"
+      },
+      {
+        "prompt": "What are people discussing about Postgres 18 this month?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Explain how Postgres MVCC works",
+        "owner": "trace"
+      },
+      {
+        "prompt": "Is it true that Postgres is faster than MySQL? Weigh the evidence.",
+        "owner": "investigate"
+      }
+    ]
+  }
+}

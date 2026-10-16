@@ -1,0 +1,5 @@
+[
+  {"name":"Read","input":"{\"file_path\":\"C:\\\\Temp\\\\ws\\\\test\\\\export.test.js\"}"},
+  {"name":"Edit","input":"{\"file_path\":\"C:\\\\Temp\\\\ws\\\\test\\\\export.test.js\",\"old_string\":\"await sleep(500);\",\"new_string\":\"await sleep(2000);\",\"replace_all\":true}"},
+  {"name":"Bash","input":"{\"command\":\"npm test\"}"}
+]

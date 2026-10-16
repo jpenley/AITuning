@@ -1,0 +1,29 @@
+{
+  "skill_name": "investigate",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Does intermittent fasting actually help with weight loss? Weigh the evidence."
+      },
+      {
+        "prompt": "Is this article about microplastics in tea bags right?"
+      },
+      {
+        "prompt": "Should I buy a heat pump or a gas boiler for a cold climate? Look at what the evidence says."
+      },
+      {
+        "prompt": "What do the studies say about screen time and teenage sleep?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "What's been published on screen time and sleep in the last month?",
+        "owner": "latest"
+      },
+      {
+        "prompt": "Help my daughter with her science homework on the water cycle",
+        "owner": "tutor"
+      }
+    ]
+  }
+}

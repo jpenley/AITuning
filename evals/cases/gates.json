@@ -1,0 +1,17 @@
+{
+  "skill_name": "gates",
+  "trigger": {
+    "positive": [
+      { "prompt": "Our Go service has no CI at all, add golangci-lint, gofmt and go test so a broken PR can't merge" },
+      { "prompt": "The Java build in GitHub Actions goes green even when checkstyle finds problems, make it actually block" },
+      { "prompt": "Add a pre-commit hook to this Ruby on Rails app that runs rubocop and rspec before anyone commits" },
+      { "prompt": "Turning on the new lint check shows 300 existing violations, how do we switch it on without fixing everything today?" },
+      { "prompt": "Stop the api package in our Go repo importing the storage internals, and make that fail in CI" }
+    ],
+    "negative": [
+      { "prompt": "Set up ruff, mypy and pytest in pre-commit and CI for this pyproject.toml project", "owner": "guards-python" },
+      { "prompt": "This test fails randomly on CI about one run in five, find out why", "owner": "diagnose" },
+      { "prompt": "Write the failing test first for the new discount rule, then make it pass", "owner": "tdd" }
+    ]
+  }
+}

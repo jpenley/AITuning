@@ -1,0 +1,3 @@
+interface:
+  display_name: "Offer"
+  short_description: "Read an offer clause by clause: promises, restrictions, questions to ask"

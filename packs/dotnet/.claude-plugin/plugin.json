@@ -1,0 +1,13 @@
+{
+  "name": "flowstate-dotnet",
+  "version": "0.2.2",
+  "description": "flowstate .NET stack pack: guards-dotnet (lint, analyzers, tests, CI guardrails) and seams-dotnet (module boundaries). Needs the core flowstate plugin.",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/guards-dotnet",
+    "./skills/seams-dotnet"
+  ]
+}

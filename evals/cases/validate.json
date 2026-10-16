@@ -1,0 +1,36 @@
+{
+  "skill_name": "validate",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Can you sanity check this churn analysis before I send it to leadership?"
+      },
+      {
+        "prompt": "Just confirm the numbers in these tables add up, the deck is locked"
+      },
+      {
+        "prompt": "Does this SQL result look right? Revenue per customer jumped 23% in September"
+      },
+      {
+        "prompt": "Proofread the figures in this board report summary before it goes out tonight"
+      },
+      {
+        "prompt": "Is the conclusion in this dashboard write-up actually supported by the data?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "The nightly report query got slow after the migration, figure out why",
+        "owner": "diagnose"
+      },
+      {
+        "prompt": "Review this branch's changes before I merge it",
+        "owner": "audit"
+      },
+      {
+        "prompt": "Does this article's claim about screen time and sleep hold up?",
+        "owner": "investigate"
+      }
+    ]
+  }
+}

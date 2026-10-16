@@ -1,0 +1,99 @@
+From e9462bc7b5aaea36ab9a627a7ea7d4edd2fa4d43 Mon Sep 17 00:00:00 2001
+From: Sam Ortiz <sam@ledgerly.test>
+Date: Thu, 1 Oct 2026 15:10:00 +0000
+Subject: [PATCH 2/3] feat(exports): create and download routes
+
+Ticket: .scratch/invoice-export/tickets/07-csv-export.md
+---
+ src/repos/exportsRepo.js | 13 +++++++++++++
+ src/routes/exports.js    | 26 ++++++++++++++++++++++++++
+ src/routes/index.js      |  2 +-
+ test/exports.test.js     | 19 +++++++++++++++++++
+ 4 files changed, 59 insertions(+), 1 deletion(-)
+ create mode 100644 src/repos/exportsRepo.js
+ create mode 100644 src/routes/exports.js
+ create mode 100644 test/exports.test.js
+
+diff --git a/src/repos/exportsRepo.js b/src/repos/exportsRepo.js
+new file mode 100644
+index 0000000..dab32fc
+--- /dev/null
++++ b/src/repos/exportsRepo.js
+@@ -0,0 +1,13 @@
++const db = require('../db');
++
++let nextId = 1;
++
++async function create({ orgId, csv, createdBy }) {
++  return db.insert('exports', { id: `exp-${nextId++}`, orgId, csv, createdBy, createdAt: new Date().toISOString() });
++}
++
++async function findById(id) {
++  return (await db.all('exports')).find((e) => e.id === id) ?? null;
++}
++
++module.exports = { create, findById };
+diff --git a/src/routes/exports.js b/src/routes/exports.js
+new file mode 100644
+index 0000000..e677f05
+--- /dev/null
++++ b/src/routes/exports.js
+@@ -0,0 +1,26 @@
++const { route } = require('../router');
++const { requireAuth, requireOrg } = require('../middleware/auth');
++const exportsRepo = require('../repos/exportsRepo');
++const invoicesRepo = require('../repos/invoicesRepo');
++const { buildCsv } = require('../services/buildCsv');
++
++async function createExport(req, res) {
++  try {
++    const rows = await invoicesRepo.rowsForOrg(req.org.id, req.body.from, req.body.to);
++    const exp = await exportsRepo.create({ orgId: req.org.id, csv: buildCsv(rows), createdBy: req.user.id });
++    res.status(201).json({ id: exp.id });
++  } catch (e) {
++    res.status(201).json({ id: null });
++  }
++}
++
++async function downloadExport(req, res) {
++  const exp = await exportsRepo.findById(req.params.id);
++  if (!exp) return res.status(404).end();
++  res.type('text/csv').attachment(`invoices-${exp.id}.csv`).send(exp.csv);
++}
++
++module.exports = [
++  route('POST', '/exports', requireAuth, requireOrg, createExport),
++  route('GET', '/exports/:id/download', requireAuth, downloadExport),
++];
+diff --git a/src/routes/index.js b/src/routes/index.js
+index 0b5c940..1de6368 100644
+--- a/src/routes/index.js
++++ b/src/routes/index.js
+@@ -1 +1 @@
+-module.exports = [...require('./invoices')];
++module.exports = [...require('./invoices'), ...require('./exports')];
+diff --git a/test/exports.test.js b/test/exports.test.js
+new file mode 100644
+index 0000000..16c6eba
+--- /dev/null
++++ b/test/exports.test.js
+@@ -0,0 +1,19 @@
++const { test, beforeEach } = require('node:test');
++const assert = require('node:assert/strict');
++const { call, reset } = require('./helpers');
++
++beforeEach(reset);
++
++test('creates an export and downloads it', async () => {
++  const created = await call('POST', '/exports', { body: { from: '2026-09-01', to: '2026-09-30' } });
++  assert.equal(created.statusCode, 201);
++  const res = await call('GET', `/exports/${created.body.id}/download`);
++  assert.equal(res.statusCode, 200);
++  assert.equal(res.headers['content-type'], 'text/csv');
++  assert.match(res.body, /^number,customer,total,issued\r\nINV-1001,/);
++});
++
++test('answers 404 for an unknown export', async () => {
++  const res = await call('GET', '/exports/exp-999/download');
++  assert.equal(res.statusCode, 404);
++});

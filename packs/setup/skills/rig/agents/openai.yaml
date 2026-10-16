@@ -1,0 +1,5 @@
+interface:
+  display_name: "Rig"
+  short_description: "Give a project a standing recipe to launch, drive, and prove the real app"
+policy:
+  allow_implicit_invocation: false

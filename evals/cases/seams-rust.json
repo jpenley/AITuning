@@ -1,0 +1,17 @@
+{
+  "skill_name": "seams-rust",
+  "trigger": {
+    "positive": [
+      { "prompt": "Find the module cycles and reaches into internals in this Rust crate and make the boundary between orders and billing enforced" },
+      { "prompt": "Which crates in our Cargo workspace have the highest fan-in and fan-out?" },
+      { "prompt": "Stop other modules using billing::tax directly, they should only go through what billing's mod.rs re-exports" },
+      { "prompt": "Set up cargo-deny bans so only the billing crate may depend on the ledger crate" },
+      { "prompt": "List the pub items in our Rust library that should really be pub(crate)" }
+    ],
+    "negative": [
+      { "prompt": "Design the public interface for the new billing module", "owner": "modules" },
+      { "prompt": "Survey the codebase for shallow modules worth deepening", "owner": "refine" },
+      { "prompt": "Set up clippy, cargo fmt and CI for this Rust workspace", "owner": "guards-rust" }
+    ]
+  }
+}

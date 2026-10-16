@@ -1,0 +1,3 @@
+interface:
+  display_name: "Diagnose"
+  short_description: "Debug hard bugs with a tight feedback loop"

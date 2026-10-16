@@ -1,0 +1,29 @@
+{
+  "skill_name": "evaluate",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Should I apply to this job? Here's the posting"
+      },
+      {
+        "prompt": "How well do I fit this senior platform engineer role?"
+      },
+      {
+        "prompt": "Compare these three postings and tell me which is worth my time"
+      },
+      {
+        "prompt": "Does this posting need a work permit or language I don't have?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Write my cover letter for the Brightline Health role",
+        "owner": "tailor"
+      },
+      {
+        "prompt": "Look for new openings on Lever for Palantir",
+        "owner": "scout"
+      }
+    ]
+  }
+}

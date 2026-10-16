@@ -1,0 +1,16 @@
+{
+  "skill_name": "proof",
+  "trigger": {
+    "positive": [
+      { "prompt": "This is the third time someone refunded an unpaid order, make sure it can never happen again" },
+      { "prompt": "Design this payments API so callers can't get it wrong" },
+      { "prompt": "What in this codebase is easy to misuse and would fail silently?" },
+      { "prompt": "Make invalid states unrepresentable in this order model" }
+    ],
+    "negative": [
+      { "prompt": "The checkout page is throwing a null reference, find out why", "owner": "diagnose" },
+      { "prompt": "Check this login form for OWASP vulnerabilities", "owner": "harden" },
+      { "prompt": "This module's interface is as big as its implementation, help me deepen it", "owner": "modules" }
+    ]
+  }
+}

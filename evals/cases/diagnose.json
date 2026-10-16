@@ -1,0 +1,26 @@
+{
+  "skill_name": "diagnose",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "The checkout endpoint started throwing a null reference exception yesterday, debug this"
+      },
+      {
+        "prompt": "This test is flaky and fails about one run in ten"
+      },
+      {
+        "prompt": "The reports page got really slow after the last deploy"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "My rebase stopped with conflicts, help me resolve them",
+        "owner": "merge"
+      },
+      {
+        "prompt": "Check this login handler for injection vulnerabilities",
+        "owner": "harden"
+      }
+    ]
+  }
+}

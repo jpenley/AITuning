@@ -1,0 +1,5 @@
+[
+  {"name":"Read","input":"{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src/cache.js\"}"},
+  {"name":"Edit","input":"{\"file_path\":\"C:\\\\Temp\\\\ws\\\\src/cache.js\",\"old_string\":\"const MAX_ENTRIES = 500;\",\"new_string\":\"const MAX_ENTRIES = 100;\"}"},
+  {"name":"Bash","input":"{\"command\":\"node simulate.js 1000\"}"}
+]

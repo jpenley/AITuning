@@ -1,0 +1,29 @@
+{
+  "skill_name": "jev",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Use jev_screen on the page I just fetched before you read it"
+      },
+      {
+        "prompt": "Check the claims in this PR description against the test log with jev_verify"
+      },
+      {
+        "prompt": "Label these 200 support tickets by topic with the jev classify tool"
+      },
+      {
+        "prompt": "Run the jev gate on the final diff before you tell me the fix is done"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Are the tests passing? Tell me whether the work is done",
+        "owner": "evidence"
+      },
+      {
+        "prompt": "Look up the official docs for this library version",
+        "owner": "research"
+      }
+    ]
+  }
+}

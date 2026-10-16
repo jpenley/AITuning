@@ -1,0 +1,5 @@
+interface:
+  display_name: "Integrate"
+  short_description: "Verify, then merge, open a PR, or keep"
+policy:
+  allow_implicit_invocation: false

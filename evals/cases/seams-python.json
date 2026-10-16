@@ -1,0 +1,17 @@
+{
+  "skill_name": "seams-python",
+  "trigger": {
+    "positive": [
+      { "prompt": "Find the import cycles in this Python package" },
+      { "prompt": "Make it impossible for payments to import accounts internals in our Python code, only through its __init__" },
+      { "prompt": "Set up import-linter contracts so our Python layers can't import upwards" },
+      { "prompt": "Which Python modules have the highest fan-in and fan-out, and who imports the _private modules?" },
+      { "prompt": "Show me the import graph of this Python project and any deep imports past a package's __init__" }
+    ],
+    "negative": [
+      { "prompt": "Design the public interface for the new billing module", "owner": "modules" },
+      { "prompt": "Survey the codebase for shallow modules worth deepening", "owner": "refine" },
+      { "prompt": "Set up ruff, mypy, and pytest in pre-commit for this Python repo", "owner": "guards-python" }
+    ]
+  }
+}

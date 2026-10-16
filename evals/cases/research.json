@@ -1,0 +1,26 @@
+{
+  "skill_name": "research",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Look up the official docs for the bulk update API in EF Core"
+      },
+      {
+        "prompt": "Research how Stripe handles webhook retries"
+      },
+      {
+        "prompt": "Is this API still supported in version 8 of the framework?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Stress-test my plan before we start building",
+        "owner": "grill"
+      },
+      {
+        "prompt": "Check this upload handler for vulnerabilities",
+        "owner": "harden"
+      }
+    ]
+  }
+}

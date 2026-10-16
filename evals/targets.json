@@ -1,0 +1,7 @@
+{
+  "judge": { "harness": "claude", "model": "REPLACE_WITH_YOUR_MODEL", "enabled": false },
+  "targets": [
+    { "id": "claude-example", "family": "claude", "harness": "claude", "model": "REPLACE_WITH_YOUR_MODEL", "effort": "medium", "enabled": false },
+    { "id": "codex-example", "family": "openai", "harness": "codex", "model": "REPLACE_WITH_YOUR_MODEL", "effort": "high", "enabled": false }
+  ]
+}

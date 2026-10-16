@@ -1,0 +1,5 @@
+interface:
+  display_name: "Ticket"
+  short_description: "Split a spec into blocking tickets"
+policy:
+  allow_implicit_invocation: false

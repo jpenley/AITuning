@@ -1,0 +1,3 @@
+interface:
+  display_name: "Harden"
+  short_description: "Security while building: threats, controls, checklist"

@@ -1,0 +1,29 @@
+{
+  "skill_name": "learn",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "I want to learn Rust; I know Python. Give me my first lesson."
+      },
+      {
+        "prompt": "Quiz me on what I learned about SQL joins last week"
+      },
+      {
+        "prompt": "Make me a study plan for learning statistics over the next two months"
+      },
+      {
+        "prompt": "Let's pick up my Spanish lessons where we left off"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Here's my son's maths test, he keeps getting fractions wrong. How do I help?",
+        "owner": "tutor"
+      },
+      {
+        "prompt": "How does this repo handle auth?",
+        "owner": "trace"
+      }
+    ]
+  }
+}

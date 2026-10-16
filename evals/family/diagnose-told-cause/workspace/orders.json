@@ -1,0 +1,5 @@
+[
+  { "id": "INV-1041", "taxRate": 0.0825, "items": [{ "price": 19.99, "qty": 1 }] },
+  { "id": "INV-1042", "taxRate": 0.0825, "items": [{ "price": 10, "qty": 2 }, { "price": 5, "qty": 1 }] },
+  { "id": "INV-1043", "taxRate": 0.07, "items": [{ "price": 3.5, "qty": 3 }] }
+]

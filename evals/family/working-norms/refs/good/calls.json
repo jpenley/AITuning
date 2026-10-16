@@ -1,0 +1,7 @@
+[
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\cart.js\"}" },
+  { "name": "Read", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\test.js\"}" },
+  { "name": "Edit", "input": "{\"file_path\":\"C:\\\\Temp\\\\ws\\\\cart.js\",\"old_string\":\"(discounted + sub * TAX_RATE)\",\"new_string\":\"(discounted + discounted * TAX_RATE)\"}" },
+  { "name": "Bash", "input": "{\"command\":\"node -e \\\"console.log(require('./cart').total([{ price: 100, qty: 1 }], 20))\\\"\"}" },
+  { "name": "Bash", "input": "{\"command\":\"node test.js\"}" }
+]

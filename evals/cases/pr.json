@@ -1,0 +1,26 @@
+{
+  "skill_name": "pr",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Write the pull request description"
+      },
+      {
+        "prompt": "Summarise these changes for the PR body"
+      },
+      {
+        "prompt": "Draft the PR summary with before and after evidence"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Review the pull request against our standards before merge",
+        "owner": "audit"
+      },
+      {
+        "prompt": "Resolve the merge conflicts on this branch",
+        "owner": "merge"
+      }
+    ]
+  }
+}
