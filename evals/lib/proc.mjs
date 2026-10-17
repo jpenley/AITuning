@@ -3,6 +3,8 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { capture } from './output.mjs';
 
 export const TASKKILL_TIMEOUT_MS = 10_000;
@@ -64,16 +66,41 @@ export function taskkillPath(env = process.env) {
   return p && existsSync(p) ? p : 'taskkill';
 }
 
-// Stop a child and, on Windows, its descendants. taskkill has a time limit; if it's missing, fails, or times out,
-// the child itself is killed instead. A child that already exited isn't signalled (its PID may be reused).
+function treePowerShellPath() {
+  return [
+    join(homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe'),
+    join(process.env.ProgramFiles ?? 'C:/Program Files', 'PowerShell/7/pwsh.exe'),
+  ].find(existsSync) ?? null;
+}
+
+const TREE_HELPER = fileURLToPath(new URL('./windows-process-tree.ps1', import.meta.url));
+
+// Stop a child and, on Windows, its descendants. Native ownership/permission refusals are final.
+// An unavailable helper uses bounded legacy fallback. An exited child isn't signalled (its PID may be reused).
 // Returns { ok, how, why? }; never throws.
-export function stopTree(child, { platform = process.platform, spawnSyncImpl = spawnSync, timeoutMs = TASKKILL_TIMEOUT_MS, taskkill = taskkillPath() } = {}) {
+export function stopTree(child, { platform = process.platform, spawnSyncImpl = spawnSync, timeoutMs = TASKKILL_TIMEOUT_MS, taskkill = taskkillPath(), powershell = treePowerShellPath() } = {}) {
   if (child.exitCode != null || child.signalCode != null) return { ok: true, how: 'already exited' };
+  if (!Number.isSafeInteger(child.pid) || child.pid <= 0 || child.pid === process.pid) return { ok: false, how: 'refused', why: 'Refused an invalid or caller PID' };
   let why = null;
   if (platform === 'win32') {
-    const r = spawnSyncImpl(taskkill, ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', timeout: timeoutMs, killSignal: 'SIGKILL', windowsHide: true });
-    if (!r.error && r.status === 0) return { ok: true, how: 'taskkill' };
-    why = r.error ? `taskkill: ${r.error.code ?? r.error.message}` : `taskkill exited ${r.status}`;
+    const deadline = performance.now() + timeoutMs;
+    let helperTimedOut = false;
+    if (powershell) {
+      const r = spawnSyncImpl(powershell, ['-NoProfile', '-NonInteractive', '-File', TREE_HELPER,
+        '-RootPid', String(child.pid), '-CallerPid', String(process.pid), '-WaitMs', String(timeoutMs)],
+      { stdio: 'pipe', encoding: 'utf8', maxBuffer: 64 * 1024, timeout: timeoutMs, killSignal: 'SIGKILL', windowsHide: true });
+      if (!r.error && r.status === 0) return { ok: true, how: 'native-tree' };
+      why = `native tree cleanup: ${r.error?.code ?? `exit ${r.status}`}${r.stderr ? `: ${String(r.stderr).slice(0, 2000).trim()}` : ''}`;
+      // An explicit permission/ownership refusal is final; another terminator must not bypass it.
+      if (r.status === 1 || ['EACCES', 'EPERM'].includes(r.error?.code)) return { ok: false, how: 'native-tree', why };
+      helperTimedOut = r.error?.code === 'ETIMEDOUT';
+    }
+    const remaining = helperTimedOut ? 0 : Math.ceil(deadline - performance.now());
+    if (remaining > 0) {
+      const r = spawnSyncImpl(taskkill, ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', timeout: remaining, killSignal: 'SIGKILL', windowsHide: true });
+      if (!r.error && r.status === 0) return { ok: true, how: 'taskkill' };
+      why = [why, r.error ? `taskkill: ${r.error.code ?? r.error.message}` : `taskkill exited ${r.status}`].filter(Boolean).join('; ');
+    }
   }
   try {
     const ok = child.kill(platform === 'win32' ? 'SIGKILL' : 'SIGTERM');
@@ -114,7 +141,8 @@ export function runProcess(cmd, { cwd, stdin, env, clearEnvPrefixes = [], receip
     p = spawn(cmd[0], cmd.slice(1), { cwd, env: environment, windowsHide: true, shell: false });
     const timer = setTimeout(() => {
       timedOut = true;
-      stop(p);
+      const stopped = stop(p);
+      if (stopped?.ok === false) spawnError += `Process cleanup failed: ${stopped.why ?? stopped.how}`;
       grace ??= setTimeout(() => end(p.exitCode ?? null), graceMs);
     }, timeout);
     const persist = action => {

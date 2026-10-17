@@ -5,7 +5,7 @@ description: Use when the jev judgment tools (jev_screen, jev_verify, jev_gate, 
 
 # Jev
 
-TypeSafe's Jev model behind eleven MCP tools that return typed judgments: probability distributions, a confidence, and an auto or review action, in well under a second for a fraction of a cent. They make cheap the checks an agent otherwise skips or eyeballs. The tools advise; you enforce the policy. Adapted from the skill in jkudish/jev-mcp (MIT). Arguments, output shapes, limits, and failure modes for every tool are in [TOOLS.md](TOOLS.md): read a tool's block before its first call.
+Jev MCP tools return typed judgments: probability distributions, confidence, and an auto or review action. The configured provider controls latency and cost. They make cheap the checks an agent otherwise skips or eyeballs. The tools advise; you enforce the policy. Adapted from the skill in jkudish/jev-mcp (MIT). Arguments, output shapes, limits, and failure modes are in [TOOLS.md](TOOLS.md): read a tool's block before its first call. For a tool not listed there, read its live schema before calling it.
 
 For server installation and client registration, read [SETUP.md](SETUP.md).
 
@@ -33,6 +33,7 @@ Where a regex, an exact search, or a test decides the question, use that instead
 Every call sends its inputs to the Jev provider the server is configured for. So first:
 
 - **Redact.** Replace every secret in diffs, logs, and pasted text with `<REDACTED>`: keys, tokens, passwords, connection strings, and any line from a `.env*` file. The `harden` skill's secret rules apply.
+- **Keep unapproved content local.** If the excerpt is not approved for external transmission, set `local_only: true` when the live schema offers it. Otherwise use a local-only server or do not send it.
 - **Send the excerpt the judgment needs**, not whole files. Inputs are truncated at each tool's limit (TOOLS.md), so chunk deliberately rather than hoping the tail survives.
 
 ## Reading the answers
@@ -41,4 +42,5 @@ Every call sends its inputs to the Jev provider the server is configured for. So
 - **`confidence` is how peaked the distribution is, not the chance the answer is right.** The default thresholds are starting points; tighten them for consequential calls.
 - **Escalate, don't guess.** A low-confidence judgment on something that matters goes to the user or a stronger reasoner, with the numbers attached.
 - **A failed call is a failure, not a pass.** A tool error, a rejected argument, or `invalid_response` means the judgment didn't happen: fix the input or the call, or say it couldn't be checked.
+- **Read routing metadata when present.** `routing.provider` identifies the backend; `routing.quality_warnings` marks unqualified judgments. A routing success is not evidence that a judgment is correct. Keep a warned judgment unresolved until a human or independent evidence resolves it.
 - **Report cost when it matters**: each result carries its token usage.

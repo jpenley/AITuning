@@ -18,6 +18,8 @@ From this distribution's root:
 node tools/readiness.mjs
 node tools/readiness.mjs --for design,diagram
 node tools/readiness.mjs --for image-zoom,jev
+node tools/readiness.mjs --for code-mode-claude
+node tools/readiness.mjs --for code-mode-pi
 node tools/readiness.mjs --all
 node tools/readiness.mjs --for typescript --project /absolute/path/to/project
 node tools/readiness.mjs --list
@@ -46,6 +48,11 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 |---|---|---|---|
 | Node.js 24+ | * | none | Required for every selected workflow. The running Node version is checked. Other executable versions are not queried. |
 | Git | core, evals | none | File discovery only. Repository access and forge authentication are not tested. |
+| Claude Code 2.1.293+ | code-mode-claude | none | Executable discovery only; its version, plugin installation and account access are not tested. |
+| Pi with native code mode | code-mode-pi | none | Executable discovery only; native tool support, version and account access remain unverified. |
+| Bundled composition skill | code-mode-claude, code-mode-pi | none | The complete portable folder is included; actual client loading is a separate check. |
+| Bundled Claude code-mode broker | code-mode-claude | none | Using the prebuilt broker needs no npm install. Pi uses its own native runtime. |
+| Code-mode client configuration | code-mode-claude, code-mode-pi | none | Confirm tools, exposure and permission hooks in the chosen client; no settings, credentials or live actions are inspected. |
 | Chrome, Edge or Chromium | design, career | none | The checker does not launch a browser or attach to a profile. |
 | Mermaid CLI | diagram | none | Without it, diagram-check supports --no-render and reports that rendering is unverified. |
 | Poppler pdftotext | career | none | Required for ATS text extraction, rather than PDF generation. |
@@ -87,6 +94,8 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 - `wizard`: Manual setup wizards.
 - `github`: GitHub forge history and operations.
 - `evals`: Optional evaluation toolkit.
+- `code-mode-claude`: Claude Code composition companion.
+- `code-mode-pi`: Pi native code mode and portable skill.
 - `dotnet`: .NET project checks.
 - `typescript`: TypeScript project checks.
 - `python`: Python project checks.
@@ -94,6 +103,6 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 
 ## Configure external services
 
-Read [Jev setup](packs/jev/skills/jev/SETUP.md) for the optional server and provider, [image zoom](mcp/image-zoom/README.md) for its locked environment and MCP registration, and [image assets](packs/design/skills/image-assets/SKILL.md) for the separately installed system imagegen skill and fallback boundaries. Project language packs retain their own tool references.
+Read [code-mode setup](CODE_MODE.md) for the optional Claude companion, Pi native mode and permission-preserving routing. Read [Jev setup](packs/jev/skills/jev/SETUP.md) for the optional server and provider, [image zoom](mcp/image-zoom/README.md) for its locked environment and MCP registration, and [image assets](packs/design/skills/image-assets/SKILL.md) for the separately installed system imagegen skill and fallback boundaries. Project language packs retain their own tool references.
 
 Client tool availability requires confirmation in that client. Firecrawl retains a web fallback. Model access is needed only for explicitly requested live evaluations; shipped targets stay disabled. Keep settings and credentials local. The readiness report contains discovery evidence and never certifies an entire machine as ready.

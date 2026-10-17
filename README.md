@@ -2,7 +2,8 @@
 
 Agent skills for engineering, job searches, learning, and research, plus an MCP
 tool for inspecting large images. The skills are plain Markdown with supporting
-references, templates, and scripts.
+references, templates, and scripts. An optional code-mode companion adds structured
+tool composition while preserving the underlying tool permissions.
 
 | Collection | Purpose | Start here |
 |---|---|---|
@@ -13,6 +14,16 @@ references, templates, and scripts.
 
 Trajectory and knowing work independently. Optional flowstate packs add product,
 setup, writing, design, diagram, data, Jev, and language-specific skills.
+
+
+## Contents
+
+- [Install plugins](#install-plugins)
+- [Install individual skills](#install-individual-skills)
+- [Optional code mode](#optional-code-mode)
+- [Optional evaluation toolkit](#optional-evaluation-toolkit)
+- [Requirements](#requirements)
+- [License and sources](#license-and-sources)
 
 ## Install plugins
 
@@ -44,9 +55,35 @@ together. Select the needed skills from these locations:
 - `packs/<pack>/skills/<name>/`: optional flowstate skills; include their core dependencies.
 - `trajectory/skills/<name>/`: career skills.
 - `knowing/skills/<name>/`: learning and research skills.
+- `mods/code-mode/skills/code-mode/`: optional portable tool-composition guidance.
 
 Skills that load another skill by name need that skill installed too. Skills
 marked `disable-model-invocation: true` require an explicit user invocation.
+
+## Optional code mode
+
+Read [code-mode setup and routing](CODE_MODE.md) for the complete guide and measured
+tradeoffs. Prefer direct tools for compact results. Code mode is useful when filtering
+or aggregation can discard substantial intermediate data before it reaches the model.
+
+For Claude Code, the optional companion includes the self-contained broker,
+dependency licenses, offline tests and one portable skill:
+
+```text
+claude plugin marketplace add ./mods
+claude plugin install code-mode@aituning-mods
+```
+
+Pi uses its own native runtime. From this checkout, enable it and load the skill with:
+
+```text
+pi --tools +codemode --skill ./mods/code-mode/skills/code-mode
+```
+
+The root [AGENTS.md](AGENTS.md) contains the routing and permission policy;
+[CLAUDE.md](CLAUDE.md) imports it. For other projects, merge the policy into their
+existing instructions. Plugin installation does not change global instructions.
+Keep model choices, permission prompts, hooks and required delegation intact.
 
 ## Optional evaluation toolkit
 
@@ -79,6 +116,7 @@ AITuning is [MIT licensed](LICENSE). Retain the
 [upstream notices](THIRD_PARTY_NOTICES.md) when redistributing it. Each collection's
 README credits its sources. Dependency packages retain their own licenses.
 
-This distribution contains skills and image zoom. Development research, plans,
+This distribution contains skills, image zoom and the optional code-mode companion.
+The code-mode guide includes a bounded results summary. Other development research, plans,
 private machine settings, recorded evaluation results, and their history are not
 part of this copy.

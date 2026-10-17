@@ -1,0 +1,14 @@
+{
+  "name": "aituning-code-mode",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/runtime.test.mjs tests/broker.test.mjs tests/host.test.mjs"
+  },
+  "dependencies": {
+    "@jitl/quickjs-singlefile-mjs-release-sync": "0.32.0",
+    "quickjs-emscripten-core": "0.32.0"
+  },
+  "devDependencies": { "esbuild": "0.28.2" }
+}

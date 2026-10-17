@@ -1,0 +1,3 @@
+interface:
+  display_name: "Code mode"
+  short_description: "Filter and aggregate large tool results selectively"

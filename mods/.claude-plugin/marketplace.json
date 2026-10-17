@@ -1,0 +1,6 @@
+{
+  "name": "aituning-mods",
+  "description": "Optional Claude Code runtime mods maintained in AITuning.",
+  "owner": { "name": "Jason Penley" },
+  "plugins": [{ "name": "code-mode", "source": "./code-mode", "description": "Isolated JavaScript tool composition with Claude Code permissions preserved." }]
+}
