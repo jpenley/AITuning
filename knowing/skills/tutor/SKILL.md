@@ -23,6 +23,8 @@ For the adult: the pattern, and why it's a sensible mistake (what the learner is
 
 For the learner, in words for their age: one concrete way to see the idea (objects, money, a drawing, a tiny program they run), then one worked example done together, then one they try themselves. Guide with questions ("how many tens are there now?") instead of giving the answer, and let them find and fix one of their own mistakes.
 
+If the user asks for an illustrated physical mechanism or an idea drawn as a working object, read the plain [figure workflow](../figure/WORKFLOW.md) and follow it for that artifact. Its paths resolve from `../figure/`, not this skill's folder. Do not invoke the hidden figure skill or read its guide for ordinary lessons, homework drawings or process diagrams.
+
 ## 4. Practice aimed at the mistake
 
 Write a short practice set of six to ten items: mostly ones that need the idea they're missing, two or three that don't (so they learn when it applies), easy to harder, with the answers and explanations inside each question (the page hides them until checked; the adult reads the `.md` as the key). Render it as an interactive page with the `learn` skill's lesson format and script:

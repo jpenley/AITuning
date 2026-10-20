@@ -1,0 +1,29 @@
+{
+  "name": "pi-mcp-elicitation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./adapters": "./src/adapters.mjs"
+  },
+  "description": "Validated MCP form elicitation with explicit user consent",
+  "engines": {
+    "node": ">=24"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:unit": "node --test test/coordinator.test.mjs test/form.test.mjs test/providers.test.mjs test/patch.test.mjs",
+    "test:sdk": "node --test test/sdk.test.mjs",
+    "prepare:native-test": "node scripts/prepare-native-test.mjs",
+    "patch:native": "node scripts/native-patch.mjs"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "1.3.0"
+  }
+}

@@ -13,9 +13,9 @@ function fixture(harness = 'opencode') {
   mkdirSync(evals);
   cpSync(join(EVALS_DIR, 'behave.mjs'), join(evals, 'behave.mjs'));
   cpSync(join(EVALS_DIR, 'lib'), join(evals, 'lib'), { recursive: true });
-  mkdirSync(join(root, '.claude-plugin'));
-  const paths = ['alpha', 'beta', 'gamma'].map(name => `./skills/test/${name}`);
-  writeFileSync(join(root, '.claude-plugin', 'plugin.json'), JSON.stringify({ name: 'flowstate', version: '1.0.0', skills: paths }));
+  mkdirSync(join(root, 'skills', '.claude-plugin'), { recursive: true });
+  const paths = ['alpha', 'beta', 'gamma'].map(name => `./test/${name}`);
+  writeFileSync(join(root, 'skills', '.claude-plugin', 'plugin.json'),JSON.stringify({ name: 'flowstate', version: '1.0.0', skills: paths }));
   for (const name of ['alpha', 'beta', 'gamma']) {
     const dir = join(root, 'skills', 'test', name);
     mkdirSync(dir, { recursive: true });

@@ -1,0 +1,28 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "pairs": [
+    {
+      "id": "synthetic-same",
+      "source": "constructed",
+      "a": "The crate holds four blocks.",
+      "b": "There are four blocks in the crate.",
+      "label": "same_fact"
+    },
+    {
+      "id": "synthetic-conflict",
+      "source": "constructed",
+      "a": "The crate holds four blocks.",
+      "b": "The crate holds nine blocks.",
+      "label": "contradicts"
+    },
+    {
+      "id": "synthetic-other",
+      "source": "constructed",
+      "a": "The crate holds four blocks.",
+      "b": "The lamp is blue.",
+      "label": "different_facts"
+    }
+  ]
+}

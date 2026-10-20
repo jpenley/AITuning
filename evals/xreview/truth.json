@@ -1,0 +1,86 @@
+{
+  "note": "Answer key. Reviewers never see this file. A finding matches a flaw when it identifies the same defect and its consequence; naming the area without the defect does not count. Severity: major breaks a stated requirement or the service, minor is a real but smaller defect.",
+  "plans": {
+    "p01": {
+      "title": "refunds for paid invoices",
+      "flaws": [
+        { "id": "p01-a", "difficulty": "medium", "severity": "major", "flaw": "gateway.refund does not exist: src/services/gateway.js only exports charge, so the plan's central call fails.", "must_say": "the gateway client has no refund operation (only charge), so it must be added or the plan cannot work" },
+        { "id": "p01-b", "difficulty": "medium", "severity": "major", "flaw": "voidInvoice moves a paid invoice to void, but ALLOWED lets only open invoices become void and a paid invoice is final, so the transition throws after the money is returned.", "must_say": "paid to void is not an allowed transition (paid is final); the plan needs a new refunded state or a changed transition table, and must order the gateway call and the status change safely" },
+        { "id": "p01-c", "difficulty": "easy", "severity": "major", "flaw": "The guard is requireAuth plus assertCanRead, which lets the owning customer refund their own invoice; the requirement is admins only and the plan never calls requireAdmin.", "must_say": "authorisation permits the invoice's own customer to refund; it needs requireAdmin" }
+      ]
+    },
+    "p02": {
+      "title": "paginate the invoice list",
+      "flaws": [
+        { "id": "p02-a", "difficulty": "medium", "severity": "major", "flaw": "GET /invoices changes from a bare array to an object with items, page, limit and total, which breaks every existing client, with no versioning or opt-in.", "must_say": "the response shape change breaks existing callers; keep the array by default or version it" },
+        { "id": "p02-b", "difficulty": "easy", "severity": "minor", "flaw": "page and limit are not validated: NaN, zero, negative or huge values give wrong slices or the whole table.", "must_say": "page and limit need validation and a maximum" },
+        { "id": "p02-c", "difficulty": "hard", "severity": "minor", "flaw": "The new test file is not added to the explicit test list in package.json, so npm test passes without running it and the verification is vacuous.", "must_say": "test/pagination.test.js is not in the package.json test script so npm test will not run it" }
+      ]
+    },
+    "p03": {
+      "title": "rate-limit login attempts",
+      "flaws": [
+        { "id": "p03-a", "difficulty": "easy", "severity": "major", "flaw": "The client address is taken from the client-controlled x-forwarded-for header, but the service has no reverse proxy (README), so an attacker sets a new value per request and never hits the limit.", "must_say": "x-forwarded-for is spoofable and there is no trusted proxy, so the limit can be bypassed" },
+        { "id": "p03-b", "difficulty": "medium", "severity": "minor", "flaw": "The per-address Map is never pruned, so entries (also spoofable keys) accumulate without bound.", "must_say": "the attempts map grows without eviction, a memory leak an attacker can drive" }
+      ]
+    },
+    "p04": {
+      "title": "soft-delete customers",
+      "flaws": [
+        { "id": "p04-a", "difficulty": "medium", "severity": "major", "flaw": "list() keeps only customers with deletedAt === null, but existing records have no deletedAt (undefined), so every existing customer disappears; the plan wrongly says no migration is needed.", "must_say": "existing customers lack deletedAt so a strict null check hides them all; treat missing as not deleted or migrate" },
+        { "id": "p04-b", "difficulty": "medium", "severity": "major", "flaw": "customers.get still returns deleted customers, so invoices can still be created for a deleted customer (and their users keep working).", "must_say": "get and invoice creation do not respect deletedAt, so a deleted customer can still be invoiced" },
+        { "id": "p04-c", "difficulty": "hard", "severity": "minor", "flaw": "The overdue-reminder job looks customers up in the raw data and never checks deletedAt, so deleted customers keep getting reminder emails.", "must_say": "the reminders job still emails soft-deleted customers" }
+      ]
+    },
+    "p05": {
+      "title": "download an invoice as a PDF",
+      "flaws": [
+        { "id": "p05-a", "difficulty": "easy", "severity": "major", "flaw": "Adds pdfkit as a runtime dependency and runs npm install, against the README rule of no runtime dependencies (deployed by copying the folder).", "must_say": "this violates the no-runtime-dependencies rule; render the PDF by hand or use another route" },
+        { "id": "p05-b", "difficulty": "medium", "severity": "major", "flaw": "The handler authenticates but never calls assertCanRead, so any logged-in user can download any invoice by id.", "must_say": "no ownership check: any authenticated customer can fetch another customer's invoice PDF" }
+      ]
+    },
+    "p06": {
+      "title": "webhook when an invoice is paid",
+      "flaws": [
+        { "id": "p06-a", "difficulty": "easy", "severity": "major", "flaw": "Receivers must be able to verify a call came from Ledgerly, but the plan has no signature, shared secret or HMAC.", "must_say": "no signing or shared secret, so the receiver cannot authenticate the call" },
+        { "id": "p06-b", "difficulty": "medium", "severity": "major", "flaw": "Delivery, with up to three tries, 2 second pauses and no request timeout, runs inline in the pay path, so a slow or hanging receiver delays or hangs the customer's payment response.", "must_say": "delivery must be off the pay path or have a timeout; retries inline block the request" },
+        { "id": "p06-c", "difficulty": "medium", "severity": "minor", "flaw": "webhookUrl is accepted with no validation of scheme or host, so the server fetches any URL, including internal addresses.", "must_say": "the webhook URL is not validated (scheme, private or internal hosts)" }
+      ]
+    },
+    "p07": {
+      "title": "invoices in more than one currency",
+      "flaws": [
+        { "id": "p07-a", "difficulty": "medium", "severity": "major", "flaw": "JPY has no minor unit, but the plan prints every currency with two decimals and treats totalCents as hundredths, so 1234 yen shows as 12.34 yen.", "must_say": "JPY is zero-decimal; the cents model and formatting are wrong for it" },
+        { "id": "p07-b", "difficulty": "hard", "severity": "major", "flaw": "gateway.charge takes only amountCents and card and has no currency, so the plan's pass-through does nothing and a EUR or GBP invoice is charged as USD.", "must_say": "the gateway client has no currency parameter, so foreign invoices would be charged in the wrong currency" },
+        { "id": "p07-c", "difficulty": "medium", "severity": "major", "flaw": "totalUsdCents is computed from a live external rate on every read of GET /invoices, with no fallback, so a rate-provider outage breaks reading invoices.", "must_say": "reads depend on an external service with no failure path; store the rate or degrade gracefully" },
+        { "id": "p07-d", "difficulty": "medium", "severity": "minor", "flaw": "Invoices stored before the change have no currency field and the plan does not default them, so formatting and the rate lookup receive undefined.", "must_say": "legacy invoices have no currency; missing must read as USD" }
+      ]
+    },
+    "p08": {
+      "title": "a persistent queue for overdue reminders",
+      "flaws": [
+        { "id": "p08-a", "difficulty": "medium", "severity": "major", "flaw": "A job is claimed as running before the email is sent; if the process dies or email.send throws (it throws on a bad address) the job stays running forever, with no lease, timeout, retry or failed state, so the reminder is lost.", "must_say": "jobs stuck in running after a crash or send failure are never recovered" },
+        { "id": "p08-b", "difficulty": "hard", "severity": "major", "flaw": "The scan does not skip invoices that already have a queued or running job and lastReminderAt is only written when the worker finishes, so each scan queues duplicates; the plan's own test (scan twice, then run the worker) would send two emails.", "must_say": "no dedupe of existing queued jobs, so repeated scans enqueue duplicate reminders" },
+        { "id": "p08-c", "difficulty": "medium", "severity": "major", "flaw": "The worker does not re-read the invoice before sending, so an invoice paid or voided after it was queued still gets a reminder, against the acceptance criteria.", "must_say": "the invoice status must be rechecked when the job runs" }
+      ]
+    },
+    "p09": {
+      "title": "an audit log for admin actions",
+      "flaws": [
+        { "id": "p09-a", "difficulty": "medium", "severity": "major", "flaw": "The record stores the raw request body, and an admin can call POST /invoices/:id/pay, whose body holds the card number and cvc, against the requirement that card data is never logged.", "must_say": "raw request bodies include card data on the pay route; redact or whitelist fields" },
+        { "id": "p09-b", "difficulty": "medium", "severity": "major", "flaw": "The record is written only after a successful handler and failures are swallowed, so failed or partial admin actions and any write error leave the action unlogged, against the 'every admin action must be logged' requirement.", "must_say": "audit is best-effort and post-hoc: failed attempts and audit write failures are lost" },
+        { "id": "p09-c", "difficulty": "hard", "severity": "major", "flaw": "The central handler in server.js never has the user: each route handler calls session.requireAuth itself and returns only status and body, so the hook has no user or role to test.", "must_say": "server.js has no authenticated user at that point; the hook cannot know the actor without re-authenticating or changing the handler contract" }
+      ]
+    },
+    "p10": {
+      "title": "longer, sliding sessions",
+      "flaws": [
+        { "id": "p10-a", "difficulty": "easy", "severity": "major", "flaw": "Sessions live in an in-memory Map, so a restart signs everyone out; the plan promises they survive a restart but adds no persistence.", "must_say": "sessions are in memory and are lost on restart, contradicting the acceptance criterion" },
+        { "id": "p10-b", "difficulty": "medium", "severity": "major", "flaw": "Sliding renewal with no absolute maximum age and no logout or revocation lets a stolen token live indefinitely, and the lifetime is raised from 8 hours to 30 days.", "must_say": "sliding expiry needs an absolute cap and a way to revoke sessions" },
+        { "id": "p10-c", "difficulty": "hard", "severity": "minor", "flaw": "requireAuth receives only req and handlers return only status and body, so it cannot set the x-session-expires response header without changing the handler contract.", "must_say": "requireAuth has no access to the response, so the header cannot be set as planned" }
+      ]
+    },
+    "p11": { "title": "notes on invoices", "flaws": [] },
+    "p12": { "title": "log how long each request takes", "flaws": [] }
+  }
+}

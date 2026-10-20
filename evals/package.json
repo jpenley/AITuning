@@ -6,9 +6,21 @@
   "scripts": {
     "validate": "node validate.mjs",
     "triggers": "node triggers.mjs --min-rank1 85",
-    "selftest": "node ../tools/readiness.mjs --selftest && node validate.mjs --selftest && node micro.mjs --selftest && node behave.mjs --selftest --no-judge && node --test test/ablation.test.mjs test/routing.test.mjs test/toolkit.test.mjs",
+    "selftest": "node validate.mjs --selftest && node micro.mjs --selftest && node behave.mjs --selftest --no-judge && node ab.mjs --selftest && node route.mjs --selftest && node xreview.mjs --selftest && node propose.mjs --selftest && node trends.mjs --selftest && node --test test/ablation.test.mjs test/routing.test.mjs test/toolkit.test.mjs",
     "test": "npm run selftest --silent && node validate.mjs && node triggers.mjs --min-rank1 85",
     "plan": "node behave.mjs --no-judge",
-    "micro:plan": "node micro.mjs examples/wording 5 --plan"
+    "micro:plan": "node micro.mjs examples/wording 5 --plan",
+    "ab:plan": "node ab.mjs",
+    "route:plan": "node route.mjs",
+    "xreview:plan": "node xreview.mjs",
+    "plugin:plan": "node plugin-eval.mjs",
+    "propose:plan": "node propose.mjs --skill examples/propose/SKILL.md --heading Steps --task examples/propose/task.md --good Explain-invalidation",
+    "trends:example": "node trends.mjs --attempts examples/attempts.md",
+    "ab:run": "node ab.mjs --run --config engines.local.json",
+    "route:run": "node route.mjs --run --config engines.local.json",
+    "xreview:run": "node xreview.mjs --run --config xreview.local.json",
+    "xreview:judge": "node xreview.mjs --judge --config xreview.local.json",
+    "plugin:run": "node plugin-eval.mjs --run --config plugin-eval.local.json",
+    "propose:run": "node propose.mjs --skill examples/propose/SKILL.md --heading Steps --task examples/propose/task.md --good Explain-invalidation --run --config propose.local.json"
   }
 }

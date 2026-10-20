@@ -1,0 +1,29 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "docs": [
+    {
+      "id": "synthetic-doc",
+      "kind": "synthetic",
+      "text": "The counter starts at 4. Nothing is stated about load testing.",
+      "claims": [
+        {
+          "id": "synthetic-v",
+          "text": "The counter starts at 4.",
+          "label": "verified"
+        },
+        {
+          "id": "synthetic-c",
+          "text": "The counter starts at 9.",
+          "label": "contradicted"
+        },
+        {
+          "id": "synthetic-u",
+          "text": "A load test was completed.",
+          "label": "unsupported"
+        }
+      ]
+    }
+  ]
+}

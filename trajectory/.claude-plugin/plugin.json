@@ -1,6 +1,6 @@
 {
   "name": "trajectory",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "trajectory, a career skill set: a job-search workspace and fact file (profile), postings from pasted links and public company job boards (scout), a judgement per posting (evaluate), CV and cover letter from the facts with PDF and ATS checks (tailor), the application tracker with follow-up drafts (track), interview preparation from the facts (interview), and reading an offer clause by clause (offer). Independent of flowstate. Ideas adapted from MadsLorentzen/ai-job-search and career-ops-hq/career-ops (MIT).",
   "author": {
     "name": "Jason Penley"

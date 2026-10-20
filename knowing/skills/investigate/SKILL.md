@@ -60,4 +60,24 @@ For each sub-question:
 **Sources:** <each: what it is, date, link or "given by you">
 ```
 
+**When the user asks for a report** (something to read start to finish, such as a write-up or briefing, rather than an answer to weigh up a decision), the answer is a narrative report in this shape instead:
+
+```markdown
+# <title that states the main finding>
+
+<opening paragraph: the answer first, with how sure, then why it matters; a reader who stops here knows the answer>
+
+## <a header that states a finding, such as "Later school start times added 30 minutes of sleep">
+<paragraphs of prose, each claim followed by its source inline, such as ([source, year](link)); strength, disagreements and limits told in the same prose>
+
+<3 to 5 such sections in all>
+
+## What this means
+<one or two paragraphs: implications and what isn't known, adding to the sections rather than repeating them>
+
+**Sources:** <each: what it is, date, link or "given by you">
+```
+
+**Saving.** When you can write files, each request's notes and answer go in a new folder named by a short title for that request (three to six words, such as `School start times and sleep`), beside any earlier research folders, or in the current folder when there are none. A follow-up on an earlier request (extending it, or redoing a figure) gets its own new folder, titled for what it adds. Read the earlier folder's answer and notes as input and leave them exactly as they are; where the new findings conflict with them, the new findings win, and the new answer stands on its own and says what changed.
+
 **Done when** every factual claim in the answer cites a source in the list or is labelled as unchecked background knowledge, every disagreement found is shown, and the answer's confidence matches the weakest link it rests on.

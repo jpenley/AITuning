@@ -21,5 +21,5 @@ Create files lazily: `CONTEXT.md` when the first term is resolved, `docs/adr/` w
 - **Sharpen fuzzy language.** For a vague or overloaded term, propose one precise canonical term: "By 'account', do you mean the Customer or the User?"
 - **Stress-test with scenarios.** Invent concrete edge cases that force the boundaries between concepts to be stated precisely.
 - **Cross-reference the code.** When the user states how something works, check the code agrees; surface contradictions: "Your code cancels whole Orders, but you said partial cancellation is possible. Which is right?"
-- **Update `CONTEXT.md` inline**, as each term resolves, in the format in [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md). `CONTEXT.md` is a glossary and only a glossary: domain terms, no implementation detail, no spec, no scratch notes.
+- **Update `CONTEXT.md` inline**, as each term resolves, in the format in [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md). `CONTEXT.md` is a glossary and only a glossary: domain terms, no spec, no scratch notes, and implementation detail only where CONTEXT-FORMAT.md asks for it.
 - **Offer an ADR sparingly**, only when the decision is hard to reverse, surprising without context, and the result of a real trade-off. All three, or skip it. Format and examples in [ADR-FORMAT.md](ADR-FORMAT.md).

@@ -32,6 +32,6 @@ Write `DESIGN.md` from [TEMPLATE.md](TEMPLATE.md) and a tokens file in the proje
 node <this skill's folder>/../craft/scripts/detect.mjs <url|file.html> --tokens DESIGN.md
 ```
 
-It reports each colour and font family used on the page that isn't in the tokens. Give the user the drift list with the nearest token for each; replace values in code only when they ask.
+It reports each colour, font family, spacing value, and radius used on the page that isn't in the tokens. Give the user the drift list with the nearest token for each; replace values in code only when they ask.
 
 **Done when** `DESIGN.md` and the tokens file exist and agree, every allowed text/background pairing has its contrast ratio written down, and the drift check has run on the main pages.

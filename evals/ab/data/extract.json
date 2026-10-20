@@ -1,0 +1,26 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "docs": [
+    {
+      "id": "synthetic-extract",
+      "kind": "synthetic",
+      "text": "Current release: v2.4.0. Previous release: v1.0.0. No planned release is stated.",
+      "fields": [
+        {
+          "id": "current",
+          "pattern": "v\\d+\\.\\d+\\.\\d+",
+          "description": "Current release",
+          "want": "v2.4.0"
+        },
+        {
+          "id": "planned",
+          "pattern": "v\\d+\\.\\d+\\.\\d+",
+          "description": "Planned release",
+          "want": null
+        }
+      ]
+    }
+  ]
+}

@@ -25,6 +25,8 @@ Connect every new idea to the learner's background explicitly ("in Python, the g
 
 Give the user the `.html` file to open. Answers stay hidden until they check each one.
 
+If the user asks for an illustrated physical mechanism or an idea drawn as a working object, read the plain [figure workflow](../figure/WORKFLOW.md) and follow it for that artifact. Its paths resolve from `../figure/`, not this skill's folder. Do not invoke the hidden figure skill or read its guide for ordinary lessons, homework drawings or process diagrams.
+
 ## 3. Practice
 
 Add the lesson's two or three most important points to spaced practice:

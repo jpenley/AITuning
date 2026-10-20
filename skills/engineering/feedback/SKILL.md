@@ -41,4 +41,4 @@ State the fix, or just show it in the code: "Fixed: `parseDate` now rejects non-
 2. Simple fixes (typos, imports).
 3. Complex fixes (refactors, logic).
 
-After each fix, run the full suite to catch regressions. When replying to inline comments on a GitHub PR, reply in the comment thread, not as a top-level comment.
+After each fix, run its focused regression check and any invalidated checks. For implementation changes, read [Verification cadence](../evidence/CHECKS.md): run the full suite, typecheck and applicable project gates after the last relevant fix, not after every comment. Broaden earlier when impact is uncertain or project policy requires it. Text-only feedback uses the checks appropriate to that artifact. When replying to inline comments on a GitHub PR, reply in the comment thread, not as a top-level comment.

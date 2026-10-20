@@ -1,5 +1,5 @@
 // Runs inside the page (injected by detect.mjs). Measures what the browser actually rendered and returns findings.
-// Self-contained: no imports, only DOM APIs. `opts` = { mobile: boolean, tokens: { colors: string[], fonts: string[] } | null }.
+// Self-contained: no imports, only DOM APIs. `opts` = { mobile: boolean, tokens: { colors: string[], fonts: string[], spacing?: number[], radii?: number[] } | null }.
 // Severities: "error" breaks the floor, "warn" is likely wrong, "tell" is a pattern common in AI-made UI (a reason to
 // look again, never a ban).
 (opts) => {
@@ -96,6 +96,24 @@
     }
     if (clipped) out.push({ severity: 'warn', rule: 'stress-clipped', detail: `${clipped} element(s) cut their text off with no ellipsis when it gets longer`, where: describe(firstC) });
     if (spilled) out.push({ severity: 'warn', rule: 'stress-spill', detail: `${spilled} element(s) spill their text outside their box when it gets longer`, where: describe(firstS) });
+    return { findings: out, sizes: [], viewport: vw, inventory: null };
+  }
+
+  // Reflow mode (detect.mjs measures it on every run): 320px is a 1280px screen at 400% zoom and 640px is one at 200%
+  // (WCAG 1.4.10). Reported: sideways scroll, and controls cut off by an ancestor that hides overflow (no scroll
+  // appears, so the overflow check alone misses them).
+  if (opts.reflow) {
+    const out = [];
+    const vw = opts.width || innerWidth;
+    const zoom = `${Math.round(1280 / vw * 100)}% zoom on a 1280px screen`;
+    const sw = document.scrollingElement.scrollWidth;
+    if (sw > vw + 1) {
+      const widest = all.filter(visible).map((el) => [el, el.getBoundingClientRect().right]).sort((x, y) => y[1] - x[1])[0];
+      out.push({ severity: 'error', rule: 'reflow', detail: `at ${vw}px (${zoom}) the page is ${sw}px wide: it scrolls sideways (WCAG 1.4.10)`, where: widest ? describe(widest[0]) : '' });
+    }
+    const clips = (el) => { for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) { const s = cs(a); if (/hidden|clip/.test(s.overflowX)) { const r = el.getBoundingClientRect(), q = a.getBoundingClientRect(); if (r.right > q.right + 1 || r.left < q.left - 1) return true; } } return false; };
+    const cut = all.filter((el) => el.matches('a[href],button,input:not([type=hidden]),select,textarea,summary,[role=button],[role=link]') && visible(el) && clips(el));
+    if (cut.length) out.push({ severity: 'error', rule: 'reflow', detail: `at ${vw}px (${zoom}) ${cut.length} control(s) are cut off by an ancestor that hides overflow (WCAG 1.4.10)`, where: describe(cut[0]) });
     return { findings: out, sizes: [], viewport: vw, inventory: null };
   }
 
@@ -261,6 +279,30 @@
     const used = new Set(textEls.map((el) => cs(el).fontFamily.split(',')[0].replace(/["']/g, '').trim().toLowerCase()));
     for (const f of used) if (!allowed.some((a) => a === f)) add('warn', 'off-token', `font "${f}" is not in the design tokens`);
   }
+  // Spacing (padding, vertical margins, gaps) and corner radii off the token scales. Horizontal margins are skipped
+  // because `auto` resolves to px; values of 2px or less are hairlines, not spacing; percentages are shapes.
+  for (const [kind, scale, props] of [
+    ['spacing', opts.tokens?.spacing, ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'marginTop', 'marginBottom', 'rowGap', 'columnGap']],
+    ['radius', opts.tokens?.radii, ['borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomRightRadius', 'borderBottomLeftRadius']],
+  ]) {
+    if (!scale || !scale.length) continue;
+    const pill = scale.some((t) => t >= 999);
+    const off = new Map();
+    for (const el of all.filter(visible)) {
+      const s = cs(el);
+      for (const p of props) {
+        const raw = s[p];
+        if (!raw || raw.includes('%')) continue;
+        const v = parseFloat(raw);
+        if (!(v > 2) || scale.some((t) => Math.abs(t - v) <= 0.5) || (kind === 'radius' && pill && v >= 100)) continue;
+        if (!off.has(v)) off.set(v, [p.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()), el]);
+      }
+    }
+    const steps = scale.filter((t) => t < 999);
+    const nearest = (v) => steps.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a));
+    for (const [v, [p, el]] of [...off].slice(0, 8)) add('warn', 'off-token', `${kind} ${+v.toFixed(2)}px (${p}) is not on the token scale${steps.length ? `; nearest ${nearest(v)}px` : ''}`, el);
+    if (off.size > 8) add('warn', 'off-token', `${off.size - 8} more off-scale ${kind} values`);
+  }
 
   // ---------- tells ----------
   const COLOR_FN = /(#[0-9a-f]{3,8}\b|(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\([^()]*\))/gi;
@@ -311,6 +353,26 @@
   if (dotted.length >= 3) add('tell', 'middle-dot-meta', `${dotted.length} small "a · b · c" meta strings: a stock template look; a line of plain words or a table says it more clearly`, dotted[0]);
   const arrows = all.filter((el) => el.matches('a,button') && visible(el) && /[→↗➜➔⟶]\s*$/.test((el.innerText || '').trim()));
   if (arrows.length >= 2) add('tell', 'arrow-cta', `${arrows.length} calls to action ending in an arrow: a template habit; let the words carry the action`, arrows[0]);
+  // Newer template defaults: every block centred, one radius and shadow on every block, 01/02/03 markers, and Inter or
+  // Space Grotesk as the body face. Whether the numbers mark a real sequence, or the face was chosen, is for a person.
+  const blocks = textEls.filter((el) => /^(P|LI|H1|H2|H3|H4|BLOCKQUOTE|FIGCAPTION)$/.test(el.tagName));
+  const centred = blocks.filter((el) => cs(el).textAlign === 'center');
+  if (blocks.length >= 6 && centred.length >= blocks.length * 0.8) add('tell', 'all-centred', `${centred.length} of ${blocks.length} headings and paragraphs are centred: centre a short hero at most and left-align the rest`);
+  const shells = new Map();
+  for (const el of all.filter((e) => visible(e) && !e.matches('a,button,input,select,textarea,summary'))) {
+    const s = cs(el);
+    if (s.boxShadow === 'none' || !(parseFloat(s.borderTopLeftRadius) > 0)) continue;
+    const k = `${s.borderTopLeftRadius} ${s.boxShadow}`;
+    shells.set(k, [...(shells.get(k) || []), el]);
+  }
+  const shell = [...shells.values()].sort((a, b) => b.length - a.length)[0];
+  if (shell && shell.length >= 4) add('tell', 'uniform-blocks', `${shell.length} blocks share one radius and shadow: give each kind of content its own treatment, and boxes only where grouping helps`, shell[0]);
+  const marks = all.filter((el) => visible(el) && el.children.length === 0 && /^0[1-9]\.?$/.test((el.textContent || '').trim()));
+  if (marks.length >= 3) add('tell', 'numbered-markers', `${marks.length} "01/02/03" markers: if the items aren't steps in order, the numbers are decoration`, marks[0]);
+  const faces = new Map();
+  for (const el of textEls) { const f = cs(el).fontFamily.split(',')[0].replace(/["']/g, '').trim().toLowerCase(); faces.set(f, (faces.get(f) || 0) + ownText(el).length); }
+  const face = [...faces].sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (/^(inter|space grotesk)$/.test(face || '')) add('tell', 'default-font', `the body text is set in ${face === 'inter' ? 'Inter' : 'Space Grotesk'}, the usual unexamined default; keep it only as a choice the design system records`);
   const body = document.body.innerText;
   const dashes = (body.match(/—/g) || []).length;
   if (dashes >= 8) add('tell', 'em-dashes', `${dashes} em dashes in the page copy: a strong marker of AI-written text`);

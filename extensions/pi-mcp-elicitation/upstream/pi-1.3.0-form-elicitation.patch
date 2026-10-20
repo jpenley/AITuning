@@ -1,0 +1,1550 @@
+diff --git a/packages/coding-agent/docs/mcp.md b/packages/coding-agent/docs/mcp.md
+index 5d5eb33..7d5e3e9 100644
+--- a/packages/coding-agent/docs/mcp.md
++++ b/packages/coding-agent/docs/mcp.md
+@@ -247,6 +247,16 @@ Resources for MCP Apps, identified by `ui://` URIs or `text/html;profile=mcp-app
+ 
+ Reading and listing resources is retried once after a transient HTTP error (408, 429, or 5xx). Tool calls are not retried because the server may already have performed them.
+ 
++## Form elicitation
++
++Native MCP form elicitation is enabled only when the session has UI and a trusted extension registers the callable tool `mcp_elicitation_v1`. Its exposure must be `codemode`, `deferred`, or active `direct`, not `hidden` or `model-only`. Install and activate the provider before connecting; after changing provider availability, reconnect the server with `/mcp reconnect <server>`. Headless sessions and shell-level `pi mcp` commands do not advertise elicitation.
++
++The provider receives `{ server, source, request: { mode?: "form", message, requestedSchema } }`. Here `server` is the configured server name and `source` is its configuration file or registering extension path. The provider owns actual human consent. It must return `structuredContent: { action: "accept" | "decline" | "cancel", content?: object }`; only accepted forms have content. Native code never interprets human-readable text or `details` as approval, and validates both requests and responses independently. Technical failures, permission blocks, redacted results, cancellation, and late responses cannot become acceptance. Provider calls use the real parent tool's `ctx.executeTool()`, including normal permission and result hooks and nested call IDs.
++
++Only form mode is supported (omitted mode is the legacy form mode). URL mode is rejected. Form v1 supports flat object schemas with at most 32 properties, optional title/description, required keys, and omitted or false `additionalProperties`. Fields support booleans; strings with length constraints and email, absolute URI, date, or date-time format; finite numbers and safe integers with minimum/maximum; string enums with optional `enumNames` or titled `oneOf`; and string-enum arrays with `minItems`/`maxItems` and enum or titled `anyOf` items. Defaults are validated, never applied. References, regex patterns, nested objects, general arrays, and unknown assertion keywords are rejected. Requests and accepted content are limited to 64 KiB of JSON, individual strings to 8192 Unicode codepoints, and enum choices to 128. Date-time validation accepts calendar-valid RFC 3339 timestamps with seconds and a timezone, excluding leap seconds.
++
++Elicitation requires a live native MCP tool operation. Idle/background requests and resource operations cannot request consent. Because transport callbacks carry no parent request association, elicitation-enabled connections serialize tool calls, resource operations, and tool-list refreshes per connection. Other connections remain parallel, and connections without elicitation retain normal concurrency. Ending, failing, or cancelling the parent operation invalidates its form and aborts the provider; late approval is ignored.
++
+ ## Permissions
+ 
+ Every MCP call passes through Pi's tool pipeline. Extension `tool_call` and `tool_result` handlers, including permission gates, therefore apply to MCP tools. Calls made from codemode scripts carry the codemode call ID as `parentToolCallId`.
+diff --git a/packages/coding-agent/src/extensions/mcp/elicitation.ts b/packages/coding-agent/src/extensions/mcp/elicitation.ts
+new file mode 100644
+index 0000000..6ecd9d3
+--- /dev/null
++++ b/packages/coding-agent/src/extensions/mcp/elicitation.ts
+@@ -0,0 +1,400 @@
++import { McpError } from "@earendil-works/pi-mcp";
++import type { ExtensionToolContext } from "../../core/extensions/types.ts";
++
++export const ELICITATION_TOOL = "mcp_elicitation_v1";
++type ObjectValue = Record<string, unknown>;
++type Check = (value: unknown) => boolean;
++
++function object(value: unknown): value is ObjectValue {
++	return (
++		typeof value === "object" &&
++		value !== null &&
++		!Array.isArray(value) &&
++		(Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null)
++	);
++}
++
++function invalid(): never {
++	throw new McpError(-32602, "Unsupported or invalid form elicitation request");
++}
++
++export function elicitationFailure(): McpError {
++	return new McpError(-32603, "Form elicitation unavailable or failed");
++}
++
++function keys(value: ObjectValue, allowed: string[]): void {
++	if (Object.keys(value).some((key) => !allowed.includes(key))) invalid();
++}
++
++/** Bound JSON bytes and every string (including property names), without interpreting human text. */
++function bounded(value: unknown, maxBytes = 65_536): boolean {
++	try {
++		const json = JSON.stringify(value);
++		if (json === undefined || Buffer.byteLength(json, "utf8") > maxBytes) return false;
++		const visit = (item: unknown): boolean => {
++			if (typeof item === "string") return [...item].length <= 8192;
++			if (Array.isArray(item)) return item.every(visit);
++			if (object(item)) return Object.entries(item).every(([key, child]) => visit(key) && visit(child));
++			return item === null || typeof item === "boolean" || (typeof item === "number" && Number.isFinite(item));
++		};
++		return visit(value);
++	} catch {
++		return false;
++	}
++}
++
++function annotation(schema: ObjectValue): void {
++	for (const key of ["title", "description"]) {
++		if (schema[key] !== undefined && typeof schema[key] !== "string") invalid();
++	}
++}
++
++function limit(schema: ObjectValue, name: string, integer: boolean): number | undefined {
++	const value = schema[name];
++	if (value === undefined) return undefined;
++	if (typeof value !== "number" || !Number.isFinite(value) || (integer && (!Number.isSafeInteger(value) || value < 0)))
++		invalid();
++	return value;
++}
++
++function choices(schema: ObjectValue, variant: "oneOf" | "anyOf"): string[] | undefined {
++	if (schema.enum !== undefined) {
++		if (schema[variant] !== undefined || !Array.isArray(schema.enum)) invalid();
++		const values = schema.enum;
++		if (
++			values.length === 0 ||
++			values.length > 128 ||
++			values.some((value) => typeof value !== "string") ||
++			new Set(values).size !== values.length
++		)
++			invalid();
++		if (
++			schema.enumNames !== undefined &&
++			(!Array.isArray(schema.enumNames) ||
++				schema.enumNames.length !== values.length ||
++				schema.enumNames.some((name) => typeof name !== "string"))
++		)
++			invalid();
++		return values as string[];
++	}
++	if (schema.enumNames !== undefined) invalid();
++	if (schema[variant] === undefined) return undefined;
++	const entries = schema[variant];
++	if (!Array.isArray(entries) || entries.length === 0 || entries.length > 128) invalid();
++	const values = entries.map((entry) => {
++		if (!object(entry)) invalid();
++		keys(entry, ["const", "title"]);
++		if (typeof entry.const !== "string" || typeof entry.title !== "string") invalid();
++		return entry.const;
++	});
++	if (new Set(values).size !== values.length) invalid();
++	return values;
++}
++
++function formatted(value: string, format: unknown): boolean {
++	if (format === undefined) return true;
++	if (format === "email") {
++		const parts = value.split("@");
++		return (
++			parts.length === 2 &&
++			parts[0].length > 0 &&
++			!/\s/u.test(value) &&
++			parts[1].includes(".") &&
++			!parts[1].startsWith(".") &&
++			!parts[1].endsWith(".")
++		);
++	}
++	if (format === "uri") {
++		return (
++			URL.canParse(value) &&
++			!/[^\x21-\x7e]/.test(value) &&
++			!/[<>"{}|\\^`]/.test(value) &&
++			!/%(?![a-f0-9]{2})/i.test(value)
++		);
++	}
++	const date = /^(\d{4})-(\d{2})-(\d{2})$/.exec(format === "date" ? value : value.slice(0, 10));
++	if (!date) return false;
++	const parsed = new Date(`${date[0]}T00:00:00Z`);
++	if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date[0]) return false;
++	return (
++		format === "date" ||
++		(/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/i.test(
++			value,
++		) &&
++			Number.isFinite(Date.parse(value)))
++	);
++}
++
++function field(schema: unknown): Check {
++	if (!object(schema)) invalid();
++	annotation(schema);
++	if (!Object.hasOwn(schema, "type")) invalid();
++	const common = ["type", "title", "description", "default"];
++	let check: Check;
++	switch (schema.type) {
++		case "boolean":
++			keys(schema, common);
++			check = (value) => typeof value === "boolean";
++			break;
++		case "string": {
++			keys(schema, [...common, "minLength", "maxLength", "format", "enum", "enumNames", "oneOf"]);
++			const min = limit(schema, "minLength", true) ?? 0;
++			const max = limit(schema, "maxLength", true) ?? 8192;
++			if (
++				min > max ||
++				min > 8192 ||
++				max > 8192 ||
++				(schema.format !== undefined &&
++					(typeof schema.format !== "string" || !["email", "uri", "date", "date-time"].includes(schema.format)))
++			)
++				invalid();
++			const values = choices(schema, "oneOf");
++			check = (value) =>
++				typeof value === "string" &&
++				[...value].length >= min &&
++				[...value].length <= max &&
++				(!values || values.includes(value)) &&
++				formatted(value, schema.format);
++			if (values?.some((value) => !check(value))) invalid();
++			break;
++		}
++		case "number":
++		case "integer": {
++			keys(schema, [...common, "minimum", "maximum"]);
++			const min = limit(schema, "minimum", false) ?? -Number.MAX_SAFE_INTEGER;
++			const max = limit(schema, "maximum", false) ?? Number.MAX_SAFE_INTEGER;
++			if (
++				min > max ||
++				Math.abs(min) > Number.MAX_SAFE_INTEGER ||
++				Math.abs(max) > Number.MAX_SAFE_INTEGER ||
++				(schema.type === "integer" &&
++					[schema.minimum, schema.maximum].some((value) => value !== undefined && !Number.isSafeInteger(value)))
++			)
++				invalid();
++			check = (value) =>
++				typeof value === "number" &&
++				Number.isFinite(value) &&
++				Math.abs(value) <= Number.MAX_SAFE_INTEGER &&
++				value >= min &&
++				value <= max &&
++				(schema.type !== "integer" || Number.isSafeInteger(value));
++			break;
++		}
++		case "array": {
++			keys(schema, [...common, "items", "minItems", "maxItems"]);
++			if (!object(schema.items)) invalid();
++			keys(schema.items, ["type", "enum", "enumNames", "anyOf"]);
++			if (
++				schema.items.type !== "string" &&
++				!(schema.items.type === undefined && Object.hasOwn(schema.items, "anyOf"))
++			)
++				invalid();
++			const values = choices(schema.items, "anyOf");
++			if (!values) invalid();
++			const min = limit(schema, "minItems", true) ?? 0;
++			const max = limit(schema, "maxItems", true) ?? 128;
++			if (min > max || min > 128 || max > 128 || min > values.length) invalid();
++			check = (value) =>
++				Array.isArray(value) &&
++				value.length >= min &&
++				value.length <= max &&
++				new Set(value).size === value.length &&
++				value.every((item) => typeof item === "string" && values.includes(item));
++			break;
++		}
++		default:
++			invalid();
++	}
++	if (Object.hasOwn(schema, "default") && !check(schema.default)) invalid();
++	return check;
++}
++
++export function validateElicitationRequest(params: unknown): {
++	request: { mode?: "form"; message: string; requestedSchema: ObjectValue };
++	validateContent: Check;
++} {
++	if (!object(params) || !bounded(params)) invalid();
++	keys(params, ["mode", "message", "requestedSchema", "_meta"]);
++	if (
++		!Object.hasOwn(params, "message") ||
++		!Object.hasOwn(params, "requestedSchema") ||
++		(params.mode !== undefined && params.mode !== "form") ||
++		typeof params.message !== "string" ||
++		!object(params.requestedSchema)
++	)
++		invalid();
++	const schema = params.requestedSchema;
++	keys(schema, [
++		"type",
++		"title",
++		"description",
++		"properties",
++		"required",
++		"additionalProperties",
++		"default",
++		"$schema",
++	]);
++	if (
++		schema.$schema !== undefined &&
++		(typeof schema.$schema !== "string" ||
++			!["https://json-schema.org/draft/2020-12/schema", "http://json-schema.org/draft-07/schema#"].includes(
++				schema.$schema,
++			))
++	)
++		invalid();
++	annotation(schema);
++	if (
++		!Object.hasOwn(schema, "type") ||
++		!Object.hasOwn(schema, "properties") ||
++		schema.type !== "object" ||
++		!object(schema.properties) ||
++		Object.keys(schema.properties).length > 32 ||
++		(schema.additionalProperties !== undefined && schema.additionalProperties !== false)
++	)
++		invalid();
++	const checks = new Map(Object.entries(schema.properties).map(([key, value]) => [key, field(value)]));
++	const required = schema.required === undefined ? [] : schema.required;
++	if (
++		!Array.isArray(required) ||
++		required.some((key) => typeof key !== "string" || !checks.has(key)) ||
++		new Set(required).size !== required.length
++	)
++		invalid();
++	const validateContent: Check = (value) =>
++		object(value) &&
++		bounded(value) &&
++		required.every((key) => Object.hasOwn(value, key)) &&
++		Object.entries(value).every(([key, item]) => checks.get(key)?.(item) === true);
++	if (Object.hasOwn(schema, "default") && !validateContent(schema.default)) invalid();
++	return {
++		request: {
++			...(params.mode === "form" ? { mode: "form" } : {}),
++			message: params.message,
++			requestedSchema: JSON.parse(JSON.stringify(schema)) as ObjectValue,
++		},
++		validateContent,
++	};
++}
++
++export function validateElicitationResponse(
++	value: unknown,
++	validateContent: Check,
++): { action: "accept" | "decline" | "cancel"; content?: ObjectValue } {
++	if (
++		!object(value) ||
++		!Object.hasOwn(value, "action") ||
++		!bounded(value, 65_536 + 64) ||
++		Object.keys(value).some((key) => key !== "action" && key !== "content")
++	)
++		throw elicitationFailure();
++	if (value.action === "decline" || value.action === "cancel") return { action: value.action };
++	if (
++		value.action !== "accept" ||
++		!Object.hasOwn(value, "content") ||
++		!validateContent(value.content) ||
++		!object(value.content)
++	)
++		throw elicitationFailure();
++	// JSON round-trip keeps own __proto__ fields without invoking a prototype setter.
++	return { action: "accept", content: JSON.parse(JSON.stringify(value.content)) as ObjectValue };
++}
++
++/** A race that observes late failures and always removes its abort listener. */
++export async function untilAborted<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
++	let abort: (() => void) | undefined;
++	try {
++		return await Promise.race([
++			work,
++			new Promise<never>((_resolve, reject) => {
++				abort = () => reject(elicitationFailure());
++				if (signal.aborted) abort();
++				else signal.addEventListener("abort", abort, { once: true });
++			}),
++		]);
++	} finally {
++		if (abort) signal.removeEventListener("abort", abort);
++	}
++}
++
++export interface McpOperationContext {
++	ctx: ExtensionToolContext;
++	toolCallId: string;
++	toolName: string;
++	validate?: () => Promise<void>;
++}
++
++export interface McpElicitationHost {
++	signal: AbortSignal;
++	available: () => boolean;
++}
++
++/** Transport callbacks have no parent association. Only a serialized, live operation owns them. */
++export class McpElicitationScopes {
++	private tail: Promise<void> = Promise.resolve();
++	private active: { operation: McpOperationContext; signal: AbortSignal; owner: object } | undefined;
++	readonly host: McpElicitationHost;
++
++	constructor(host: McpElicitationHost) {
++		this.host = host;
++	}
++
++	async run<T>(signal: AbortSignal, run: () => Promise<T>): Promise<T> {
++		const previous = this.tail;
++		const work = (async () => {
++			await untilAborted(previous, signal);
++			signal.throwIfAborted();
++			return run();
++		})();
++		this.tail = Promise.allSettled([previous, work]).then(() => undefined);
++		return work;
++	}
++
++	async scope<T>(
++		owner: object,
++		operation: McpOperationContext | undefined,
++		signal: AbortSignal,
++		run: () => Promise<T>,
++	): Promise<T> {
++		const lifetime = new AbortController();
++		const combined = AbortSignal.any([signal, lifetime.signal]);
++		if (operation) this.active = { operation, signal: combined, owner };
++		try {
++			combined.throwIfAborted();
++			return await untilAborted(run(), combined);
++		} finally {
++			this.active = undefined;
++			lifetime.abort();
++		}
++	}
++
++	async dispatch(
++		owner: object,
++		params: unknown,
++		inbound: AbortSignal,
++		connection: AbortSignal,
++		server: string,
++		source: string,
++	): Promise<unknown> {
++		const { request, validateContent } = validateElicitationRequest(params);
++		const scope = this.active;
++		if (!scope || scope.owner !== owner) throw elicitationFailure();
++		const signal = AbortSignal.any([scope.signal, inbound, connection, this.host.signal]);
++		const available = () =>
++			!signal.aborted &&
++			this.active === scope &&
++			this.host.available() &&
++			scope.operation.ctx.hasUI &&
++			scope.operation.ctx.tools.some((tool) => tool.name === ELICITATION_TOOL);
++		if (!available()) throw elicitationFailure();
++		try {
++			const outcome = await untilAborted(
++				scope.operation.ctx.executeTool(ELICITATION_TOOL, { server, source, request }, { signal }),
++				signal,
++			);
++			if (!available() || outcome.isError || outcome.result.isError) throw elicitationFailure();
++			return validateElicitationResponse(outcome.result.structuredContent, validateContent);
++		} catch {
++			throw elicitationFailure();
++		}
++	}
++}
+diff --git a/packages/coding-agent/src/extensions/mcp/index.ts b/packages/coding-agent/src/extensions/mcp/index.ts
+index 8a97d7f..554102f 100644
+--- a/packages/coding-agent/src/extensions/mcp/index.ts
++++ b/packages/coding-agent/src/extensions/mcp/index.ts
+@@ -91,6 +91,7 @@ export interface McpExtensionOptions {
+ }
+ 
+ const DEFAULT_STARTUP_WAIT_MS = 10_000;
++const ELICITATION_TOOL = "mcp_elicitation_v1";
+ 
+ const RESOURCE_TOOL_NAMES: ReadonlySet<string> = new Set([
+ 	LIST_MCP_RESOURCES_TOOL,
+@@ -295,6 +296,16 @@ export function createMcpExtension(options: McpExtensionOptions = {}): Extension
+ 		const startupWaitMs = options.startupWaitMs ?? DEFAULT_STARTUP_WAIT_MS;
+ 		/** Working directory of the session, for stdio servers. */
+ 		let sessionCwd = process.cwd();
++		let sessionHasUI = false;
++		const elicitationAvailable = () => {
++			if (!sessionHasUI || session.signal.aborted) return false;
++			const provider = pi.getAllTools().find((tool) => tool.name === ELICITATION_TOOL);
++			return (
++				provider?.exposure === "codemode" ||
++				provider?.exposure === "deferred" ||
++				(provider?.exposure === "direct" && pi.getActiveTools().includes(ELICITATION_TOOL))
++			);
++		};
+ 		let credentials = options.credentials;
+ 		/** The session's model registry, which resolves `auth.provider` tokens. */
+ 		let modelRegistry: ModelRegistry | undefined;
+@@ -572,6 +583,7 @@ export function createMcpExtension(options: McpExtensionOptions = {}): Extension
+ 				credentials: getCredentials(runtime),
+ 				providerToken: async (provider) => modelRegistry?.getApiKeyForProvider(provider),
+ 				log: getServerLog(runtime),
++				elicitation: { signal: session.signal, available: () => isCurrent() && elicitationAvailable() },
+ 				onTools: (connection) => {
+ 					if (isCurrent()) registerTools(connection);
+ 				},
+@@ -1120,7 +1132,9 @@ export function createMcpExtension(options: McpExtensionOptions = {}): Extension
+ 			waitedForStartup = false;
+ 			sessionCwd = ctx.cwd;
+ 			modelRegistry = ctx.modelRegistry;
++			session.abort();
+ 			session = new AbortController();
++			sessionHasUI = ctx.hasUI;
+ 			const { signal } = session;
+ 			configuredEntries = loaded.servers;
+ 			const registered = registeredServers();
+diff --git a/packages/coding-agent/src/extensions/mcp/runtime.ts b/packages/coding-agent/src/extensions/mcp/runtime.ts
+index f13d21b..9cb210c 100644
+--- a/packages/coding-agent/src/extensions/mcp/runtime.ts
++++ b/packages/coding-agent/src/extensions/mcp/runtime.ts
+@@ -32,6 +32,7 @@ import { McpOAuthAuthorizationRequiredError, type OAuthChallenge } from "@earend
+ import { VERSION } from "../../config.ts";
+ import { resolveConfigValueOrThrow, resolveHeadersOrThrow } from "../../core/resolve-config-value.ts";
+ import type { McpServerEntry } from "./config.ts";
++import { type McpElicitationHost, McpElicitationScopes, type McpOperationContext } from "./elicitation.ts";
+ import type { McpServerLog } from "./log.ts";
+ import {
+ 	createMcpAuthProvider,
+@@ -162,6 +163,9 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 	private readonly onTools: (connection: McpServerConnection) => void;
+ 	private readonly onChange: ((connection: McpServerConnection) => void) | undefined;
+ 	private readonly log: McpServerLog | undefined;
++	private readonly elicitation: McpElicitationScopes | undefined;
++	private elicitationEnabled = false;
++	private generation = new AbortController();
+ 
+ 	constructor(options: {
+ 		entry: McpServerEntry;
+@@ -175,6 +179,7 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 		onChange?: (connection: McpServerConnection) => void;
+ 		/** Receives the server's log messages (`notifications/message`). */
+ 		log?: McpServerLog;
++		elicitation?: McpElicitationHost;
+ 	}) {
+ 		this.entry = options.entry;
+ 		this.cwd = options.cwd;
+@@ -182,6 +187,7 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 		this.onTools = options.onTools;
+ 		this.onChange = options.onChange;
+ 		this.log = options.log;
++		this.elicitation = options.elicitation ? new McpElicitationScopes(options.elicitation) : undefined;
+ 		const url = this.oauthUrl;
+ 		const provider = "url" in this.entry.config ? this.entry.config.auth?.provider : undefined;
+ 		this.authProvider = url
+@@ -243,16 +249,21 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 		return this.opening;
+ 	}
+ 
+-	callTool(name: string, args: Record<string, unknown>, options: McpRequestOptions): Promise<CallToolResult> {
+-		return this.withClient((client) => client.callTool(name, args, options));
++	callTool(
++		name: string,
++		args: Record<string, unknown>,
++		options: McpRequestOptions,
++		operation?: McpOperationContext,
++	): Promise<CallToolResult> {
++		return this.withClient((client) => client.callTool(name, args, options), false, options, operation);
+ 	}
+ 
+ 	readResource(uri: string, options: McpRequestOptions): Promise<ReadResourceResult> {
+-		return this.withClient((client) => client.readResource(uri, options), true);
++		return this.withClient((client) => client.readResource(uri, options), true, options);
+ 	}
+ 
+ 	resourcesPage(cursor: string | undefined, options: McpRequestOptions): Promise<ListResourcesResult> {
+-		return this.withClient((client) => client.listResourcesPage(cursor, options), true);
++		return this.withClient((client) => client.listResourcesPage(cursor, options), true, options);
+ 	}
+ 
+ 	resourceTemplatesPage(cursor: string | undefined, options: McpRequestOptions): Promise<ListResourceTemplatesResult> {
+@@ -260,26 +271,54 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 			(client) =>
+ 				withoutTemplates(() => client.listResourceTemplatesPage(cursor, options), { resourceTemplates: [] }),
+ 			true,
++			options,
+ 		);
+ 	}
+ 
+ 	allResources(options: McpRequestOptions): Promise<Resource[]> {
+-		return this.withClient((client) => client.listResources(options), true);
++		return this.withClient((client) => client.listResources(options), true, options);
+ 	}
+ 
+ 	allResourceTemplates(options: McpRequestOptions): Promise<ResourceTemplate[]> {
+-		return this.withClient((client) => listTemplates(client, options), true);
++		return this.withClient((client) => listTemplates(client, options), true, options);
+ 	}
+ 
+ 	/**
+ 	 * Run a request, reconnecting when needed. `readOnly` requests are retried once after a transient
+ 	 * HTTP error; tool calls are not, since they may have run.
+ 	 */
+-	private async withClient<T>(run: (client: McpClient) => Promise<T>, readOnly = false): Promise<T> {
++	private async withClient<T>(
++		run: (client: McpClient) => Promise<T>,
++		readOnly = false,
++		options: McpRequestOptions = {},
++		operation?: McpOperationContext,
++	): Promise<T> {
++		// Initial discovery finishes before a scope can become eligible.
++		await this.getClient();
++		const signals = [this.shutdown.signal, this.generation.signal];
++		if (options.signal) signals.push(options.signal);
++		if (operation?.ctx.signal) signals.push(operation.ctx.signal);
++		if (this.elicitation) signals.push(this.elicitation.host.signal);
++		const signal = AbortSignal.any(signals);
++		const execute = () => this.requestWithClient(run, readOnly, signal, operation);
++		return this.elicitationEnabled && this.elicitation ? this.elicitation.run(signal, execute) : execute();
++	}
++
++	private async requestWithClient<T>(
++		run: (client: McpClient) => Promise<T>,
++		readOnly: boolean,
++		signal: AbortSignal,
++		operation?: McpOperationContext,
++	): Promise<T> {
+ 		for (let attempt = 1; ; attempt++) {
++			signal.throwIfAborted();
+ 			const client = await this.getClient();
++			await operation?.validate?.();
++			signal.throwIfAborted();
+ 			try {
+-				return await run(client);
++				return this.elicitationEnabled && this.elicitation
++					? await this.elicitation.scope(client, operation, signal, () => run(client))
++					: await run(client);
+ 			} catch (error) {
+ 				if (readOnly && attempt === 1 && error instanceof McpHttpError && isTransientError(error)) {
+ 					await new Promise((resolve) => setTimeout(resolve, CONNECT_RETRY_DELAYS_MS[0]));
+@@ -302,6 +341,8 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 
+ 	/** Connect again with fresh credentials, for example after signing in. */
+ 	async reconnect(): Promise<void> {
++		this.generation.abort();
++		this.generation = new AbortController();
+ 		await this.opening?.catch(() => undefined);
+ 		if (this.client) await this.dropClient(this.client);
+ 		await this.getClient();
+@@ -309,6 +350,8 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 
+ 	/** Disconnect after the stored credentials were removed. */
+ 	async signOut(): Promise<void> {
++		this.generation.abort();
++		this.generation = new AbortController();
+ 		await this.opening?.catch(() => undefined);
+ 		if (this.client) await this.dropClient(this.client);
+ 		if (!this.closed) this.markNeedsAuth();
+@@ -357,12 +400,29 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 	}
+ 
+ 	private async connectOnce(): Promise<McpClient> {
++		const elicitation = this.elicitation;
++		const enabled = elicitation?.host.available() === true;
++		this.elicitationEnabled = enabled;
++		const generation = this.generation;
+ 		const client = new McpClient({
+ 			name: "pi",
+ 			version: VERSION,
+ 			requestTimeoutMs: this.timeoutMs,
++			...(enabled ? { capabilities: { elicitation: { form: {} } } } : {}),
+ 			roots: [{ uri: pathToFileURL(this.cwd).href, name: basename(this.cwd) }],
+ 		});
++		if (enabled && elicitation) {
++			client.setRequestHandler("elicitation/create", (params, { signal }) =>
++				elicitation.dispatch(
++					client,
++					params,
++					signal,
++					AbortSignal.any([this.shutdown.signal, generation.signal]),
++					this.entry.name,
++					this.entry.source,
++				),
++			);
++		}
+ 		const log = this.log;
+ 		if (log) client.onNotification("notifications/message", (params) => log.write(this.entry.name, params));
+ 		// Closing the client fails its pending initialize or discovery requests and closes the transport.
+@@ -420,6 +480,8 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 	/** The transport dropped. The next call reconnects; until then the status shows why. */
+ 	private handleClientClose(client: McpClient, stdio: StdioTransport | undefined): void {
+ 		if (this.client !== client || this.closed) return;
++		this.generation.abort();
++		this.generation = new AbortController();
+ 		this.client = undefined;
+ 		this.state = "disconnected";
+ 		const stderr = stdio?.stderr.trim().slice(-STDERR_TAIL_CHARS);
+@@ -429,7 +491,14 @@ export class McpServerConnection implements McpToolCaller, McpResourceServer {
+ 
+ 	private async refreshTools(client: McpClient): Promise<void> {
+ 		try {
+-			const tools = await client.listTools();
++			const list = () => client.listTools();
++			const tools =
++				this.elicitationEnabled && this.elicitation
++					? await this.elicitation.run(
++							AbortSignal.any([this.shutdown.signal, this.generation.signal, this.elicitation.host.signal]),
++							list,
++						)
++					: await list();
+ 			if (this.client !== client || this.closed) return;
+ 			this.tools = tools;
+ 			this.onTools(this);
+diff --git a/packages/coding-agent/src/extensions/mcp/tools.ts b/packages/coding-agent/src/extensions/mcp/tools.ts
+index 63f95db..9d73d23 100644
+--- a/packages/coding-agent/src/extensions/mcp/tools.ts
++++ b/packages/coding-agent/src/extensions/mcp/tools.ts
+@@ -36,6 +36,7 @@ import { keyHint } from "../../modes/interactive/components/keybinding-hints.ts"
+ import { VisualLinePreview } from "../../modes/interactive/components/visual-truncate.ts";
+ import { writeOutputFile } from "../../utils/output-files.ts";
+ import type { McpExposure } from "./config.ts";
++import type { McpOperationContext } from "./elicitation.ts";
+ 
+ /**
+  * Tool exposure of an MCP exposure. `codemode` and `deferred` both leave tools out of the codemode
+@@ -72,7 +73,12 @@ export function saveToTempFile(data: string | Uint8Array, extension: string): Pr
+ }
+ 
+ export interface McpToolCaller {
+-	callTool(name: string, args: Record<string, unknown>, options: McpRequestOptions): Promise<CallToolResult>;
++	callTool(
++		name: string,
++		args: Record<string, unknown>,
++		options: McpRequestOptions,
++		operation?: McpOperationContext,
++	): Promise<CallToolResult>;
+ }
+ 
+ /**
+@@ -334,17 +340,29 @@ export function createMcpToolDefinition(options: {
+ 		namespace: options.namespace,
+ 		...(annotations ? { annotations } : {}),
+ 		...createMcpToolRenderers(label),
+-		async execute(_toolCallId, params, signal, onUpdate) {
++		async execute(toolCallId, params, signal, onUpdate, ctx) {
+ 			const client = await options.getClient();
+-			const result = await client.callTool(tool.name, (params ?? {}) as Record<string, unknown>, {
+-				signal,
+-				timeoutMs: options.timeoutMs,
+-				onProgress: (progress) => {
+-					const total = progress.total === undefined ? "" : `/${progress.total}`;
+-					const text = progress.message ?? `Progress ${progress.progress}${total}`;
+-					onUpdate?.({ content: [{ type: "text", text }], details: { server, tool: tool.name } });
++			const result = await client.callTool(
++				tool.name,
++				(params ?? {}) as Record<string, unknown>,
++				{
++					signal,
++					timeoutMs: options.timeoutMs,
++					onProgress: (progress) => {
++						const total = progress.total === undefined ? "" : `/${progress.total}`;
++						const text = progress.message ?? `Progress ${progress.progress}${total}`;
++						onUpdate?.({ content: [{ type: "text", text }], details: { server, tool: tool.name } });
++					},
+ 				},
+-			});
++				{
++					ctx,
++					toolCallId,
++					toolName: options.name,
++					validate: async () => {
++						if ((await options.getClient()) !== client) throw new Error("MCP connection replaced");
++					},
++				},
++			);
+ 			return convertMcpResult(server, tool.name, result, { readableResources: options.readableResources?.() });
+ 		},
+ 	};
+diff --git a/packages/coding-agent/test/mcp-elicitation.test.ts b/packages/coding-agent/test/mcp-elicitation.test.ts
+new file mode 100644
+index 0000000..7f38ce4
+--- /dev/null
++++ b/packages/coding-agent/test/mcp-elicitation.test.ts
+@@ -0,0 +1,179 @@
++import { describe, expect, it } from "vitest";
++import {
++	McpElicitationScopes,
++	untilAborted,
++	validateElicitationRequest,
++	validateElicitationResponse,
++} from "../src/extensions/mcp/elicitation.ts";
++
++function form(properties: Record<string, unknown>, extra: Record<string, unknown> = {}) {
++	return { message: "Fill in", requestedSchema: { type: "object", properties, ...extra } };
++}
++
++function accepts(schema: unknown, value: unknown): boolean {
++	return validateElicitationRequest(form({ value: schema }, { required: ["value"] })).validateContent({ value });
++}
++
++describe("native form v1 validation", () => {
++	it("preserves explicit false, zero, empty strings and own __proto__ fields without applying defaults", () => {
++		const properties = JSON.parse(
++			'{"__proto__":{"type":"string"},"flag":{"type":"boolean","default":true},"count":{"type":"integer"},"text":{"type":"string"}}',
++		) as Record<string, unknown>;
++		const validated = validateElicitationRequest(form(properties));
++		const content = JSON.parse('{"__proto__":"own value","flag":false,"count":0,"text":""}') as Record<
++			string,
++			unknown
++		>;
++		const result = validateElicitationResponse({ action: "accept", content }, validated.validateContent);
++		expect(result.content).toEqual(content);
++		expect(Object.hasOwn(result.content ?? {}, "__proto__")).toBe(true);
++		expect(validateElicitationResponse({ action: "accept", content: {} }, validated.validateContent).content).toEqual(
++			{},
++		);
++	});
++
++	it.each([
++		{ type: "string", pattern: "(a+)+$" },
++		{ type: "string", $ref: "#/x" },
++		{ type: "string", minLength: -1 },
++		{ type: "string", minLength: 5, maxLength: 2 },
++		{ type: "string", format: "regex" },
++		{ type: "string", default: 0 },
++		{ type: "number", exclusiveMinimum: 1 },
++		{ type: "integer", minimum: 0.5 },
++		{ type: "integer", default: Number.MAX_SAFE_INTEGER + 1 },
++		{ type: "boolean", default: "false" },
++		{ type: "object", properties: {} },
++		{ type: "array", items: { type: "string" } },
++		{ type: "string", enum: ["x"], enumNames: [] },
++		{ type: "string", enum: ["x", "x"] },
++		{ type: "string", oneOf: [{ const: "x" }] },
++		{ type: "array", items: { type: "string", enum: ["x"] }, uniqueItems: true },
++	])("rejects unsupported assertions instead of weakening semantics (%#)", (schema) => {
++		expect(() => validateElicitationRequest(form({ value: schema }))).toThrow();
++	});
++
++	it("validates string codepoints, formats, numeric bounds and safe integers", () => {
++		expect(accepts({ type: "string", minLength: 1, maxLength: 1 }, "😀")).toBe(true);
++		expect(accepts({ type: "string", maxLength: 1 }, "😀😀")).toBe(false);
++		for (const [format, valid, invalid] of [
++			["email", "test@example.com", "not-email"],
++			["uri", "https://example.com/path", "relative/path"],
++			["date", "2024-02-29", "2025-02-29"],
++			["date-time", "2024-02-29T12:30:00Z", "2024-02-29T25:00:00Z"],
++		]) {
++			expect(accepts({ type: "string", format }, valid)).toBe(true);
++			expect(accepts({ type: "string", format }, invalid)).toBe(false);
++		}
++		expect(accepts({ type: "integer", minimum: 0, maximum: 2 }, 0)).toBe(true);
++		expect(accepts({ type: "integer" }, 0.5)).toBe(false);
++		expect(accepts({ type: "integer" }, Number.MAX_SAFE_INTEGER + 1)).toBe(false);
++		expect(accepts({ type: "number", minimum: -1, maximum: 1 }, 0.5)).toBe(true);
++		expect(accepts({ type: "number" }, Infinity)).toBe(false);
++	});
++
++	it("supports enums and titled choices including multi-select", () => {
++		for (const schema of [
++			{ type: "string", enum: ["", "a"], enumNames: ["Empty", "A"] },
++			{
++				type: "string",
++				oneOf: [
++					{ const: "", title: "Empty" },
++					{ const: "a", title: "A" },
++				],
++			},
++		]) {
++			expect(accepts(schema, "")).toBe(true);
++			expect(accepts(schema, "unknown")).toBe(false);
++		}
++		for (const items of [
++			{ type: "string", enum: ["a", "b"] },
++			{
++				type: "string",
++				anyOf: [
++					{ const: "a", title: "A" },
++					{ const: "b", title: "B" },
++				],
++			},
++		]) {
++			const schema = { type: "array", items, minItems: 1, maxItems: 2 };
++			expect(accepts(schema, ["a", "b"])).toBe(true);
++			expect(accepts(schema, [])).toBe(false);
++			expect(accepts(schema, ["c"])).toBe(false);
++		}
++	});
++
++	it("bounds fields, enum choices, JSON bytes, strings and required keys", () => {
++		expect(() =>
++			validateElicitationRequest(
++				form(Object.fromEntries(Array.from({ length: 33 }, (_, i) => [i, { type: "boolean" }]))),
++			),
++		).toThrow();
++		expect(() =>
++			validateElicitationRequest(
++				form({ x: { type: "string", enum: Array.from({ length: 129 }, (_, i) => String(i)) } }),
++			),
++		).toThrow();
++		expect(() => validateElicitationRequest({ ...form({}), message: "😀".repeat(8193) })).toThrow();
++		expect(() => validateElicitationRequest(form({ x: { type: "string" } }, { required: ["missing"] }))).toThrow();
++		expect(() => validateElicitationRequest(form({}, { additionalProperties: true }))).toThrow();
++		expect(() => validateElicitationRequest({ ...form({}), mode: "url" })).toThrow();
++		const many = Object.fromEntries(
++			Array.from({ length: 10 }, (_, i) => [i, { type: "string", description: "x".repeat(8192) }]),
++		);
++		expect(() => validateElicitationRequest(form(many))).toThrow();
++		const validated = validateElicitationRequest(form({ value: { type: "string" } }, { required: ["value"] }));
++		expect(validated.validateContent({})).toBe(false);
++		expect(validated.validateContent({ value: "x".repeat(8193) })).toBe(false);
++		expect(validated.validateContent({ value: "ok", unknown: false })).toBe(false);
++	});
++});
++
++describe("connection operation queue", () => {
++	it("recovers after failure and aborts a queued operation before dispatch", async () => {
++		const lifetime = new AbortController();
++		const queue = new McpElicitationScopes({ signal: lifetime.signal, available: () => true });
++		let finish: () => void = () => {
++			throw new Error("not started");
++		};
++		const first = queue.run(
++			lifetime.signal,
++			() =>
++				new Promise<void>((resolve) => {
++					finish = resolve;
++				}),
++		);
++		await new Promise((resolve) => setImmediate(resolve));
++		const cancel = new AbortController();
++		let called = false;
++		const second = queue.run(cancel.signal, async () => {
++			called = true;
++		});
++		cancel.abort();
++		await expect(second).rejects.toThrow();
++		expect(called).toBe(false);
++		finish();
++		await first;
++		await expect(
++			queue.run(lifetime.signal, async () => {
++				throw new Error("expected");
++			}),
++		).rejects.toThrow("expected");
++		expect(await queue.run(lifetime.signal, async () => 42)).toBe(42);
++	});
++
++	it("observes late provider rejection after cancellation", async () => {
++		const cancel = new AbortController();
++		let fail: (error: Error) => void = () => {
++			throw new Error("not started");
++		};
++		const work = new Promise<never>((_resolve, reject) => {
++			fail = reject;
++		});
++		const raced = untilAborted(work, cancel.signal);
++		cancel.abort();
++		await expect(raced).rejects.toThrow();
++		fail(new Error("late failure"));
++		await new Promise((resolve) => setImmediate(resolve));
++	});
++});
+diff --git a/packages/coding-agent/test/suite/agent-session-mcp-elicitation.test.ts b/packages/coding-agent/test/suite/agent-session-mcp-elicitation.test.ts
+new file mode 100644
+index 0000000..8016088
+--- /dev/null
++++ b/packages/coding-agent/test/suite/agent-session-mcp-elicitation.test.ts
+@@ -0,0 +1,624 @@
++import type { AgentToolResult } from "@earendil-works/pi-agent-core";
++import { fauxAssistantMessage, fauxToolCall } from "@earendil-works/pi-ai";
++import { type JsonRpcRequest, LATEST_PROTOCOL_VERSION } from "@earendil-works/pi-mcp";
++import { createInMemoryTransportPair } from "@earendil-works/pi-mcp/testing";
++import { Type } from "typebox";
++import { expect, it, vi } from "vitest";
++import type { ExtensionAPI, ExtensionFactory, ToolExposure } from "../../src/core/extensions/types.ts";
++import { createMcpExtension } from "../../src/extensions/mcp/index.ts";
++import { createHarness, createTestUiContext } from "./harness.ts";
++
++const FORM = {
++	message: "Choose",
++	requestedSchema: { type: "object", properties: { yes: { type: "boolean" } }, required: ["yes"] },
++};
++const CANCEL = {
++	content: [],
++	details: undefined,
++	structuredContent: { action: "cancel" },
++} satisfies AgentToolResult<undefined>;
++
++// Break caught: native MCP omits form capability even when a callable UI provider is installed.
++it("advertises form elicitation when a callable provider and UI are available", async () => {
++	let capabilities: unknown;
++	const pair = createInMemoryTransportPair();
++	pair.server.onMessage((message) => {
++		if (!("id" in message) || !("method" in message)) return;
++		const request = message as JsonRpcRequest;
++		if (request.method === "initialize") capabilities = (request.params as { capabilities?: unknown })?.capabilities;
++		const result =
++			request.method === "initialize"
++				? {
++						protocolVersion: LATEST_PROTOCOL_VERSION,
++						capabilities: { tools: {} },
++						serverInfo: { name: "forms", version: "1" },
++					}
++				: { tools: [] };
++		void pair.server.send({ jsonrpc: "2.0", id: request.id, result });
++	});
++	await pair.server.start();
++	const harness = await createHarness({
++		initialActiveToolNames: [],
++		extensionFactories: [
++			(pi) =>
++				pi.registerTool({
++					name: "mcp_elicitation_v1",
++					label: "Form provider",
++					description: "Collect an MCP form.",
++					exposure: "codemode",
++					parameters: Type.Object({}),
++					async execute() {
++						return { content: [], details: undefined, structuredContent: { action: "cancel" } };
++					},
++				}),
++			createMcpExtension({
++				loadConfig: () => ({
++					servers: [{ name: "forms", config: { command: "unused", exposure: "direct" }, source: "test" }],
++					errors: [],
++				}),
++				createTransport: () => pair.client,
++			}),
++		],
++	});
++	try {
++		await harness.session.bindExtensions({ uiContext: createTestUiContext() });
++		await vi.waitFor(() => expect(capabilities).toBeDefined());
++		expect(capabilities).toMatchObject({ elicitation: { form: {} } });
++	} finally {
++		harness.cleanup();
++		await pair.server.close();
++	}
++});
++
++async function setup(
++	options: {
++		exposure?: ToolExposure | "absent";
++		headless?: boolean;
++		provider?: (signal: AbortSignal | undefined) => Promise<AgentToolResult<undefined>>;
++		forms?: unknown;
++		extra?: ExtensionFactory;
++		resourceForms?: boolean;
++		timeout?: number;
++		initializeForm?: boolean;
++		registered?: boolean;
++	} = {},
++) {
++	const pair = createInMemoryTransportPair();
++	const requests: JsonRpcRequest[] = [];
++	const replies = new Map<string | number, unknown>();
++	const pending = new Map<string, (reply: unknown) => void>();
++	let capabilities: unknown;
++	let api: ExtensionAPI | undefined;
++	let providerCalls = 0;
++	const providerInputs: unknown[] = [];
++	let providerSignal: AbortSignal | undefined;
++	let nextId = 0;
++	const incoming = (params: unknown = options.forms ?? FORM) => {
++		const id = `form-${++nextId}`;
++		const answer = new Promise<unknown>((resolve) => pending.set(id, resolve));
++		void pair.server.send({
++			jsonrpc: "2.0",
++			id,
++			method: "elicitation/create",
++			params: params as Record<string, unknown>,
++		});
++		return answer;
++	};
++	const finish = (id: string | number) => pair.server.send({ jsonrpc: "2.0", id, result: { content: [] } });
++	pair.server.onMessage((message) => {
++		if (!("id" in message)) return;
++		if (!("method" in message)) {
++			replies.set(message.id, message);
++			pending.get(String(message.id))?.(message);
++			pending.delete(String(message.id));
++			return;
++		}
++		const request = message as JsonRpcRequest;
++		requests.push(request);
++		if (request.method === "initialize") {
++			capabilities = (request.params as { capabilities?: unknown })?.capabilities;
++			const respond = () =>
++				pair.server.send({
++					jsonrpc: "2.0",
++					id: request.id,
++					result: {
++						protocolVersion: LATEST_PROTOCOL_VERSION,
++						capabilities: { tools: {}, resources: {} },
++						serverInfo: { name: "forms", version: "1" },
++					},
++				});
++			if (options.initializeForm) void incoming().then(respond);
++			else void respond();
++		} else if (request.method === "tools/list") {
++			void pair.server.send({
++				jsonrpc: "2.0",
++				id: request.id,
++				result: { tools: [{ name: "ask", inputSchema: { type: "object", properties: {} } }] },
++			});
++		} else if (request.method === "tools/call") {
++			void incoming().then(() => finish(request.id));
++		} else if (request.method === "resources/list") {
++			const respond = () => pair.server.send({ jsonrpc: "2.0", id: request.id, result: { resources: [] } });
++			if (options.resourceForms) void incoming().then(respond);
++			else void respond();
++		}
++	});
++	await pair.server.start();
++	const provider: ExtensionFactory = (pi) => {
++		api = pi;
++		if (options.registered) pi.registerMcpServer("forms", { command: "unused", exposure: "direct" });
++		if (options.exposure === "absent") return;
++		pi.registerTool({
++			name: "mcp_elicitation_v1",
++			label: "Forms",
++			description: "Trusted test form provider",
++			exposure: options.exposure ?? "codemode",
++			parameters: Type.Object({}, { additionalProperties: true }),
++			async execute(_id, _params, signal) {
++				providerCalls++;
++				providerInputs.push(_params);
++				providerSignal = signal;
++				return options.provider ? options.provider(signal) : CANCEL;
++			},
++		});
++	};
++	const harness = await createHarness({
++		initialActiveToolNames: [],
++		extensionFactories: [
++			provider,
++			...(options.extra ? [options.extra] : []),
++			createMcpExtension({
++				loadConfig: () => ({
++					servers: options.registered
++						? []
++						: [
++								{
++									name: "forms",
++									config: { command: "unused", exposure: "direct", timeout: options.timeout },
++									source: "test",
++								},
++							],
++					errors: [],
++				}),
++				createTransport: () => pair.client,
++			}),
++		],
++	});
++	await harness.session.bindExtensions(options.headless ? {} : { uiContext: createTestUiContext() });
++	await vi.waitFor(() =>
++		expect(harness.session.getAllTools().some((tool) => tool.name === "mcp__forms__ask")).toBe(true),
++	);
++	const prompt = (count = 1) => {
++		harness.setResponses([
++			fauxAssistantMessage(
++				Array.from({ length: count }, () => fauxToolCall("mcp__forms__ask", {})),
++				{ stopReason: "toolUse" },
++			),
++			fauxAssistantMessage("done"),
++		]);
++		return harness.session.prompt("ask");
++	};
++	return {
++		harness,
++		pair,
++		requests,
++		replies,
++		providerInputs,
++		incoming,
++		finish,
++		prompt,
++		get capabilities() {
++			return capabilities;
++		},
++		get api() {
++			if (!api) throw new Error("No provider API");
++			return api;
++		},
++		get providerCalls() {
++			return providerCalls;
++		},
++		get providerSignal() {
++			return providerSignal;
++		},
++		async cleanup() {
++			harness.cleanup();
++			await pair.server.close();
++		},
++	};
++}
++
++it.each(["absent", "hidden", "model-only"] as const)("does not advertise a %s provider", async (exposure) => {
++	const fixture = await setup({ exposure });
++	try {
++		expect(fixture.capabilities).not.toHaveProperty("elicitation");
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("installs the handler before initialize but refuses discovery-time forms without a parent", async () => {
++	const fixture = await setup({ initializeForm: true });
++	try {
++		expect(fixture.replies.get("form-1")).toMatchObject({ error: { code: -32603 } });
++		expect(fixture.providerCalls).toBe(0);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("does not advertise an inactive direct provider", async () => {
++	const fixture = await setup({
++		exposure: "direct",
++		extra: (pi) => {
++			pi.on("session_start", () => pi.setActiveTools([]));
++		},
++	});
++	try {
++		expect(fixture.capabilities).not.toHaveProperty("elicitation");
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("does not advertise in headless sessions", async () => {
++	const fixture = await setup({ headless: true });
++	try {
++		expect(fixture.capabilities).not.toHaveProperty("elicitation");
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it.each(["codemode", "deferred", "direct"] as const)(
++	"bridges a real incoming form through a %s callable provider with nested IDs",
++	async (exposure) => {
++		const fixture = await setup({
++			exposure,
++			provider: async () => ({
++				content: [],
++				details: undefined,
++				structuredContent: { action: "accept", content: { yes: false } },
++			}),
++		});
++		try {
++			expect(fixture.capabilities).toHaveProperty("elicitation", { form: {} });
++			await fixture.prompt();
++			expect(fixture.replies.get("form-1")).toMatchObject({ result: { action: "accept", content: { yes: false } } });
++			const parent = fixture.harness
++				.eventsOfType("tool_execution_start")
++				.find((event) => event.toolName === "mcp__forms__ask");
++			const nested = fixture.harness
++				.eventsOfType("tool_execution_start")
++				.find((event) => event.toolName === "mcp_elicitation_v1");
++			expect(parent).toBeDefined();
++			expect(fixture.providerInputs).toEqual([{ server: "forms", source: "test", request: FORM }]);
++			expect(nested?.parentToolCallId).toBe(parent?.toolCallId);
++			expect(nested?.toolCallId).toMatch(new RegExp(`^${parent?.toolCallId}/\\d+$`));
++		} finally {
++			await fixture.cleanup();
++		}
++	},
++);
++
++it.each(["cancel", "decline"] as const)("forwards canonical %s without content", async (action) => {
++	const fixture = await setup({
++		provider: async () => ({
++			content: [],
++			details: undefined,
++			structuredContent: { action, content: { yes: true } },
++		}),
++	});
++	try {
++		await fixture.prompt();
++		expect(fixture.replies.get("form-1")).toMatchObject({ result: { action } });
++		expect(fixture.replies.get("form-1")).not.toHaveProperty("result.content");
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it.each<AgentToolResult<undefined>>([
++	{ content: [{ type: "text" as const, text: "Approved" }], details: undefined },
++	{ ...CANCEL, structuredContent: { action: "accept", content: { yes: "true" } } },
++	{ ...CANCEL, structuredContent: { action: "accept", content: { yes: true, extra: 1 } } },
++	{ ...CANCEL, isError: true, structuredContent: { action: "accept", content: { yes: true } } },
++])("never treats malformed or error provider results as approval (%#)", async (result) => {
++	const fixture = await setup({ provider: async () => result });
++	try {
++		await fixture.prompt();
++		expect(fixture.replies.get("form-1")).toMatchObject({
++			error: { code: -32603, message: "Form elicitation unavailable or failed" },
++		});
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it.each(["blocked", "redacted", "throws"])("fails closed when provider is %s", async (failure) => {
++	const fixture = await setup({
++		provider: async () => {
++			if (failure === "throws") throw new Error("private technical error");
++			return { ...CANCEL, structuredContent: { action: "accept", content: { yes: true } } };
++		},
++		extra: (pi) => {
++			pi.on("tool_call", (event) =>
++				event.toolName === "mcp_elicitation_v1" && failure === "blocked"
++					? { block: true, reason: "denied" }
++					: undefined,
++			);
++			pi.on("tool_result", (event) =>
++				event.toolName === "mcp_elicitation_v1" && failure === "redacted"
++					? { content: [{ type: "text", text: "redacted" }] }
++					: undefined,
++			);
++		},
++	});
++	try {
++		await fixture.prompt();
++		expect(fixture.replies.get("form-1")).toMatchObject({ error: { code: -32603 } });
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("rejects idle requests, unsupported modes, and withdrawn providers", async () => {
++	const fixture = await setup();
++	try {
++		expect(await fixture.incoming()).toMatchObject({ error: { code: -32603 } });
++		expect(await fixture.incoming({ ...FORM, mode: "url" })).toMatchObject({ error: { code: -32602 } });
++		fixture.api.registerTool({
++			name: "mcp_elicitation_v1",
++			label: "withdrawn",
++			description: "withdrawn",
++			parameters: Type.Object({}),
++			exposure: "hidden",
++			async execute() {
++				return CANCEL;
++			},
++		});
++		await fixture.prompt();
++		expect(fixture.replies.get("form-3")).toMatchObject({ error: { code: -32603 } });
++		expect(fixture.providerCalls).toBe(0);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("serializes same-server calls and refreshes until the live scope completes", async () => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	const fixture = await setup({
++		provider: () =>
++			new Promise((resolve) => {
++				release = resolve;
++			}),
++	});
++	try {
++		const work = fixture.prompt(2);
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		await fixture.pair.server.send({ jsonrpc: "2.0", method: "notifications/tools/list_changed" });
++		await new Promise((resolve) => setImmediate(resolve));
++		expect(fixture.requests.filter((request) => request.method === "tools/call")).toHaveLength(1);
++		expect(fixture.requests.filter((request) => request.method === "tools/list")).toHaveLength(1);
++		release(CANCEL);
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(2));
++		release(CANCEL);
++		await work;
++		await vi.waitFor(() =>
++			expect(fixture.requests.filter((request) => request.method === "tools/list")).toHaveLength(2),
++		);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("aborts an uncooperative provider when its server operation completes and ignores late approval", async () => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	const fixture = await setup({
++		provider: () =>
++			new Promise((resolve) => {
++				release = resolve;
++			}),
++	});
++	try {
++		const work = fixture.prompt();
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		const call = fixture.requests.find((request) => request.method === "tools/call");
++		if (!call) throw new Error("No MCP call");
++		await fixture.finish(call.id);
++		await vi.waitFor(() => expect(fixture.providerSignal?.aborted).toBe(true));
++		release({ ...CANCEL, structuredContent: { action: "accept", content: { yes: true } } });
++		await work;
++		await vi.waitFor(() => expect(fixture.replies.get("form-1")).toMatchObject({ error: { code: -32603 } }));
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("cancels queued calls without sending them and recovers the queue after cancellation", async () => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	let hold = true;
++	const fixture = await setup({
++		provider: () =>
++			hold
++				? new Promise((resolve) => {
++						release = resolve;
++					})
++				: Promise.resolve(CANCEL),
++	});
++	try {
++		const work = fixture.prompt(2);
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		const aborting = fixture.harness.session.abort();
++		await vi.waitFor(() => expect(fixture.providerSignal?.aborted).toBe(true));
++		release(CANCEL);
++		await aborting;
++		await work;
++		expect(fixture.requests.filter((request) => request.method === "tools/call")).toHaveLength(1);
++		hold = false;
++		await fixture.prompt();
++		expect(fixture.providerCalls).toBe(2);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("queues resources as ineligible operations, never borrowing a tool parent", async () => {
++	const fixture = await setup({ resourceForms: true });
++	try {
++		fixture.harness.setResponses([
++			fauxAssistantMessage([fauxToolCall("list_mcp_resources", { server: "forms" })], { stopReason: "toolUse" }),
++			fauxAssistantMessage("done"),
++		]);
++		await fixture.harness.session.prompt("list resources");
++		expect(fixture.replies.get("form-1")).toMatchObject({ error: { code: -32603 } });
++		expect(fixture.providerCalls).toBe(0);
++		await fixture.prompt();
++		expect(fixture.providerCalls).toBe(1);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("cancels provider work on an inbound cancellation without accepting its late result", async () => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	const fixture = await setup({
++		provider: () =>
++			new Promise((resolve) => {
++				release = resolve;
++			}),
++	});
++	try {
++		const work = fixture.prompt();
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		await fixture.pair.server.send({
++			jsonrpc: "2.0",
++			method: "notifications/cancelled",
++			params: { requestId: "form-1" },
++		});
++		await vi.waitFor(() => expect(fixture.providerSignal?.aborted).toBe(true));
++		release({ ...CANCEL, structuredContent: { action: "accept", content: { yes: true } } });
++		const call = fixture.requests.find((request) => request.method === "tools/call");
++		if (!call) throw new Error("No MCP call");
++		await fixture.finish(call.id);
++		await work;
++		expect([...fixture.replies.values()]).not.toContainEqual(
++			expect.objectContaining({ result: expect.objectContaining({ action: "accept" }) }),
++		);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("invalidates active and queued scopes when a registered server is removed", async () => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	const fixture = await setup({
++		registered: true,
++		provider: () =>
++			new Promise((resolve) => {
++				release = resolve;
++			}),
++	});
++	try {
++		const work = fixture.prompt(2);
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		fixture.api.unregisterMcpServer("forms");
++		await vi.waitFor(() => expect(fixture.providerSignal?.aborted).toBe(true));
++		release({ ...CANCEL, structuredContent: { action: "accept", content: { yes: true } } });
++		await work;
++		expect(fixture.requests.filter((request) => request.method === "tools/call")).toHaveLength(1);
++		expect([...fixture.replies.values()]).not.toContainEqual(
++			expect.objectContaining({ result: expect.objectContaining({ action: "accept" }) }),
++		);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it.each(["transport", "timeout"])("invalidates live consent on %s failure", async (failure) => {
++	let release: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("provider not started");
++	};
++	const fixture = await setup({
++		timeout: failure === "timeout" ? 0.2 : undefined,
++		provider: () =>
++			new Promise((resolve) => {
++				release = resolve;
++			}),
++	});
++	try {
++		const work = fixture.prompt();
++		await vi.waitFor(() => expect(fixture.providerCalls).toBe(1));
++		if (failure === "transport") await fixture.pair.server.close();
++		await vi.waitFor(() => expect(fixture.providerSignal?.aborted).toBe(true));
++		release({ ...CANCEL, structuredContent: { action: "accept", content: { yes: true } } });
++		await work;
++		expect([...fixture.replies.values()]).not.toContainEqual(
++			expect.objectContaining({ result: expect.objectContaining({ action: "accept" }) }),
++		);
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it.each([
++	{ ...FORM, mode: "url" },
++	{ ...FORM, mode: "unsupported" },
++	{
++		message: "Unsafe pattern",
++		requestedSchema: { type: "object", properties: { value: { type: "string", pattern: "(a+)+$" } } },
++	},
++])("rejects invalid requests before calling the provider (%#)", async (forms) => {
++	const fixture = await setup({ forms });
++	try {
++		await fixture.prompt();
++		expect(fixture.providerCalls).toBe(0);
++		expect(fixture.replies.get("form-1")).toMatchObject({ error: { code: -32602 } });
++	} finally {
++		await fixture.cleanup();
++	}
++});
++
++it("keeps different connections parallel while each owns a live form", async () => {
++	let releaseA: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("A not started");
++	};
++	let releaseB: (result: AgentToolResult<undefined>) => void = () => {
++		throw new Error("B not started");
++	};
++	const a = await setup({
++		provider: () =>
++			new Promise((resolve) => {
++				releaseA = resolve;
++			}),
++	});
++	const b = await setup({
++		provider: () =>
++			new Promise((resolve) => {
++				releaseB = resolve;
++			}),
++	});
++	try {
++		const workA = a.prompt();
++		const workB = b.prompt();
++		await vi.waitFor(() => {
++			expect(a.providerCalls).toBe(1);
++			expect(b.providerCalls).toBe(1);
++		});
++		releaseA(CANCEL);
++		releaseB(CANCEL);
++		await Promise.all([workA, workB]);
++	} finally {
++		await a.cleanup();
++		await b.cleanup();
++	}
++});

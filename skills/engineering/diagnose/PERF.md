@@ -91,7 +91,9 @@ Re-measure **exactly** as the baseline was measured: same command, conditions, a
 | Worse | **Revert** |
 | Better, but a test went red | **Revert**: a regression wearing a win's clothes |
 
-**The noise is the bar, not a percentage.** A change that is better beyond the noise, with tests green, is a win however small: small wins add up (five 3% wins take off about 14%). Set no minimum-gain threshold of your own; a target the user gives decides when to stop, not what to keep. What can still reject a win is the complexity it adds: a change that adds state, a cache, or an invariant to keep true must earn it, and the call is recorded.
+**Keep every verified improvement that meets the agreed consistency criteria, however small.** This applies to any metric being improved. The criteria cover required behavior, accuracy, repeatability, workload coverage, other protected metrics, and maintainability. Establish them before judging candidates; added state, caches, and invariants must satisfy those criteria rather than an improvised minimum payoff. Reject only for a named failed criterion, with evidence; "too small", "not significant enough", or missing the overall target is not a rejection reason. A target decides when to stop, not what to keep. An explicit project acceptance threshold remains binding: retain a below-threshold candidate and its evidence as unpromoted work and report the conflict for the owner to resolve.
+
+**The noise is the bar, not a percentage.** A measured gain must be distinguishable from variation; deterministic metrics can establish a gain exactly. Uncertain measurements remain inconclusive, not verified wins. Each kept improvement becomes the next baseline. Small wins accumulate (five successive 3% reductions take off about 14%); measure the combined result against the original baseline on the relevant workload rather than adding percentages or assuming independent effects. Stopping exploration preserves all accepted improvements.
 
 Correctness gates the metric: an "optimisation" that wins by dropping work the product needed (a validation, a required refresh, an awaited call) is a regression.
 

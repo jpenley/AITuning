@@ -30,14 +30,16 @@ export function parseFrontmatter(src) {
 }
 
 // Packs are separate plugins: packs/<pack>/.claude-plugin/plugin.json with skills at packs/<pack>/skills/<skill>/.
-// The core pack is the repository root (.claude-plugin/plugin.json, skills at skills/<domain>/<skill>/).
+// The core pack's plugin root is skills/ (skills/.claude-plugin/plugin.json, skills at skills/<domain>/<skill>/), so
+// the plugin cache copies only the skills, not the whole repository.
 // A standalone set (another skill set sharing the marketplace, such as trajectory/) has the same shape as a pack
 // but sits at the top level; STANDALONE_SETS names them.
 export const PACKS_DIR = join(ROOT, 'packs');
 export const STANDALONE_SETS = ['trajectory', 'knowing'];
 
 export function listPacks(root = ROOT) {
-  const packs = [{ name: 'core', dir: root, manifest: join(root, '.claude-plugin', 'plugin.json') }];
+  const core = join(root, 'skills');
+  const packs = [{ name: 'core', dir: core, manifest: join(core, '.claude-plugin', 'plugin.json') }];
   const packsDir = join(root, 'packs');
   if (existsSync(packsDir)) {
     for (const p of readdirSync(packsDir).sort()) {

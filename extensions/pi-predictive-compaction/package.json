@@ -1,0 +1,11 @@
+{
+  "name": "pi-predictive-compaction",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "description": "Adaptive background native Pi compaction with Luna medium",
+  "engines": { "node": ">=24" },
+  "pi": { "extensions": ["./index.ts"] },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": "1.3.0" }
+}

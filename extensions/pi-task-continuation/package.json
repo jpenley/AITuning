@@ -1,0 +1,11 @@
+{
+  "name": "pi-task-continuation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bounded task continuation and explicit blocker reporting for rpiv-todo",
+  "engines": { "node": ">=24" },
+  "pi": { "extensions": ["./index.ts"] },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": "1.3.0", "@earendil-works/pi-tui": "1.3.0" }
+}

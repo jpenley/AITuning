@@ -1,6 +1,6 @@
 {
   "name": "flowstate-writing",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "flowstate writing pack: prose (long-form text people read, documentation and personal writing, written or edited so it does not read as AI-made; a detect mode for AI slop) and its prose linter, and draft (a new piece written with the author block by block, user-invoked).",
   "author": {
     "name": "Jason Penley"

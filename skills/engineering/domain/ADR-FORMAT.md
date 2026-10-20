@@ -17,6 +17,7 @@ Add these only when they carry real information:
 - **Status** frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`), for decisions that get revisited
 - **Considered options**, when the rejected alternatives are worth remembering
 - **Consequences**, when downstream effects are non-obvious
+- **Revisit when**, when the decision is right only below a scale, before a date, or until an expected event: one line naming that condition so someone can check it ("p99 above 300 ms at peak", "when a second region launches")
 
 **Never delete an ADR.** When a decision changes, write a new ADR that references the old one, and mark the old one `superseded by ADR-NNNN`; the history of why is the point.
 

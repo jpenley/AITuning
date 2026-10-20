@@ -1,0 +1,7 @@
+{
+  "claude": {
+    "enabled": false,
+    "model": "CHOOSE_CLAUDE_MODEL",
+    "effort": "medium"
+  }
+}

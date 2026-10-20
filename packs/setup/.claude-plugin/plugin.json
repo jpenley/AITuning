@@ -1,6 +1,6 @@
 {
   "name": "flowstate-setup",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "flowstate setup pack: setup (prepare a project for the flow), adopt (bring existing plans into it), and rig (a standing recipe for agents to launch and drive the real app). Needs the core flowstate plugin.",
   "author": {
     "name": "Jason Penley"

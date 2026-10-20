@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "flowstate",
-      "source": "./",
+      "source": "./skills",
       "description": "flowstate, the core pack: the idea-to-release flow (grill, spec, ticket, build, refine, integrate, release) plus review, security, debugging, optimisation, and skill-tuning skills."
     },
     {
@@ -73,7 +73,7 @@
     {
       "name": "knowing",
       "source": "./knowing",
-      "description": "knowing: learning and research skills (understand, investigate, latest, learn, tutor). Independent of flowstate."
+      "description": "knowing: learning and research skills (understand, investigate, latest, learn, tutor, figure). Independent of flowstate."
     }
   ]
 }

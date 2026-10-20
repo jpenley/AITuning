@@ -11,7 +11,7 @@ Read `CONTEXT.md` (if present) so test names and interface vocabulary match the 
 
 ## Discover the stack first
 
-Find how *this* repo runs tests before writing one: the checked-in wrappers (`./gradlew`, `make test`, a repo script) before global tools; the command that runs one focused test and the one that runs the full suite; where tests live and how neighbouring tests are written; and what the README, CONTRIBUTING, and CI actually run. Use the focused command during the loop and the full suite before finishing. Never assume a default command.
+Find how *this* repo runs tests before writing one: the checked-in wrappers (`./gradlew`, `make test`, a repo script) before global tools; the command that runs one focused test and the one that runs the full suite; where tests live and how neighbouring tests are written; and what the README, CONTRIBUTING, and CI actually run. Use the focused command during the loop and the full suite before finishing. Read [Verification cadence](../evidence/CHECKS.md) for reuse, invalidation and delivery gates; red-before-green remains mandatory. Never assume a default command.
 
 ## Seams: where tests go
 

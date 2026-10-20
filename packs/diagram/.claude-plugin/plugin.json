@@ -1,6 +1,6 @@
 {
   "name": "flowstate-diagram",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "flowstate diagram pack (optional, off until switched on): diagram (draw architecture, flow, sequence, state and ER diagrams as Mermaid, tie each node to a source line with `%% src:` comments, and check them with the Mermaid CLI and diagram-check.mjs before handing them over). Needs mermaid-cli installed by the user (npm install @mermaid-js/mermaid-cli, Node 22.13 or later); without it the static checks still run.",
   "author": {
     "name": "Jason Penley"

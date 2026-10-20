@@ -9,9 +9,12 @@
 // stdout: one JSON object {status, base, findings[]}; stderr: human-readable report.
 // Secrets are reported by rule and location only, never by value.
 // Paths listed in .constraintsignore (one glob per line, # for comments) are exempt.
+// Code-pattern rules distinguish documentation/records and proven JS data contexts.
+// Secrets always use raw added text; preservation and constraint checks stay separate.
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
+import { policyLines } from './policy-lines.mjs';
 
 const report = (status, extra = {}) => {
   process.stdout.write(JSON.stringify({ status, ...extra }) + '\n');
@@ -29,7 +32,7 @@ const git = (args) => {
 // branch planting one violation per rule, runs this script on it, and checks every rule fires; then checks a
 // clean branch passes and a non-repo fails to run.
 if (process.argv.includes('--selftest')) {
-  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs');
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync, copyFileSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
   const { fileURLToPath } = await import('node:url');
@@ -64,8 +67,19 @@ if (process.argv.includes('--selftest')) {
     put('deny.toml', '[advisories]\n# RUSTSEC-2023-0071 was fixed in 0.9.2; keep this list empty\nyanked = "deny"\n\n[licenses]\nallow = ["MIT", "Apache-2.0"]\n\n[bans]\nskip = []\ndeny = [\n    { crate = "openssl", reason = "use rustls" },\n    "native-tls",\n]\n\n[sources]\nskip = ["not-a-bans-entry"]\n');
     put('Cargo.toml', '[workspace.lints.clippy]\nall = "deny"\n\n[lints]\nworkspace = true\n');
     put('ok.rs', '#[must_use]\n#[derive(Debug)]\npub fn allow(x: u8) -> u8 { x }\n');
+    const lf = String.fromCharCode(10);
+    put('notes.md', 'Find `TODO.md`; never add `@ts-ignore` or `test.skip()` to get green.' + lf);
+    put('previous.log', '{"findings":[{"text":"TODO.md and test.skip()"}]}' + lf);
+    put('fallback.mjs', ['const label = `${value / divisor}`;', '// extra.skip(ctx, m) filters text.'].join(lf) + lf);
+    put('data.mjs', [
+      '// extra.skip(ctx, m) filters text, not tests.',
+      'const pattern = /^bans.skip(?:-tree)?$/;',
+      'const forbidden = new RegExp(["@ts-ignore", "TODO"].join("|"));',
+      'const matcher = new RegExp("TODO");',
+    ].join(lf) + lf);
     g('add', '-A');
     g('commit', '-qm', 'clean');
+    copyFileSync(self, join(repo, 'copied-guard.mjs'));
     const c = run(repo);
     if (c.code !== 0) {
       const hits = (JSON.parse(c.out.trim() || '{}').findings ?? []).map((x) => `${x.file}:${x.line} ${x.text}`);
@@ -97,9 +111,47 @@ if (process.argv.includes('--selftest')) {
     for (const [f, lines] of Object.entries(rust)) put(f, lines.join('\n') + '\n');
     g('add', '-A');
     g('commit', '-qm', 'dirty');
+    // Keep this file untracked: the guard must still check effective new code.
+    put('untracked.mjs', [
+      '// @ts-ignore',
+      '// TODO implement the missing branch',
+      'try { operation(); } catch {}',
+      'throw new Error("not implemented");',
+      'test.skip("real disabled test", () => {});',
+      'evaluate(`try { operation(); } catch {}`);',
+      'eval("try { operation(); } catch {}");',
+      'execFileSync("cargo", ["clippy", "--force-warn", "clippy::needless_return"]);',
+      'const options = { env: { RUSTFLAGS: "-Awarnings" } };',
+      'const code = "try { operation(); } catch {}"; eval(code);',
+      'import { execSync as execute } from "node:child_process"; execute("cargo clippy -- -Awarnings");',
+      'process.env.RUSTFLAGS = "-Awarnings";',
+      "const message = `don't`; try { operation(); } catch {} test.skip('disabled', () => {});",
+      'const n = {} / 2; try { operation(); } catch {} // explanation',
+      'eval /* execute */ ("try { operation(); } catch {}");',
+      'throw new Error(/* reason */ "not implemented");',
+      'const argument = "--force-warn clippy::needless_return";',
+      "RegExp((() => { const code = 'try { operation(); } catch {}'; eval(code); return 'x'; })());",
+      'if (ready) {} /[//]/.test(value); test.skip("disabled", () => {});',
+
+    ].join(lf) + lf);
+    put('secret.md', 'ghp_' + 'A'.repeat(36) + lf);
+    put('secret.log', '-----BEGIN ' + 'PRIVATE KEY-----' + lf);
     const r = run(repo);
     const found = JSON.parse(r.out.trim() || '{}').findings ?? [];
     const rules = new Set(found.map((x) => x.rule));
+    for (const [line, rule] of [[1, 'silenced-checker'], [2, 'unfinished-work'], [3, 'unfinished-work'],
+      [4, 'unfinished-work'], [5, 'test-made-easier'], [6, 'unfinished-work'], [7, 'unfinished-work'],
+      [8, 'silenced-checker'], [9, 'silenced-checker'], [10, 'unfinished-work'],
+      [11, 'silenced-checker'], [12, 'silenced-checker'], [13, 'unfinished-work'], [13, 'test-made-easier'],
+      [14, 'unfinished-work'], [15, 'unfinished-work'], [16, 'unfinished-work'], [17, 'silenced-checker'], [18, 'unfinished-work'], [19, 'test-made-easier']]) {
+      if (!found.some((x) => x.file === 'untracked.mjs' && x.line === line && x.rule === rule)) {
+        problems.push(`missed effective untracked code: ${line} ${rule}`);
+      }
+    }
+    for (const file of ['secret.md', 'secret.log']) {
+      const secret = found.find((x) => x.file === file && x.rule === 'secret-in-diff');
+      if (!secret || secret.text !== '[redacted]') problems.push(`secret scan or redaction lost for ${file}`);
+    }
     for (const file of ['docs/capabilities/auth.md', 'docs/capabilities/retired.md']) {
       if (!found.some((x) => x.rule === 'curated-file-shrunk' && x.file === file)) problems.push(`missed capability preservation: ${file}`);
     }
@@ -265,10 +317,20 @@ const TEST_FILE = /(\.|_)(test|spec)s?\.|(^|\/)test_|Tests?\.cs$|(^|\/)(tests?|_
 const ASSERTION = /\b(expect|assert|Assert|should|Should|Verify|Received)\b/;
 const CONSTRAINTS = /(^|\/)CONSTRAINTS\.md$/;
 
+const policyFiles = new Map();
 for (const { file: f, line, text } of added) {
-  if (SUPPRESSIONS.test(text) || fileSuppression(f, line, text)) flag('silenced-checker', f, line, text);
-  if (STUBS.test(text)) flag('unfinished-work', f, line, text);
-  if (SKIPS.test(text)) flag('test-made-easier', f, line, text);
+  if (!policyFiles.has(f)) {
+    try { policyFiles.set(f, policyLines(f, readFileSync(f, 'utf8'))); }
+    catch {
+      console.error(`floor-guard: could not inspect ${f}`);
+      report('error', { reason: 'could not inspect added file', file: f });
+      process.exit(2);
+    }
+  }
+  const view = policyFiles.get(f)?.[line - 1];
+  if (view && (SUPPRESSIONS.test(view.policy) || fileSuppression(f, line, view.policy))) flag('silenced-checker', f, line, text);
+  if (view && STUBS.test(view.policy)) flag('unfinished-work', f, line, text);
+  if (view && SKIPS.test(view.tests)) flag('test-made-easier', f, line, text);
   if (SECRETS.test(text)) flag('secret-in-diff', f, line, text, true);
   if (CONSTRAINTS.test(f) && /^\| *(W|E)\d+ *\|/.test(text)) flag('new-exception', f, line, text);
 }

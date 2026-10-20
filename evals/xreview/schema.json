@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "findings"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["approve", "revise"] },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "severity", "evidence", "consequence"],
+        "properties": {
+          "title": { "type": "string" },
+          "severity": { "type": "string", "enum": ["major", "minor"] },
+          "evidence": { "type": "string" },
+          "consequence": { "type": "string" }
+        }
+      }
+    }
+  }
+}

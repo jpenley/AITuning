@@ -1,0 +1,22 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "commits": {
+    "abcdef1234": "Synthetic change: invalidate cache after writes to avoid stale reads.",
+    "fedcba9876": "Synthetic change: rename a display label."
+  },
+  "items": [
+    {
+      "id": "synthetic-dig",
+      "query": "Why is the cache cleared after a write?",
+      "candidates": [
+        "abcdef1234",
+        "fedcba9876"
+      ],
+      "gold": [
+        "abcdef1234"
+      ]
+    }
+  ]
+}

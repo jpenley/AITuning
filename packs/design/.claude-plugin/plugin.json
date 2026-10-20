@@ -1,6 +1,6 @@
 {
   "name": "flowstate-design",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "flowstate design pack: craft (the UI quality floor and rendered-page checks: detect.mjs, shoot.mjs), compose (build or restyle an interface), critique (review a UI with evidence), codify (DESIGN.md and tokens, drift), animate (UI motion), and image-assets (system imagegen discovery and API fallback). Style lives in each project's DESIGN.md; the pack enforces only the checkable floor. Ideas from nexu-io/open-design, pbakaus/impeccable, heygen-com/hyperframes (Apache-2.0), and leonxlnx/taste-skill (MIT). Needs the core flowstate plugin.",
   "author": {
     "name": "Jason Penley"

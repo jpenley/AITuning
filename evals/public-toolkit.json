@@ -2,14 +2,24 @@
   "version": 1,
   "optional": true,
   "offlineDefault": true,
-  "fixtureKind": "synthetic evaluation inputs",
-  "sourceFiles": 433,
+  "fixtureKind": "newly generated synthetic demonstration datasets",
   "entrypoints": [
     "validate.mjs",
     "triggers.mjs",
     "behave.mjs",
-    "micro.mjs"
+    "micro.mjs",
+    "ab.mjs",
+    "route.mjs",
+    "xreview.mjs",
+    "plugin-eval.mjs",
+    "trends.mjs",
+    "propose.mjs",
+    "run-checks.mjs"
   ],
+  "benchmark": "public-synthetic-v1",
+  "syntheticDatasets": 9,
+  "freeze": "regenerated against final exported bytes",
+  "sourceFiles": 489,
   "omitted": [
     "recorded runs",
     "transcripts",

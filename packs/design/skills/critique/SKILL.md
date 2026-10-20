@@ -11,6 +11,7 @@ Reviews an interface the way a demanding design lead would: measured where it ca
 
 ## 1. Gather evidence
 
+- Name the design's **stage** in one line. **Exploration** (a wireframe, grey boxes, placeholder copy, or the user calls it early): P0 and P1 are for structure, flow, and hierarchy, and P0 means "settle before styling"; floor findings that come only from the placeholder styling (its greys, its unstyled focus, lorem ipsum) go under P2 as notes to carry into the styled version. **Final** (launching, styled, or real copy): the full walk at the severities below.
 - Run `craft`'s check on the rendered page (its step 3, including the no-browser fallback): the findings name the element, and the screenshots give both widths to look at.
 - Read the `DESIGN.md` if there is one: departures from it are findings.
 - Look at the screenshots at each width, then the code for states you can't see (hover, focus, disabled, error, empty, loading).
@@ -20,7 +21,7 @@ Reviews an interface the way a demanding design lead would: measured where it ca
 
 Walk each area and note what you find, including "fine":
 
-1. Works on a phone (no sideways scroll, readable, tappable)
+1. Works on a phone and zoomed (no sideways scroll at 320px, nothing clipped at 200% zoom, readable, tappable)
 2. Contrast and text size, measured
 3. Keyboard and focus, semantic structure (headings in order, labels, alt text)
 4. Honesty (claims, metrics, logos, and testimonials the product can back)
@@ -36,7 +37,7 @@ Walk each area and note what you find, including "fine":
 **Verdict:** <one sentence: ready, ready after the P0s, or not ready, and why>
 
 **P0: fix before launch** (broken, inaccessible, or untrue)
-- <element or selector>: <evidence: the measured value, the line, or what the screenshot shows>. **Fix:** <the concrete change: the value, rule, or replacement text>
+- <element or selector>: <evidence: the measured value, the line, or what the screenshot shows> <the WCAG criterion, e.g. (WCAG 1.4.3), on an accessibility finding>. **Fix:** <the concrete change: the value, rule, or replacement text>
 
 **P1: fix soon** (works but costs users)
 - <same shape>
@@ -45,6 +46,8 @@ Walk each area and note what you find, including "fine":
 - <same shape; for taste, the reason it matters here>
 
 **Keep:** <what works and should survive the fixes>
+
+**Not tested:** <the checks this review couldn't run; for accessibility, say that automated checks find only part of the issues, and whether a keyboard-only pass and a screen-reader pass were done>
 
 **Score:** <only if asked: n/10, from the worst sustained problem, not an average of the good parts; one line on what would raise it>
 ```

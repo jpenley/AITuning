@@ -28,6 +28,8 @@ Use what the user named (a SHA, branch, tag, `main`, `HEAD~5`); ask if they name
 
 Run `node <this skill's folder>/scripts/floor-guard.mjs --base <fixed-point>` with the repo's root as the working directory. It flags moves that lower the bar: silenced checkers, stubs and TODOs, skipped tests, removed assertions, deleted test files, secrets (by location only), weakened `CONSTRAINTS.md` rows, and curated files (`CONSTRAINTS.md`, `CONTEXT.md`, `AGENTS.md`, ADRs, specs) collapsed to under 40% of their size in one change. Exit 0 is clean; **exit 1** means violations, each reported under Standards as at least **Important**, and a weakened `CONSTRAINTS.md` in the same diff as feature work is **Critical**; **exit 2** means it couldn't run, which is reported as "floor guard did not run", never as clean. Paths in `.constraintsignore` are exempt by design.
 
+For test and typecheck evidence supplied with a review, read [Verification cadence](../evidence/CHECKS.md). Independently inspect the diff and receipt validity; request missing or invalidated checks, not a duplicate full suite solely because a fresh reviewer arrived. This does not narrow the audit axes or waive the floor guard.
+
 ## 3. Find the spec
 
 Look in this order:

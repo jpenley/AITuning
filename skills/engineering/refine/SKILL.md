@@ -40,12 +40,13 @@ For each piece of code on the list: what is its responsibility, what calls it an
 | | A wrapper that adds nothing | Call the target directly |
 | | A factory for a factory, a strategy with one strategy | The simple direct form |
 | | Redundant casts or assertions | Remove |
+| | Stored state that other state already determines (a count, total, or flag kept in step by hand) | Compute it from its source where it's read, and delete the field and its updates. A difference that needs values outside the type's exact range (past `Number.MAX_SAFE_INTEGER`, integer overflow) doesn't block the change: list it under "Noticed, not touched" |
 
 ### 4. Apply one change at a time
 
 1. Make one simplification.
 2. Run the tests. **Existing tests must pass without modification**: needing to change a test means behaviour changed, so revert.
-3. Keep it only if the code is genuinely clearer. Not clearer, or merely shorter: revert.
+3. Keep it only if the code is genuinely clearer. Keep even a small clarity improvement when behavior, project conventions, and maintainability criteria hold; the overall cleanup target is a stopping condition, not a minimum size per change. Not clearer, or merely shorter: revert.
 4. Commit it on its own. Refinement commits never mix with behaviour changes; a large refinement is its own PR.
 
 **Stop signals**: if you revert more than one change in a row, or a simplification starts pulling in files outside the branch's diff, stop and report what you have: the code is telling you the cleanup is bigger than local mode.

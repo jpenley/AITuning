@@ -6,7 +6,7 @@
 // stdout: one JSON object {status, errors[], warnings[]}; stderr: human-readable report.
 
 import { readFileSync, readdirSync, existsSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative, extname, basename } from 'node:path';
+import { join, relative, resolve, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { loadSkills, listPacks, stripFences, finish, frontmatterBlock, ROOT, SKILLS_DIR, EVALS_DIR, STANDALONE_SETS } from './lib/skills.mjs';
@@ -193,6 +193,9 @@ if (!ONLY_SKILLS) {
     for (const l of listed) if (!actual.has(l)) err(rel(manifestPath), `listed path is not a skill folder in this pack: ${l}`);
     const entry = (marketplace?.plugins || []).find((p) => p.name === manifest.name);
     if (marketplace && !entry) err(rel(marketplacePath), `plugin "${manifest.name}" (pack ${pack.name}) is not listed`);
+    // The source is the folder Claude Code copies into its plugin cache, so it must be the pack's own folder:
+    // a parent folder (the repository root, say) would copy everything under it.
+    if (entry && typeof entry.source === 'string' && resolve(ROOT, entry.source) !== resolve(pack.dir)) err(rel(marketplacePath), `plugin "${manifest.name}" has source ${entry.source}; expected ./${rel(pack.dir)}`);
     // Every plugin but the core names each of its skills in both descriptions (the core's is a summary).
     if (pack.name !== 'core') {
       const descriptions = [{ where: rel(manifestPath), text: manifest.description }];

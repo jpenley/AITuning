@@ -88,10 +88,10 @@ Commit the attempt, run the characterization test, then the benchmark with the t
 |---|---|
 | **Changed output**: golden master red | Revert (`git revert`), whatever the benchmark says |
 | **Crash or timeout**: the test or benchmark failed to finish, or its number couldn't be read | Revert |
-| **Win**: green, and better beyond the noise | Weigh it against the complexity it adds (below). A win more than twice the previous best improvement is re-measured first: a broken benchmark can look quiet |
+| **Win**: green, and better beyond the noise | Keep when the agreed consistency criteria pass (below). A win more than twice the previous best improvement is re-measured first: a broken benchmark can look quiet |
 | **Flat or worse**: green, within the noise or worse | Revert |
 
-**Weighing a win.** Its size alone never rejects it; the complexity rule in `PERF.md`'s *Keep or revert* decides. A 4% win from a one-line exact lookup is kept; a 2% win that needs a cache with its own invalidation rule usually isn't. Record the call either way in the attempt log (the win, what it adds, kept or reverted, and why), so the user can overrule it.
+**Retaining a win.** Apply the consistency criteria in `PERF.md`'s *Keep or revert*: keep every verified gain that passes them, however small. A 4% exact lookup improvement and a 0.2% improvement both qualify; a cache also needs evidence that its invalidation, memory use, and maintenance obligations meet the agreed criteria. A rejection names the failed criterion and its evidence, never the gain's size alone. Record the call in the attempt log (the win, what it adds, kept or reverted, and why), so the user can overrule it. Preserve candidates blocked only by an explicit project acceptance threshold as unpromoted work with their evidence.
 
 Each kept win becomes the new baseline: measure the next attempt against it, not against the original, so wins aren't counted twice.
 
@@ -108,7 +108,7 @@ If a measurement or rollback is still pending, record the candidate revision, av
 
 **Plateau**: after 3 attempts in a row with no win, switch to a family you haven't tried, or combine two near-misses. The target from Phase 1 is never relaxed to declare victory; changing it is the user's call.
 
-**Done when** the target from Phase 1 is met, or two families in a row have plateaued, and every attempt is in the log.
+**Done when** the target from Phase 1 is met, or two families in a row have plateaued, and every attempt is in the log. Stopping below the target keeps all accepted improvements.
 
 ## Phase 6: Reintegrate
 

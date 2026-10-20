@@ -10,7 +10,7 @@ Get finished work into its base branch. Integration is the user's decision; this
 
 ## 1. Verify
 
-Run the project's full test suite (and typecheck, if the project has one) on the branch as it stands, and check the work against the Definition of Done in the `evidence` skill (Correctness, Quality, Integration, Documentation). Report the result with evidence. If anything fails, show the failures and stop: the options come after a green suite.
+Read [Verification cadence](../evidence/CHECKS.md). Establish passing evidence for the project's full test suite (and typecheck, if the project has one) on the branch as it stands, running missing or invalidated checks rather than repeating still-valid ones merely to enter this skill, and check the work against the Definition of Done in the `evidence` skill (Correctness, Quality, Integration, Documentation). Report the result with evidence. If anything fails, show the failures and stop: the options come after a green suite.
 
 Read [Capabilities and deltas](../spec/CAPABILITIES.md) and [Course correction](../spec/REVISION.md). Recheck the approved revision, active ticket dispositions, preserved invariants, removal checks, and actual prerequisite delivery. Stale work or a cancelled blocker does not become valid because tests pass. Reconcile it before offering integration.
 
@@ -41,7 +41,7 @@ Wait for the user's choice.
 
 Before any commit this step makes, review the staged diff: no secrets, `.env*` files, build output, or key files go in.
 
-- **Merge locally**: from the main checkout, update `<base>`, merge the branch, and **run the tests on the merged result**. If they fail, stop and leave the branch and any worktree in place: nothing has been pushed, so it's recoverable. If the merge conflicts, load the `merge` skill with your skill tool. Once the merged result is green, clean up (step 6).
+- **Merge locally**: from the main checkout, update `<base>`, merge the branch, and **run the tests on the merged result**, plus typecheck and other applicable merged-result gates. Pre-merge evidence alone does not prove a different merged tree. If they fail, stop and leave the branch and any worktree in place: nothing has been pushed, so it's recoverable. If the merge conflicts, load the `merge` skill with your skill tool. Once the merged result is green, clean up (step 6).
 - **Push and open a PR**: push the branch with upstream tracking, then open the PR against `<base>` with the forge's tooling (its CLI, or the creation link the push prints), following the repo's PR template if it has one, otherwise writing the body by loading the `pr` skill with your skill tool. Report the PR link. Keep any worktree: review fixes happen there.
 - **Merge an existing PR**: confirm its checks pass, merge it with the forge's tooling using the repo's usual merge method, then clean up (step 6).
 - **Keep as is**: report the branch name and any worktree path.

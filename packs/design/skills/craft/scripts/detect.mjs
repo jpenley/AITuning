@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Checks a rendered page against the craft floor and flags patterns common in AI-made UI. It opens the page in
-// headless Chrome (cdp.mjs), runs audit.page.js at a desktop and a mobile width, and merges the findings.
+// headless Chrome (cdp.mjs), runs audit.page.js at a desktop and a mobile width, checks reflow at 640px and 320px
+// (a 1280px screen at 200% and 400% zoom: sideways scroll, controls cut off by hidden overflow), and merges the findings.
 //
 //   node detect.mjs <url|file.html> [--tokens <DESIGN.md|tokens.css>] [--widths 1280,390] [--browser <path>]
 //   node detect.mjs <url|file.html> --inventory     what the page uses: colours, families, sizes, radii, with counts
@@ -8,10 +9,10 @@
 //   node detect.mjs --selftest
 // Severities: error (breaks the floor: contrast, text under 12px, tap targets, sideways scroll, no focus indicator,
 // animation with no reduced-motion path, no html lang, no title), warn (likely wrong: line length, leading, skipped
-// headings, layout transitions, long durations, 100vh, off-token colours and fonts, a lazy image in the first screen,
+// headings, layout transitions, long durations, 100vh, off-token colours, fonts, spacing, and radii, a lazy image in the first screen,
 // a render-blocking head script, tabindex above 0), tell (a pattern common in AI-made UI; a reason
 // to look again, not a ban).
-// --tokens reads every colour literal and font family from the file; used colours and fonts outside it are flagged.
+// --tokens reads every colour literal, font family, spacing step, and radius from the file; used values outside it are flagged.
 // Exit: 0 no errors, 1 errors found, 2 couldn't run (no browser, page wouldn't open).
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, realpathSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -29,10 +30,30 @@ export function readTokens(src) {
   for (const m of src.matchAll(/font-family\s*:\s*([^;\n}]+)/gi)) fonts.add(m[1].split(',')[0].replace(/["']/g, '').trim());
   // Prose and table rows in a DESIGN.md: "Body font: Source Serif", "| Display typeface | Fraunces |".
   for (const m of src.matchAll(/(?:^|\|)[ \t*-]*[\w -]*?\b(?:font|typeface)s?\b[\w -]*?\**[ \t]*[:|][ \t]*`?([A-Z][\w ]*?\w)`?[ \t]*(?=[,(|;\n]|$)/gim)) fonts.add(m[1].trim());
-  return { colors, fonts: [...fonts].filter((f) => f && !/^(var|inherit|initial|system-ui|sans-serif|serif|monospace)$/i.test(f)) };
+  // Spacing and radius scales, in px: CSS declarations and custom properties (`--space-4: 16px`, `border-radius: 6px`),
+  // DESIGN.md prose ("Spacing scale: 4, 8, 12", "Radii: 4px controls, full for pills") and table rows, whose kind
+  // comes from the row or its heading. Bare numbers count only where the value carries no px or rem at all.
+  const spacing = new Set(), radii = new Set();
+  let section = '';
+  for (const line of src.split('\n')) {
+    const h = line.match(/^#{1,6}\s+(.*)/);
+    if (h) { section = /radi|corner|rounded/i.test(h[1]) ? (/spac/i.test(h[1]) ? '' : 'radius') : /spac/i.test(h[1]) ? 'spacing' : ''; continue; }
+    const table = /^\s*\|/.test(line);
+    for (const seg of table ? [line] : line.split(/[;{}]/)) {
+      if (/(letter|word|border)-spacing/i.test(seg)) continue;
+      const kind = /radi(us|i)|rounded|corner/i.test(seg) ? 'radius' : /spac|gap|padding|margin|gutter/i.test(seg) ? 'spacing' : table ? section : '';
+      if (!kind) continue;
+      const value = table ? seg.split('|').slice(2).join('|') : seg.includes(':') ? seg.slice(seg.indexOf(':') + 1) : '';
+      const bare = !/\d(px|rem)\b/i.test(value);
+      const into = kind === 'radius' ? radii : spacing;
+      for (const m of value.matchAll(/(?<![\w.#-])(\d*\.?\d+)(px|rem)?(?![\w%.])/gi)) if (m[2] || bare) into.add(m[2]?.toLowerCase() === 'rem' ? parseFloat(m[1]) * 16 : parseFloat(m[1]));
+      if (kind === 'radius' && /\b(full|pill)\b/i.test(value)) radii.add(9999);
+    }
+  }
+  return { colors, fonts: [...fonts].filter((f) => f && !/^(var|inherit|initial|system-ui|sans-serif|serif|monospace)$/i.test(f)), spacing: [...spacing], radii: [...radii] };
 }
 
-export async function detect(target, { widths = [1280, 390], tokens = null, browser, inventory = false, stress = false } = {}) {
+export async function detect(target, { widths = [1280, 390], tokens = null, browser, inventory = false, stress = false, reflow = true } = {}) {
   const url = toUrl(target);
   const byKey = new Map();
   const sizes = {};
@@ -55,6 +76,12 @@ export async function detect(target, { widths = [1280, 390], tokens = null, brow
         if (byKey.has(k)) { const e = byKey.get(k); if (!e.widths.includes(w)) e.widths.push(w); }
         else byKey.set(k, { ...f, widths: [w] });
       }
+    }
+    // Reflow (WCAG 1.4.10): 640px is a 1280px screen at 200% zoom, 320px one at 400%.
+    if (reflow) for (const w of [640, 320]) {
+      await page.viewport(w, w < 600 ? 844 : 900, w < 600);
+      await page.goto(url);
+      for (const f of (await page.evaluate(`(${AUDIT})(${JSON.stringify({ mobile: w < 600, width: w, reflow: true })})`)).findings) byKey.set(`${f.rule}|${f.detail}|${f.where}`, { ...f, widths: [w] });
     }
   }, { browser });
   const order = { error: 0, warn: 1, tell: 2 };
@@ -81,7 +108,7 @@ export async function run(argv) {
   let tokens = null;
   if (opts.tokens) {
     try { tokens = readTokens(readFileSync(opts.tokens, 'utf8')); } catch (e) { log(`Couldn't read --tokens: ${e.message}`); return 2; }
-    if (!tokens.colors.length && !tokens.fonts.length) log(`warning: no colours or fonts found in ${opts.tokens}; drift isn't checked`);
+    if (!tokens.colors.length && !tokens.fonts.length && !tokens.spacing.length && !tokens.radii.length) log(`warning: no colours, fonts, spacing, or radii found in ${opts.tokens}; drift isn't checked`);
   }
   try {
     const r = await detect(pos[0], { widths: (opts.widths ?? '1280,390').split(',').map(Number), tokens, browser: opts.browser, inventory: !!opts.inventory, stress: !!opts.stress });
@@ -155,11 +182,17 @@ async function selftest() {
     if (loud.length) problems.push(`clean page raised: ${loud.map((f) => `${f.rule} (${f.detail})`).join('; ')}`);
     const bad = await detect(join(tmp, 'bad.html'));
     const rules = new Set(bad.findings.map((f) => f.rule));
-    for (const r of ['contrast', 'text-size', 'line-length', 'leading', 'headings', 'tap-target', 'overflow', 'focus', 'alt', 'viewport-height', 'layout-transition', 'duration', 'reduced-motion', 'blue-purple-gradient', 'gradient-text', 'accent-border-card', 'pulsing-dot', 'default-indigo', 'emoji-icons', 'identical-cards', 'eyebrows', 'em-dashes', 'buzzwords', 'placeholder-copy', 'zoom-disabled', 'unlabelled-control', 'input-type', 'autocomplete', 'unnamed-control', 'div-button', 'image-size', 'middle-dot-meta', 'arrow-cta', 'html-lang', 'title', 'lazy-above-fold', 'blocking-script', 'positive-tabindex']) {
+    for (const r of ['contrast', 'text-size', 'line-length', 'leading', 'headings', 'tap-target', 'overflow', 'focus', 'alt', 'viewport-height', 'layout-transition', 'duration', 'reduced-motion', 'blue-purple-gradient', 'gradient-text', 'accent-border-card', 'pulsing-dot', 'default-indigo', 'emoji-icons', 'identical-cards', 'eyebrows', 'em-dashes', 'buzzwords', 'placeholder-copy', 'zoom-disabled', 'unlabelled-control', 'input-type', 'autocomplete', 'unnamed-control', 'div-button', 'image-size', 'middle-dot-meta', 'arrow-cta', 'html-lang', 'title', 'lazy-above-fold', 'blocking-script', 'positive-tabindex', 'default-font']) {
       if (!rules.has(r)) problems.push(`planted fault not found: ${r}`);
     }
-    const tok = readTokens('--ink:#1d2330; --paper:#fbfaf7; --accent: #0f6b5c; --muted:#4d5566;\nfont-family: Georgia, serif;\n| Body font | Source Serif |');
-    if (tok.colors.length !== 4 || !tok.fonts.includes('Georgia') || !tok.fonts.includes('Source Serif')) problems.push(`readTokens: ${JSON.stringify(tok)}`);
+    const tok = readTokens('--ink:#1d2330; --paper:#fbfaf7; --accent: #0f6b5c; --muted:#4d5566;\nfont-family: Georgia, serif;\n| Body font | Source Serif |\n- Spacing scale: 4, 8, 12, 16, 24\n--space-xl: 3rem; letter-spacing: 2px;\n- Radii: 4px controls, 8px cards, full for pills');
+    const same = (a, b) => JSON.stringify([...(a || [])].sort((x, y) => x - y)) === JSON.stringify(b);
+    if (tok.colors.length !== 4 || !tok.fonts.includes('Georgia') || !tok.fonts.includes('Source Serif') || !same(tok.spacing, [4, 8, 12, 16, 24, 48]) || !same(tok.radii, [4, 8, 9999])) problems.push(`readTokens: ${JSON.stringify(tok)}`);
+    // Spacing and radius drift: the clean page's 20px padding and 6px radius are off a scale that lacks them.
+    const shape = await detect(join(tmp, 'good.html'), { widths: [1280], tokens: { colors: [], fonts: [], spacing: [0, 4, 8, 12, 16, 24, 32, 40, 48], radii: [4, 8] } });
+    const shapeOff = shape.findings.filter((f) => f.rule === 'off-token').map((f) => f.detail);
+    if (!shapeOff.some((d) => /spacing 20px .*nearest 16px|spacing 20px .*nearest 24px/.test(d))) problems.push(`off-scale spacing (20px) not flagged with its nearest step: ${JSON.stringify(shapeOff)}`);
+    if (!shapeOff.some((d) => /radius 6px .*nearest (4|8)px/.test(d))) problems.push(`off-scale radius (6px) not flagged with its nearest step: ${JSON.stringify(shapeOff)}`);
     const drift = await detect(join(tmp, 'good.html'), { tokens: { colors: ['#1d2330', '#fbfaf7', '#4d5566'], fonts: ['Georgia'] } });
     const off = drift.findings.filter((f) => f.rule === 'off-token');
     if (!off.some((f) => /15, 107, 92|#0f6b5c|rgb\(15, 107, 92\)/.test(f.detail))) problems.push(`the accent missing from the tokens must be flagged: ${JSON.stringify(off.map((f) => f.detail))}`);
@@ -177,6 +210,25 @@ async function selftest() {
 <div tabindex="0">Focusable</div><div tabindex="-1">Script focus</div>`);
     const allowed = (await detect(join(tmp, 'allowed.html'))).findings.filter((f) => ['html-lang', 'title', 'lazy-above-fold', 'blocking-script', 'positive-tabindex'].includes(f.rule));
     if (allowed.length) problems.push(`allowed forms flagged: ${allowed.map((f) => `${f.rule} (${f.detail})`).join('; ')}`);
+    // Newer template tells: everything centred, one radius and shadow on every block, 01/02/03 markers, Space Grotesk.
+    writeFileSync(join(tmp, 'tells.html'), `<!doctype html><html lang="en"><meta name=viewport content="width=device-width"><title>Pressmark</title><style>
+body{margin:0;padding:24px;text-align:center;font:17px/1.6 "Space Grotesk",sans-serif;color:#2b2420;background:#f6f0e4} .block{border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:24px;margin:16px 0;background:#fffaf1}</style>
+<h1>Your zine, printed and posted</h1><p>Upload a PDF and we print and post each copy as orders come in.</p>
+<div class="block"><span>01</span><h3>Riso and digital</h3><p>Two-colour riso for short runs.</p></div><div class="block"><span>02</span><h3>Recycled stock</h3><p>At least 80% recycled.</p></div>
+<div class="block"><span>03</span><h3>Your shop, our post</h3><p>We ship under your name.</p></div><div class="block"><h2>Ready to print?</h2></div></html>`);
+    const t2 = new Set((await detect(join(tmp, 'tells.html'), { widths: [1280], reflow: false })).findings.map((f) => f.rule));
+    for (const r of ['all-centred', 'uniform-blocks', 'numbered-markers', 'default-font']) if (!t2.has(r)) problems.push(`planted tell not found: ${r}`);
+    // Reflow: a table with a min-width that fits at 390px but not 320px, and a one-line nav that hides its overflow and
+    // only collapses below 600px, so its last links are cut off at 640px (200% zoom). Neither shows at 1280 or 390.
+    writeFileSync(join(tmp, 'reflow.html'), `<!doctype html><html lang="en"><meta name=viewport content="width=device-width"><title>Plans</title><style>
+*{box-sizing:border-box} body{margin:0;font:16px sans-serif} .top{display:flex;gap:24px;padding:0 24px;height:64px;align-items:center;overflow:hidden;white-space:nowrap}
+.nav{display:flex;gap:8px} .nav a{padding:10px 14px} main{padding:16px} table{min-width:340px;width:100%}
+@media (max-width:599px){.nav{display:none}}</style><header class="top"><a href="/">Tallyroom</a><nav class="nav"><a href="/a">Dashboard</a><a href="/b">Invoices</a><a href="/c">Clients</a><a href="/d">Reports</a><a href="/e">Team</a><a href="/f">Plans and billing</a><a href="/g">Settings</a><a href="/h">Sign out</a></nav></header>
+<main><h1>Plans</h1><table><tr><th>Feature</th><th>Solo</th><th>Studio</th><th>Agency</th></tr></table></main></html>`);
+    const rf = (await detect(join(tmp, 'reflow.html'))).findings.filter((f) => f.rule === 'reflow');
+    if (!rf.some((f) => f.widths.includes(320) && /scrolls sideways/.test(f.detail))) problems.push(`reflow: sideways scroll at 320px not reported: ${JSON.stringify(rf)}`);
+    if (!rf.some((f) => f.widths.includes(640) && /cut off/.test(f.detail))) problems.push(`reflow: nav links clipped at 640px (200% zoom) not reported: ${JSON.stringify(rf)}`);
+    if (rf.some((f) => f.widths.includes(1280) || f.widths.includes(390))) problems.push(`reflow findings must come only from the 640 and 320 passes: ${JSON.stringify(rf)}`);
     // Stress: a fixed-width, no-wrap, clipped button breaks with longer text; the clean page must survive it.
     writeFileSync(join(tmp, 'tight.html'), '<!doctype html><meta name=viewport content="width=device-width"><style>body{font:16px sans-serif;margin:0} .b{width:120px;white-space:nowrap;overflow:hidden;display:inline-block}</style><h1>Title</h1><span class="b">Save changes</span>');
     const st = await detect(join(tmp, 'tight.html'), { stress: true, widths: [390] });

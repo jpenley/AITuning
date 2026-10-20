@@ -17,11 +17,13 @@ First identify the requested outcome and the artifacts actually changed. Apply p
 
 When the task changes no implementation artifacts, an application build, test suite, typecheck, dependency install, worktree or code audit is outside its verification scope unless explicitly requested. Loading this skill supplies an evidence standard, not another assignment. Select the smallest check that can disprove the claim, then stop when it establishes the requested outcome.
 
+For multi-step implementation, review fixes or integration, read [Verification cadence](CHECKS.md) before choosing when to run checks. Reuse must account for all relevant inputs, not just whether source code changed.
+
 ## What proves what
 
 | Claim | Proof | Not proof |
 |---|---|---|
-| Tests pass | A fresh run of the test command in this session, output read: 0 failures | An earlier run, "should pass" |
+| Tests pass | A run in this task, output read: 0 failures, with still-valid inputs under [Verification cadence](CHECKS.md) | Stale or unbound earlier output, "should pass" |
 | Build succeeds | The build command, exit code 0 | A clean linter run, logs that look fine |
 | Typecheck is clean | The typecheck command's output | The editor showing no errors |
 | Bug fixed | The original symptom re-tested and gone | The code changed |
@@ -33,6 +35,8 @@ When the task changes no implementation artifacts, an application build, test su
 | Current capability advanced | The landed revision and checks for the specific Delta entries, with source, artifact, runtime, or deployment scope stated | An approved plan, ticket closure, or source code presented as production verification |
 | Prerequisite delivered | Evidence that the prerequisite behavior needed by this ticket exists at its bound spec revision | A blocker closed because it was cancelled or superseded |
 | It can't be done (a tool is missing, access is denied, an API doesn't support it) | The failing command and its output | An assumption, or a failure from an earlier session |
+
+When `docs/agents/rig/` doesn't exist and getting the app running to check a change took installs, environment or config patches, or a driver you wrote, end the report by suggesting the user run `rig`, so that setup becomes a standing recipe. When the app started and was driven with the repo's own commands and tests, leave the suggestion out.
 
 ## Select proof by what changed
 

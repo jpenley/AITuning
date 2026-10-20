@@ -18,6 +18,7 @@ One diagram answers one question.
 | What states something has and how it moves between them | `stateDiagram-v2` |
 | Which tables or entities relate to which | `erDiagram` |
 | Which types extend or use which | `classDiagram` |
+| How two or more options differ | One `flowchart` with the shared parts drawn once and each option's added or changed nodes and edges labelled with its option (`A: publishes event`) or styled per option; or a before/after pair of only the part that changes |
 
 More than about fifteen nodes means two diagrams, or `subgraph` groups.
 
@@ -42,6 +43,8 @@ Future -.->|unverified: possible storage| Storage
 An unverified sequence message uses a dashed arrow and starts its message text with `unverified` (`API-->>Worker: unverified: possible refresh`). Edge and message labels can add descriptive text after the marker, with or without a colon. These labels apply only to their own statements. Cite each remaining claim. For other diagram forms, omit claims you cannot trace.
 
 ## 3. Write it
+
+On the lines after the diagram type, put `accTitle: <the question>` and `accDescr: <the one claim the diagram makes>`: screen readers announce them, and the claim travels with the figure.
 
 Declare each node once, with its label and shape (`API[API service]`), then refer to it by id. Declare sequence participants before their messages. Quote a label with punctuation (`Cache["Cache (Redis)"]`). Keep labels short; put words on an edge only where they change the meaning. Save the text as `<name>.mmd`, or as a ```` ```mermaid ```` block in the document it belongs to.
 
