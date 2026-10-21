@@ -160,6 +160,7 @@ function widen(recipe, args) {
       const split = templateOf(fixed, value, key, new Set(Object.keys(params)));
       if (split) {
         recipe.args[key] = split.template;
+        if (params[key]) delete params[key].default;
         params[split.name] = { required: true, template: true, seen: [split.was, split.now] };
         changed.push(`${split.name} in ${key} (was ${split.was}, now ${split.now})`);
         continue;

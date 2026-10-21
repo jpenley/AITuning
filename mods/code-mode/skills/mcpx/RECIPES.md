@@ -8,7 +8,7 @@ mcpx run confluence-search --set cloudId=<cloudId> --set 'cql=type = page AND te
 mcpx run teamcity-errors --set build_id=123
 ```
 
-Recipes live in `~/.claude/mcpx/recipes/`. When the same call shape (tool, argument names and `--js` filter) runs three times (`MCPX_AUTOSAVE` changes the count), mcpx saves it as `auto-<tool>-<id>`, with the arguments that changed as required parameters, and prints a note on stderr. Rename or describe it with `mcpx recipe rename|desc <name> ...`, inspect with `recipe show`, delete with `recipe rm`. Seeded recipes are not overwritten once they exist, so edit them freely.
+Recipes live in `~/.claude/mcpx/recipes/`. When the same call shape (tool, argument names and `--js` filter) runs three times (`MCPX_AUTOSAVE` changes the count), mcpx saves it as `auto-<tool>-<id>`, with the arguments that changed as required parameters, and prints a note on stderr. If the shape later arrives with a different value where the recipe had a fixed one (another company ID, say), the value becomes a variable instead of being reused silently. A difference inside a string, such as `companyId = 111` against `companyId = 222` in a JQL query, becomes a `{{companyId}}` placeholder; a differing whole argument becomes a required parameter. mcpx says so on stderr, and `mcpx run` then requires `--set companyId=...`. A difference in the `--js` filter makes a different shape, so it is not merged. Rename or describe it with `mcpx recipe rename|desc <name> ...`, inspect with `recipe show`, delete with `recipe rm`. Seeded recipes are not overwritten once they exist, so edit them freely.
 
 ## Writing a filter by hand
 
