@@ -91,7 +91,7 @@ node ~/.claude/mcpx/mcpx.mjs list jira
 node ~/.claude/mcpx/mcpx.mjs call mcp__plugin_github_github__get_me '{}'
 ```
 
-The mod copies the CLI to that stable path each session. It picks the live session whose directory contains the current one; use `--session <id>` or `MCPX_SESSION` to choose. `list` shows names and descriptions only, not input schemas. A call that is not yet in the tool list is retried for 20 seconds because slow servers connect late. Any local process of the same user can queue requests, but each still faces the session's permission prompt.
+The mod copies the CLI to that stable path each session. It picks the live session whose directory contains the current one; use `--session <id>` or `MCPX_SESSION` to choose. `list` shows names and descriptions only, not input schemas. A call that is not yet in the tool list is retried for 20 seconds because slow servers connect late. `--js` filters a result locally so only the answer reaches the model. `mcpx recipes` and `mcpx run <name>` use saved calls: five ship in `recipes/`, and a call shape repeated three times with a `--js` filter is saved automatically to `~/.claude/mcpx/recipes/`. `mcpx status` lists them, which is how the agent learns they exist. See `skills/mcpx/RECIPES.md`. Any local process of the same user can queue requests, but each still faces the session's permission prompt.
 
 ## Develop and verify
 

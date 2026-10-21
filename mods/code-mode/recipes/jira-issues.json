@@ -1,0 +1,25 @@
+{
+  "name": "jira-issues",
+  "description": "List Jira issues from a JQL query, one line each: key | status | assignee | summary. Prints the next page token when more pages exist.",
+  "tool": "mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql",
+  "args": {
+    "fields": [
+      "summary",
+      "status",
+      "assignee"
+    ],
+    "maxResults": 50
+  },
+  "params": {
+    "cloudId": {
+      "required": true
+    },
+    "jql": {
+      "required": true
+    },
+    "fields": {},
+    "maxResults": {},
+    "nextPageToken": {}
+  },
+  "js": "const d = r.issues?.nodes ?? r.data?.issues ?? r.issues ?? []; const t = r.nextPageToken ?? r.data?.nextPageToken ?? r.issues?.nextPageToken; return d.map(i => [i.key, i.fields?.status?.name, i.fields?.assignee?.displayName ?? '-', i.fields?.summary].join(' | ')).join('\\n') + (t ? '\\n[more: --set nextPageToken=' + t + ']' : '');"
+}

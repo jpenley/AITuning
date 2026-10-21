@@ -1,0 +1,21 @@
+{
+  "name": "jira-count-by",
+  "description": "Count Jira issues from a JQL query by status. Counts only the page fetched (up to maxResults); use jira-issues to see whether more pages exist.",
+  "tool": "mcp__plugin_atlassian_atlassian__searchJiraIssuesUsingJql",
+  "args": {
+    "fields": [
+      "status"
+    ],
+    "maxResults": 100
+  },
+  "params": {
+    "cloudId": {
+      "required": true
+    },
+    "jql": {
+      "required": true
+    },
+    "maxResults": {}
+  },
+  "js": "const d = r.issues?.nodes ?? r.data?.issues ?? r.issues ?? []; const m = {}; for (const i of d) { const k = i.fields?.status?.name ?? 'unknown'; m[k] = (m[k] || 0) + 1; } return m;"
+}

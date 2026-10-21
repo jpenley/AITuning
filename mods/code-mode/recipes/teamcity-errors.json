@@ -1,0 +1,15 @@
+{
+  "name": "teamcity-errors",
+  "description": "Failure lines from a TeamCity build log: scans the last tail_lines lines for error, fail or exception and prints the final 40 matches.",
+  "tool": "mcp__plugin_teamcity_teamcity__get_build_log",
+  "args": {
+    "tail_lines": 2000
+  },
+  "params": {
+    "build_id": {
+      "required": true
+    },
+    "tail_lines": {}
+  },
+  "js": "String(r).split('\\n').filter(l => /error|fail|exception/i.test(l)).slice(-40).join('\\n')"
+}
