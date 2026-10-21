@@ -118,6 +118,60 @@ const summarize = r => ({ name: r.name, tool: shortTool(r.tool), description: r.
 // A repeated call shape is the same tool, argument keys and filter; values may differ.
 const signature = (tool, args, js) => hash(JSON.stringify([tool, Object.keys(args).sort(), js || '']));
 
+const PLACEHOLDER = /\{\{(\w+)\}\}/g;
+const escapeRe = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Does `value` fit a string that holds {{placeholders}}? Returns the captured values by name.
+function fit(template, value) {
+  const names = [];
+  const source = template.split(PLACEHOLDER).map((part, i) => { if (i % 2) { names.push(part); return '(.+?)'; } return escapeRe(part); }).join('');
+  const found = new RegExp(`^${source}$`, 's').exec(value);
+  return found ? Object.fromEntries(names.map((n, i) => [n, found[i + 1]])) : null;
+}
+
+// Two strings that differ in one stretch become a template with a placeholder
+// there, widened to whole words so `12345` and `12399` are compared as ids.
+function templateOf(a, b, key, taken) {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  let j = 0;
+  while (j < a.length - i && j < b.length - i && a[a.length - 1 - j] === b[b.length - 1 - j]) j++;
+  while (i > 0 && /\w/.test(a[i - 1]) && /\w/.test(b[i - 1])) i--;
+  while (j > 0 && /\w/.test(a[a.length - j]) && /\w/.test(b[b.length - j])) j--;
+  const was = a.slice(i, a.length - j), now = b.slice(i, b.length - j);
+  if (!was || !now || was.length > 80 || now.length > 80 || i + j < 6) return null;
+  let name = (/([A-Za-z_]\w*)\W*$/.exec(a.slice(0, i)) || [])[1] || `${key}Value`;
+  for (let n = 2; taken.has(name); n++) name = `${name.replace(/\d+$/, '')}${n}`;
+  return { name, template: `${a.slice(0, i)}{{${name}}}${a.slice(a.length - j)}`, was, now };
+}
+
+// A recipe built from calls that all shared a value keeps it as a default. When a
+// later call of the same shape differs, turn the value into a variable instead of
+// letting `run` quietly reuse the old one. Returns what changed.
+function widen(recipe, args) {
+  const changed = [];
+  const params = recipe.params || (recipe.params = {});
+  for (const [key, value] of Object.entries(args)) {
+    if (!(key in recipe.args)) continue;
+    const fixed = recipe.args[key];
+    if (JSON.stringify(fixed) === JSON.stringify(value)) continue;
+    if (typeof fixed === 'string' && typeof value === 'string') {
+      if (fit(fixed, value)) continue; // an existing variable already explains the difference
+      const split = templateOf(fixed, value, key, new Set(Object.keys(params)));
+      if (split) {
+        recipe.args[key] = split.template;
+        params[split.name] = { required: true, template: true, seen: [split.was, split.now] };
+        changed.push(`${split.name} in ${key} (was ${split.was}, now ${split.now})`);
+        continue;
+      }
+    }
+    delete recipe.args[key];
+    params[key] = { required: true, seen: [JSON.stringify(fixed).slice(0, 60), JSON.stringify(value).slice(0, 60)] };
+    changed.push(`${key} (was ${JSON.stringify(fixed).slice(0, 40)}, now ${JSON.stringify(value).slice(0, 40)})`);
+  }
+  return changed;
+}
+
 function track(tool, args, js) {
   let usage = {};
   try { usage = readJson(USAGE_FILE); } catch { /* first use */ }
@@ -133,7 +187,12 @@ function track(tool, args, js) {
   atomic(USAGE_FILE, usage);
   const existing = loadRecipes();
   const same = existing.find(r => r.sig === sig);
-  if (same) return note(`recipe "${same.name}" covers this call; next time: mcpx run ${same.name}`);
+  if (same) {
+    const widened = widen(same, args);
+    if (!widened.length) return note(`recipe "${same.name}" covers this call; next time: mcpx run ${same.name}`);
+    atomic(recipePath(same.name), same);
+    return note(`recipe "${same.name}" had fixed values that differ in this call, so they are now variables: ${widened.join('; ')}. Run: mcpx run ${same.name} --set <name>=...`);
+  }
   if (entry.n < AUTOSAVE_AT || !js) return;
   const names = new Set(Object.keys(args));
   const params = {};
@@ -255,8 +314,11 @@ async function main() {
     const name = opts.positional[0];
     if (!name || !existsSync(recipePath(name))) fail(`no recipe named ${name || ''}; see: mcpx recipes`);
     const recipe = readJson(recipePath(name));
-    const args = { ...recipe.args, ...opts.set };
-    const missing = Object.entries(recipe.params || {}).filter(([k, v]) => v && v.required && !(k in args)).map(([k]) => k);
+    // Values for {{placeholders}} fill the templates; they are not tool arguments themselves.
+    const direct = Object.fromEntries(Object.entries(opts.set).filter(([k]) => !(recipe.params?.[k]?.template)));
+    const merged = { ...recipe.args, ...direct };
+    const args = Object.fromEntries(Object.entries(merged).map(([k, v]) => [k, typeof v === 'string' ? v.replace(PLACEHOLDER, (all, n) => (n in opts.set ? String(opts.set[n]) : all)) : v]));
+    const missing = Object.entries(recipe.params || {}).filter(([k, v]) => v && v.required && !(v.template ? k in opts.set : k in args)).map(([k]) => k);
     if (missing.length) fail(`recipe ${name} needs --set ${missing.join(' --set ')}`);
     return callTool(session, recipe.tool, args, opts.js || recipe.js, timeoutMs, { track: false });
   }

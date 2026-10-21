@@ -1,6 +1,6 @@
 {
   "name": "code-mode",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Compose existing Claude Code tools in isolated JavaScript, preserving tool permissions and returning compact output.",
   "author": {
     "name": "Jason Penley"
