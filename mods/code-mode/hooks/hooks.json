@@ -1,1 +1,1 @@
-{"description":"Permission-preserving code-mode tools","modules":["./register.js"]}
+{"description":"Permission-preserving code-mode tools and the mcpx bridge","modules":["./register.js"]}

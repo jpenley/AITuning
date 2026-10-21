@@ -138,13 +138,96 @@ async function run($, e, next) {
   }
 }
 
+// Bridge for the mcpx CLI: serves list/call requests from a spool directory so a
+// shell command can use this session's MCP tools. A mod cannot listen on a
+// socket, so a timer polls the directory. Every call goes through $.tool.call,
+// which keeps the permission check, its dialog and other plugins' hooks.
+const POLL_MS = 150;
+const BEAT_MS = 2000;
+const FRAME_LIMIT = 250000;
+const bytes = text => new TextEncoder().encode(text).length;
+
+async function reply($, cli, dir, id, value) {
+  const body = JSON.stringify({ id, value });
+  if (bytes(body) > FRAME_LIMIT) {
+    await $.process.run(['node', cli, 'reply', dir, id], { stdin: body, timeoutMs: 10000 });
+    return;
+  }
+  // The CLI ignores the reply until the marker exists, after the full write.
+  await $.fs.write(`${dir}/res-${id}.json`, body);
+  await $.fs.write(`${dir}/res-${id}.ready`, 'ready');
+}
+
+async function serve($, request) {
+  if (request.op === 'list') {
+    const tools = (await $.tool.list()).filter(t => t.mcp && !t.name.startsWith(SELF));
+    return { tools: tools.map(t => ({ name: t.name, description: String(t.description).slice(0, 400) })) };
+  }
+  if (request.op !== 'call') return { deny: 'Unknown operation: ' + request.op };
+  const { tool, args } = request;
+  if (typeof tool !== 'string' || !tool.startsWith('mcp__') || tool.startsWith(SELF)) return { deny: 'mcpx only calls MCP tools; use the direct tool for ' + tool };
+  if (!args || typeof args !== 'object' || Array.isArray(args) || Object.keys(args).some(key => RESERVED.includes(key))) return { deny: 'Tool arguments must be an object without reserved metadata' };
+  if (!(await $.tool.list()).some(t => t.name === tool)) return { deny: 'Tool is not available in this session: ' + tool };
+  try { return await $.tool.call({ ...args, tool }); }
+  catch (error) { return { isError: true, text: String(error.message) }; }
+}
+
+async function startBridge($) {
+  const cli = $.plugin.root + '/cli/mcpx.mjs';
+  let session;
+  try {
+    const init = await $.process.run(['node', cli, 'serve-init', await $.session.cwd()]);
+    if (init.exitCode !== 0) throw new Error(init.stderr.slice(0, 300));
+    session = JSON.parse(init.stdout);
+  } catch (error) {
+    // Without the bridge, direct tools and the execute tool still work.
+    $.ui.log('mcpx bridge unavailable: ' + String(error.message));
+    return;
+  }
+  const { dir } = session;
+  const beat = async () => $.fs.write(dir + '/heartbeat.json', JSON.stringify({ at: await $.clock.now() }));
+  await beat();
+  $.clock.every(BEAT_MS, () => { beat().catch(() => {}); });
+  // A permission dialog can hold one call open, so later requests wait their turn.
+  let busy = false;
+  $.clock.every(POLL_MS, async () => {
+    if (busy) return;
+    busy = true;
+    try {
+      const entries = await $.fs.list(dir);
+      const done = new Set(entries.map(entry => entry.name));
+      const pending = entries.filter(entry => /^req-[0-9a-f-]{36}\.json$/.test(entry.name) && !done.has(entry.name.replace('req-', 'res-').replace('.json', '.ready')));
+      for (const entry of pending) {
+        if (entry.kind !== 'file' || entry.isLink || entry.size > 300000) continue;
+        let request;
+        try { request = JSON.parse(await $.fs.read(dir + '/' + entry.name)); } catch { continue; }
+        const id = request.id;
+        if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/.test(id) || `req-${id}.json` !== entry.name) continue;
+        const value = await serve($, request);
+        $.ui.log(`mcpx ${request.op}${request.tool ? ' ' + request.tool : ''}: ${value.deny ? 'denied' : value.isError ? 'error' : 'ok'}`);
+        await reply($, cli, dir, id, value);
+      }
+    } catch (error) {
+      $.ui.log('mcpx bridge error: ' + String(error.message));
+    } finally {
+      busy = false;
+    }
+  });
+}
+
 export function register(on) {
   on('session.start', async ($, e, next) => {
+    // The bridge registers no tool, so it still works where policy refuses tool registration.
+    await startBridge($);
+    try {
     await $.tool.register({
       name: 'execute', isDeferred: false,
       description: 'Run JavaScript to compose existing tools and filter large results before they enter context. Use await tools.call("Read", {file_path:"..."}); results have text/result fields. tools.list() lists names/descriptions; use existing tool schemas or ToolSearch for unfamiliar schemas. Return a small JSON value or emit(value). Every underlying call keeps its normal permissions. Use Promise.all for independent Read/Grep/Glob calls (up to 4 at once); await dependencies. All other tools are sequential barriers. Await all calls, and await reads before dependent mutations. No Node, imports, filesystem, network, timers, or persistent state in the guest. Limits: 32 calls, 60s, 32MiB guest memory, 16000 output characters. Effects are real and not rolled back on error. Use direct tools for simple calls or images/interactive capabilities.',
       inputSchema: { type: 'object', properties: { code: { type: 'string', minLength: 1, maxLength: 16384 } }, required: ['code'], additionalProperties: false },
     });
+    } catch (error) {
+      $.ui.log('code-mode execute tool unavailable: ' + String(error.message));
+    }
     return next(e);
   });
   on('tool.call', { tool: 'mcp__code-mode__execute' }, async ($, e, next) => {

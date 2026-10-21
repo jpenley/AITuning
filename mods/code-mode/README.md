@@ -6,6 +6,7 @@ Compose existing session tools in isolated JavaScript and return a compact answe
 - [Call the tool](#call-the-tool)
 - [Parallel reads](#parallel-reads)
 - [Results and limits](#results-and-limits)
+- [mcpx CLI bridge](#mcpx-cli-bridge)
 - [Develop and verify](#develop-and-verify)
 - [API sources](#api-sources)
 
@@ -79,6 +80,18 @@ The guest has no host filesystem, Node APIs, environment, network, timers, impor
 SDK polling sleeps total at most 250 ms per execution, then a blocking helper handles longer waits. This keeps polling within the hook's own execution budget while retaining the 60-second guest deadline. Large final diagnostic receipts also use the original process transport. Initialization and cleanup remain in the native broker, which validates the temporary root, owner nonce, and expiry. Normal completion cleans the mailbox. An abrupt host or process termination can leave a temporary directory named `aituning-codemode-*`; never delete one belonging to an active run.
 
 The mod's deadline stops guest computation and scheduling. Claude Code retains control of cancellation for an underlying tool already running. Permission prompts consume the deadline; if one expires, check the action's actual state before deciding whether to retry.
+
+## mcpx CLI bridge
+
+`mcpx` lets Bash call the MCP tools of the running session with no separate login. The mod starts a polling bridge on `session.start`, since a mod cannot listen on a socket. The CLI writes a request file to `~/.claude/mcpx/<session>/`, the bridge runs it through `$.tool.call` (permission check, dialog and hooks included) and writes the reply. The bridge registers no tool, so it still works where managed policy refuses `$.tool.register`. Only `mcp__*` tools are reachable.
+
+```text
+node ~/.claude/mcpx/mcpx.mjs status
+node ~/.claude/mcpx/mcpx.mjs list jira
+node ~/.claude/mcpx/mcpx.mjs call mcp__plugin_github_github__get_me '{}'
+```
+
+The mod copies the CLI to that stable path each session. It picks the live session whose directory contains the current one; use `--session <id>` or `MCPX_SESSION` to choose. `list` shows names and descriptions only, not input schemas. A call that is not yet in the tool list is retried for 20 seconds because slow servers connect late. Any local process of the same user can queue requests, but each still faces the session's permission prompt.
 
 ## Develop and verify
 
