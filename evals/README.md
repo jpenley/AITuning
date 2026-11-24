@@ -19,6 +19,8 @@ npm run micro:plan
 
 `npm test` runs checker and harness selftests, then structural and lexical-routing checks. It has no global synchronization, installation hooks or provider-load check. Selftests use constructed inputs and fake process responses. They do not establish model quality. Default A/B, routing, cross-review, plugin and proposal commands plan without executing a model. Wording comparisons need `--plan` explicitly; the package's `micro:plan` includes it.
 
+The package uses `floor.mjs check --bundle` to read this distribution's [public floor record](../floor.json), including in an extracted archive. Ordinary floor commands discover the consuming project through Git.
+
 ## Entrypoints
 
 The toolkit provides these eleven CLIs:
@@ -70,6 +72,6 @@ Keep local configuration private. The publisher excludes private configs and rec
 
 ## Results and attribution
 
-Behavior and advanced live outputs go under `results/`; wording replies go under the experiment's `out/`. Requested settings and response-observed model identity are different evidence. Read repeated controlled results before accepting an instruction change, as [tune's testing reference](../skills/productivity/tune/TESTING.md) describes.
+Behavior and advanced live outputs go under `results/`; wording replies go under the experiment's `out/`. Requested settings and response-observed model identity are different evidence. Read repeated controlled results before accepting an instruction change, as [tune's testing reference](../skills/core/productivity/tune/TESTING.md) describes.
 
 The [toolkit constraints](CONSTRAINTS.md) and [metadata](public-toolkit.json) describe the public profile. Source adaptations are recorded in the publisher inventory. Retain [upstream notices](../THIRD_PARTY_NOTICES.md), copied source credits, and the Factory Floor credit on the native process helper.

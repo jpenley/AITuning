@@ -2,7 +2,7 @@
 // evidence support this claim?", "which of these is the one?"). The skills never name an engine; evals/engines.json does.
 //
 // An engine is { id, call(tool, args) -> { out, usage, ms, apiMs?, costUsd? }, close() } and answers the Jev tool
-// contracts (packs/jev/skills/jev/TOOLS.md) under short names: screen, verify, classify, rerank, find, compare, extract, gate.
+// contracts (skills/packs/jev/skills/jev/TOOLS.md) under short names: screen, verify, classify, rerank, find, compare, extract, gate.
 // Kinds:
 //   mcp     an MCP server that exposes the Jev tools (Jev today, or any local server with the same tools)
 //   claude  a Claude model through `claude -p`, answering the same contracts (see emulate.mjs)
@@ -39,11 +39,33 @@ export function hostHarness(env = process.env) {
   return null;
 }
 
-// Legacy catalogs without an explicit evaluation decisionChain use the host's global choice ("Claude uses the latest Sonnet at
-// low effort, with Haiku as the fallback"; "Codex uses the latest Luna at low effort"). The policy is the one source;
-// test/harness.test.mjs checks the repo copy (global/codex-AGENTS.md) still parses for both hosts.
-// Returns { family, effort, fallback? }, or null when the sentence isn't there.
+// Catalogs without an explicit evaluation override read the global decision policy.
+// Modern policies declare a host-independent ordered chain; older live copies retain
+// their per-host sentence format until synchronized. Catalog decisionName aliases
+// map policy names to runtime ids without duplicating the policy's ordering.
+// Returns { chain: [{ name, effort? }] }, legacy { family, effort, fallback? }, or null.
 export function decisionChoice(instructions, harness) {
+  const headers = [...instructions.matchAll(/^ {0,3}###[ \t]+Decisions \/ System One(?:[ \t]+#+)?[ \t]*\r?$/gm)];
+  // Reserve modern signatures document-wide, including malformed/unsupported forms.
+  const titles = instructions.match(/Decisions\s*\/\s*System\s+One\b/gi) ?? [];
+  const declarations = instructions.match(/try\s+the\s+configured\s+engines\s+in\s+order\b/gi) ?? [];
+  if (titles.length || declarations.length) {
+    if (headers.length !== 1 || titles.length !== 1 || declarations.length !== 1) return null;
+    const [header] = headers;
+    const section = instructions.slice(header.index + header[0].length).split(/\r?\n(?: {0,3}#{1,3}(?:[ \t]+|\r?$)|[ \t]*<!--)/m, 1)[0];
+    if (section.split('try the configured engines in order:').length !== 2) return null;
+    const order = /try the configured engines in order:\s*\*\*([^\r\n]+?)\*\*/.exec(section);
+    if (!order) return null;
+    const chain = [];
+    for (const entry of order[1].split(/\s*→\s*/)) {
+      const item = /^(?:`([A-Za-z0-9._/-]+)`|([A-Za-z0-9._/-]+))(?:\s+\(`([a-z]+)`\))?$/.exec(entry.trim());
+      if (!item) return null;
+      const [, quoted, plain, effort] = item;
+      chain.push({ name: quoted ?? plain, ...(effort ? { effort } : {}) });
+    }
+    if (new Set(chain.map(({ name }) => name.toLowerCase())).size !== chain.length) return null;
+    return { chain };
+  }
   const match = harness === 'claude'
     ? /Claude uses the latest (\w+) at (\w+) effort, with (\w+) as the fallback/.exec(instructions)
     : /Codex uses the latest (\w+) at (\w+) effort/.exec(instructions);

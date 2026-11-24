@@ -57,3 +57,4 @@ export function mcpClient(argv, { env = process.env, timeoutMs = 120_000 } = {})
     close() { try { child.stdin.end(); } catch { /* already closed */ } stopTree(child); },
   };
 }
+

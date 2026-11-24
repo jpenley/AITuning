@@ -1,0 +1,26 @@
+{
+  "skill_name": "task-talk",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Where are we on this ticket? Give me the short version."
+      },
+      {
+        "prompt": "Can I get a quick update on the rollout?"
+      },
+      {
+        "prompt": "What’s the blocker and who needs to act?"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Verify that the job actually passed before you call this done",
+        "owner": "evidence"
+      },
+      {
+        "prompt": "Draft the pull request body for this change",
+        "owner": "pr"
+      }
+    ]
+  }
+}

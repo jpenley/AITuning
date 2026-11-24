@@ -1,4 +1,4 @@
-// Any plain language model answering the Jev tool contracts (packs/jev/skills/jev/TOOLS.md), so a model can stand in for
+// Any plain language model answering the Jev tool contracts (skills/packs/jev/skills/jev/TOOLS.md), so a model can stand in for
 // Jev: as the baseline in the A/B tests, as the fallback when Jev is unavailable, or as a local engine (llama-server).
 // The model returns probabilities as JSON; the derived fields (verdict, action, thresholds) are computed here with
 // Jev's defaults, so every engine's answer has the same shape and the same policy.

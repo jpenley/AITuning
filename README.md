@@ -7,7 +7,7 @@ describes how to handle a particular task, with scripts and references where
 needed.
 
 For code that looks wrong but may have a reason to exist,
-[dig](skills/engineering/dig/SKILL.md) asks the agent to check the history before
+[dig](skills/core/engineering/dig/SKILL.md) asks the agent to check the history before
 making a change.
 
 | Collection | What it's for |
@@ -17,7 +17,7 @@ making a change.
 | [knowing](#knowing-learning-and-research) | Research, lessons, tutoring, and interactive explanations. |
 
 The collections are independent plugins. Flowstate also has
-[11 optional packs](#optional-flowstate-packs) for work such as UI design and
+[10 optional packs](#optional-flowstate-packs) for work such as UI design and
 Python development.
 
 
@@ -56,9 +56,9 @@ lists all available plugins.
 For an agent that reads skill folders, copy the complete skill directories into
 its configured skills directory. Keep `SKILL.md`, `agents/`, and supporting files
 together. Install any skills they load by name too. Code mode has a separate
-[portable companion skill](mods/code-mode/skills/code-mode/SKILL.md).
+[portable companion skill](harnesses/claude/code-mode/skills/code-mode/SKILL.md).
 
-Use [flow](skills/productivity/flow/SKILL.md) to choose an engineering skill.
+Use [flow](skills/core/productivity/flow/SKILL.md) to choose an engineering skill.
 Skills marked
 `disable-model-invocation: true`, including figure, need an explicit invocation.
 
@@ -66,103 +66,103 @@ Skills marked
 
 ### flowstate: engineering
 
-Flowstate has **34 core skills**, split between engineering and productivity.
-The [flowstate guide](skills/README.md) explains how they connect.
+Flowstate has **35 core skills**, split between engineering and productivity.
+The [flowstate guide](skills/core/README.md) explains how they connect.
 
 #### Engineering
 
 | Skill | Use it to |
 |---|---|
-| [trace](skills/engineering/trace/SKILL.md) | Map unfamiliar code and follow how a feature works. |
-| [dig](skills/engineering/dig/SKILL.md) | Find the history and reasoning behind a design or workaround. |
-| [research](skills/engineering/research/SKILL.md) | Check technical facts against documentation and outside sources. |
-| [domain](skills/engineering/domain/SKILL.md) | Define shared terms and record architecture decisions. |
-| [modules](skills/engineering/modules/SKILL.md) | Design useful module boundaries and interfaces. |
-| [proof](skills/engineering/proof/SKILL.md) | Make invalid states and easy caller mistakes harder to express. |
-| [audition](skills/engineering/audition/SKILL.md) | Compare alternatives before an expensive choice becomes fixed. |
-| [spec](skills/engineering/spec/SKILL.md) | Turn accepted intent into a specification or capability record. |
-| [ticket](skills/engineering/ticket/SKILL.md) | Split a specification into linked implementation tickets. |
-| [streamline](skills/engineering/streamline/SKILL.md) | Find gaps, deadlocks, and unowned work across specs and tickets. |
-| [build](skills/engineering/build/SKILL.md) | Implement a ticket or work through a ticket graph. |
-| [tdd](skills/engineering/tdd/SKILL.md) | Work test-first through the red-green loop. |
-| [diagnose](skills/engineering/diagnose/SKILL.md) | Reproduce failures and investigate their causes. |
-| [gates](skills/engineering/gates/SKILL.md) | Make lint, type, test, and boundary checks block broken changes. |
-| [harden](skills/engineering/harden/SKILL.md) | Review security risks, untrusted inputs, and unsafe defaults. |
-| [audit](skills/engineering/audit/SKILL.md) | Review a change against its base, standards, and requirements. |
-| [doubt](skills/engineering/doubt/SKILL.md) | Ask a fresh adversarial reviewer to challenge a decision. |
-| [crosscheck](skills/engineering/crosscheck/SKILL.md) | Have another agent engine review a plan and assess its findings. |
-| [feedback](skills/engineering/feedback/SKILL.md) | Assess review comments before making changes in response. |
-| [evidence](skills/engineering/evidence/SKILL.md) | Check the proof behind a completion or success claim. |
-| [refine](skills/engineering/refine/SKILL.md) | Improve working code that is hard to read or change. |
-| [optimize](skills/engineering/optimize/SKILL.md) | Measure performance changes while preserving behavior. |
-| [merge](skills/engineering/merge/SKILL.md) | Resolve overlapping changes without losing their intent. |
-| [integrate](skills/engineering/integrate/SKILL.md) | Verify finished branch work and choose how to integrate it. |
-| [pr](skills/engineering/pr/SKILL.md) | Write a clear pull request description. |
-| [release](skills/engineering/release/SKILL.md) | Prepare a version, changelog, release checks, and rollback plan. |
-| [wizard](skills/engineering/wizard/SKILL.md) | Guide the human-only steps in provisioning or setup. |
+| [trace](skills/core/engineering/trace/SKILL.md) | Map unfamiliar code and follow how a feature works. |
+| [dig](skills/core/engineering/dig/SKILL.md) | Find the history and reasoning behind a design or workaround. |
+| [research](skills/core/engineering/research/SKILL.md) | Check technical facts against documentation and outside sources. |
+| [domain](skills/core/engineering/domain/SKILL.md) | Define shared terms and record architecture decisions. |
+| [modules](skills/core/engineering/modules/SKILL.md) | Design useful module boundaries and interfaces. |
+| [proof](skills/core/engineering/proof/SKILL.md) | Make invalid states and easy caller mistakes harder to express. |
+| [audition](skills/core/engineering/audition/SKILL.md) | Compare alternatives before an expensive choice becomes fixed. |
+| [spec](skills/core/engineering/spec/SKILL.md) | Turn accepted intent into a specification or capability record. |
+| [ticket](skills/core/engineering/ticket/SKILL.md) | Split a specification into linked implementation tickets. |
+| [streamline](skills/core/engineering/streamline/SKILL.md) | Find gaps, deadlocks, and unowned work across specs and tickets. |
+| [build](skills/core/engineering/build/SKILL.md) | Implement a ticket or work through a ticket graph. |
+| [tdd](skills/core/engineering/tdd/SKILL.md) | Work test-first through the red-green loop. |
+| [diagnose](skills/core/engineering/diagnose/SKILL.md) | Reproduce failures and investigate their causes. |
+| [gates](skills/core/engineering/gates/SKILL.md) | Make lint, type, test, and boundary checks block broken changes. |
+| [harden](skills/core/engineering/harden/SKILL.md) | Review security risks, untrusted inputs, and unsafe defaults. |
+| [audit](skills/core/engineering/audit/SKILL.md) | Review a change against its base, standards, and requirements. |
+| [doubt](skills/core/engineering/doubt/SKILL.md) | Ask a fresh adversarial reviewer to challenge a decision. |
+| [crosscheck](skills/core/engineering/crosscheck/SKILL.md) | Have another agent engine review a plan and assess its findings. |
+| [feedback](skills/core/engineering/feedback/SKILL.md) | Assess review comments before making changes in response. |
+| [evidence](skills/core/engineering/evidence/SKILL.md) | Check the proof behind a completion or success claim. |
+| [refine](skills/core/engineering/refine/SKILL.md) | Improve working code that is hard to read or change. |
+| [optimize](skills/core/engineering/optimize/SKILL.md) | Measure performance changes while preserving behavior. |
+| [merge](skills/core/engineering/merge/SKILL.md) | Resolve overlapping changes without losing their intent. |
+| [integrate](skills/core/engineering/integrate/SKILL.md) | Verify finished branch work and choose how to integrate it. |
+| [pr](skills/core/engineering/pr/SKILL.md) | Write a clear pull request description. |
+| [release](skills/core/engineering/release/SKILL.md) | Prepare a version, changelog, release checks, and rollback plan. |
+| [wizard](skills/core/engineering/wizard/SKILL.md) | Guide the human-only steps in provisioning or setup. |
 
 #### Productivity
 
 | Skill | Use it to |
 |---|---|
-| [flow](skills/productivity/flow/SKILL.md) | Choose a workflow and see how the skills connect. |
-| [grill](skills/productivity/grill/SKILL.md) | Stress-test a plan, design, or idea before work starts. |
-| [survey](skills/productivity/survey/SKILL.md) | Get answers from someone else through a focused questionnaire. |
-| [what](skills/productivity/what/SKILL.md) | Re-explain the last message in plain language. |
-| [handoff](skills/productivity/handoff/SKILL.md) | Leave context and next steps for a fresh agent or colleague. |
-| [retro](skills/productivity/retro/SKILL.md) | Review an agent session and improve its working environment. |
-| [tune](skills/productivity/tune/SKILL.md) | Write and test skills, prompts, and agent instructions. |
+| [flow](skills/core/productivity/flow/SKILL.md) | Choose a workflow and see how the skills connect. |
+| [grill](skills/core/productivity/grill/SKILL.md) | Stress-test a plan, design, or idea before work starts. |
+| [survey](skills/core/productivity/survey/SKILL.md) | Get answers from someone else through a focused questionnaire. |
+| [what](skills/core/productivity/what/SKILL.md) | Re-explain the last message in plain language. |
+| [handoff](skills/core/productivity/handoff/SKILL.md) | Leave context and next steps for a fresh agent or colleague. |
+| [retro](skills/core/productivity/retro/SKILL.md) | Review an agent session and improve its working environment. |
+| [task-talk](skills/core/productivity/task-talk/SKILL.md) | Give clear progress updates, status answers, and blocker summaries. |
+| [tune](skills/core/productivity/tune/SKILL.md) | Write and test skills, prompts, and agent instructions. |
 
 ### Optional flowstate packs
 
-The packs add **25 skills** to flowstate. The .NET, TypeScript, Python, and Rust
+The packs add **24 skills** to flowstate. The .NET, TypeScript, Python, and Rust
 packs each pair a `guards` skill for project checks with a `seams` skill for
 module boundaries.
 
 | Pack | Skills | What it adds |
 |---|---|---|
-| Product | [discover](packs/product/skills/discover/SKILL.md), [ideate](packs/product/skills/ideate/SKILL.md), [sketch](packs/product/skills/sketch/SKILL.md) | Research opportunities, develop a concept, and test a throwaway prototype. |
-| Setup | [setup](packs/setup/skills/setup/SKILL.md), [adopt](packs/setup/skills/adopt/SKILL.md), [rig](packs/setup/skills/rig/SKILL.md) | Prepare a project, bring existing plans into the flow, and document a repeatable app test rig. |
-| Writing | [prose](packs/writing/skills/prose/SKILL.md), [draft](packs/writing/skills/draft/SKILL.md) | Edit for the reader or develop a new piece with its author. |
-| Design | [compose](packs/design/skills/compose/SKILL.md), [craft](packs/design/skills/craft/SKILL.md), [critique](packs/design/skills/critique/SKILL.md), [codify](packs/design/skills/codify/SKILL.md), [animate](packs/design/skills/animate/SKILL.md), [image-assets](packs/design/skills/image-assets/SKILL.md) | Build and review interfaces, define visual rules, add motion, and create image assets. |
-| Diagram | [diagram](packs/diagram/skills/diagram/SKILL.md) | Create diagrams tied to the system or material they explain. |
-| Data | [validate](packs/data/skills/validate/SKILL.md) | Check an analysis, its calculations, and whether its conclusions follow. |
-| .NET | [guards-dotnet](packs/dotnet/skills/guards-dotnet/SKILL.md), [seams-dotnet](packs/dotnet/skills/seams-dotnet/SKILL.md) | Enforce C# and .NET checks, project boundaries, and architecture rules. |
-| TypeScript | [guards-typescript](packs/typescript/skills/guards-typescript/SKILL.md), [seams-typescript](packs/typescript/skills/seams-typescript/SKILL.md) | Enforce Node and TypeScript checks, package boundaries, and import rules. |
-| Python | [guards-python](packs/python/skills/guards-python/SKILL.md), [seams-python](packs/python/skills/seams-python/SKILL.md) | Enforce Python checks, package boundaries, and import rules. |
-| Rust | [guards-rust](packs/rust/skills/guards-rust/SKILL.md), [seams-rust](packs/rust/skills/seams-rust/SKILL.md) | Enforce Cargo checks, crate boundaries, and visibility rules. |
-| Jev | [jev](packs/jev/skills/jev/SKILL.md) | Use separately configured judgment tools to check, classify, compare, and extract. |
+| Product | [discover](skills/packs/product/skills/discover/SKILL.md), [ideate](skills/packs/product/skills/ideate/SKILL.md), [sketch](skills/packs/product/skills/sketch/SKILL.md) | Research opportunities, develop a concept, and test a throwaway prototype. |
+| Setup | [setup](skills/packs/setup/skills/setup/SKILL.md), [adopt](skills/packs/setup/skills/adopt/SKILL.md), [rig](skills/packs/setup/skills/rig/SKILL.md) | Prepare a project, bring existing plans into the flow, and document a repeatable app test rig. |
+| Writing | [prose](skills/packs/writing/skills/prose/SKILL.md), [draft](skills/packs/writing/skills/draft/SKILL.md) | Edit for the reader or develop a new piece with its author. |
+| Design | [compose](skills/packs/design/skills/compose/SKILL.md), [craft](skills/packs/design/skills/craft/SKILL.md), [critique](skills/packs/design/skills/critique/SKILL.md), [codify](skills/packs/design/skills/codify/SKILL.md), [animate](skills/packs/design/skills/animate/SKILL.md), [image-assets](skills/packs/design/skills/image-assets/SKILL.md) | Build and review interfaces, define visual rules, add motion, and create image assets. |
+| Diagram | [diagram](skills/packs/diagram/skills/diagram/SKILL.md) | Create diagrams tied to the system or material they explain. |
+| Data | [validate](skills/packs/data/skills/validate/SKILL.md) | Check an analysis, its calculations, and whether its conclusions follow. |
+| .NET | [guards-dotnet](skills/packs/dotnet/skills/guards-dotnet/SKILL.md), [seams-dotnet](skills/packs/dotnet/skills/seams-dotnet/SKILL.md) | Enforce C# and .NET checks, project boundaries, and architecture rules. |
+| TypeScript | [guards-typescript](skills/packs/typescript/skills/guards-typescript/SKILL.md), [seams-typescript](skills/packs/typescript/skills/seams-typescript/SKILL.md) | Enforce Node and TypeScript checks, package boundaries, and import rules. |
+| Python | [guards-python](skills/packs/python/skills/guards-python/SKILL.md), [seams-python](skills/packs/python/skills/seams-python/SKILL.md) | Enforce Python checks, package boundaries, and import rules. |
+| Rust | [guards-rust](skills/packs/rust/skills/guards-rust/SKILL.md), [seams-rust](skills/packs/rust/skills/seams-rust/SKILL.md) | Enforce Cargo checks, crate boundaries, and visibility rules. |
 
 ### trajectory: careers
 
 Trajectory has **seven skills**. CVs and interview answers draw on a candidate
-fact file. The [trajectory guide](trajectory/README.md) explains that file, the
+fact file. The [trajectory guide](skills/trajectory/README.md) explains that file, the
 private workspace, and application records.
 
 | Skill | Use it to |
 |---|---|
-| [profile](trajectory/skills/profile/SKILL.md) | Build a candidate fact file and set your search targets. |
-| [scout](trajectory/skills/scout/SKILL.md) | Find openings and collect postings from company job boards. |
-| [evaluate](trajectory/skills/evaluate/SKILL.md) | Check eligibility, fit, and whether a role is worth applying to. |
-| [tailor](trajectory/skills/tailor/SKILL.md) | Produce role-specific CVs, cover letters, and checked PDFs. |
-| [track](trajectory/skills/track/SKILL.md) | Record applications, replies, interviews, and follow-ups. |
-| [interview](trajectory/skills/interview/SKILL.md) | Prepare and practice answers from the candidate's experience. |
-| [offer](trajectory/skills/offer/SKILL.md) | Review an offer and prepare negotiation or lawyer questions. |
+| [profile](skills/trajectory/skills/profile/SKILL.md) | Build a candidate fact file and set your search targets. |
+| [scout](skills/trajectory/skills/scout/SKILL.md) | Find openings and collect postings from company job boards. |
+| [evaluate](skills/trajectory/skills/evaluate/SKILL.md) | Check eligibility, fit, and whether a role is worth applying to. |
+| [tailor](skills/trajectory/skills/tailor/SKILL.md) | Produce role-specific CVs, cover letters, and checked PDFs. |
+| [track](skills/trajectory/skills/track/SKILL.md) | Record applications, replies, interviews, and follow-ups. |
+| [interview](skills/trajectory/skills/interview/SKILL.md) | Prepare and practice answers from the candidate's experience. |
+| [offer](skills/trajectory/skills/offer/SKILL.md) | Review an offer and prepare negotiation or lawyer questions. |
 
 ### knowing: learning and research
 
 Knowing has **six skills**. You can use it for a single research question or
-return for lessons and practice over time. The [knowing guide](knowing/README.md)
+return for lessons and practice over time. The [knowing guide](skills/knowing/README.md)
 explains the learner folder and sources.
 
 | Skill | Use it to |
 |---|---|
-| [understand](knowing/skills/understand/SKILL.md) | Map unfamiliar material, its claims, and a useful reading order. |
-| [investigate](knowing/skills/investigate/SKILL.md) | Research a question and weigh sources that disagree. |
-| [latest](knowing/skills/latest/SKILL.md) | Catch up on recent developments, releases, and research. |
-| [learn](knowing/skills/learn/SKILL.md) | Study through lessons, spaced practice, and a learning log. |
-| [tutor](knowing/skills/tutor/SKILL.md) | Teach from a learner's own work and target misconceptions. |
-| [figure](knowing/skills/figure/SKILL.md) | Create an interactive physical-mechanism illustration on explicit invocation. |
+| [understand](skills/knowing/skills/understand/SKILL.md) | Map unfamiliar material, its claims, and a useful reading order. |
+| [investigate](skills/knowing/skills/investigate/SKILL.md) | Research a question and weigh sources that disagree. |
+| [latest](skills/knowing/skills/latest/SKILL.md) | Catch up on recent developments, releases, and research. |
+| [learn](skills/knowing/skills/learn/SKILL.md) | Study through lessons, spaced practice, and a learning log. |
+| [tutor](skills/knowing/skills/tutor/SKILL.md) | Teach from a learner's own work and target misconceptions. |
+| [figure](skills/knowing/skills/figure/SKILL.md) | Create an interactive physical-mechanism illustration on explicit invocation. |
 
 ## Tools
 
@@ -173,7 +173,7 @@ These tools are optional and separate from the 72 registered skills.
 | Image zoom | Inspect an image through an overview grid, full-resolution crops, and tiles. | [MCP setup](mcp/image-zoom/README.md) |
 | Code mode | Compose tool calls and filter large intermediate results before they reach the model. | [Setup and routing](CODE_MODE.md) |
 | Readiness | Discover local prerequisites without launching tools or reading client settings or credentials. | [Dependencies by workflow](DEPENDENCIES.md) |
-| Pi task continuation | Nudge unfinished, unblocked tasks within finite limits and record explicit waiting conditions. | [Extension guide](extensions/pi-task-continuation/README.md) |
+| Pi task continuation | Nudge unfinished, unblocked tasks within finite limits and record explicit waiting conditions. | [Extension guide](harnesses/pi/extensions/pi-task-continuation/README.md) |
 
 Use code mode when filtering or aggregation saves the model from reading a large
 tool result. For compact results, use direct tools. Code mode does not change
@@ -227,15 +227,14 @@ review the executable, arguments, environment, and working directory first.
 
 ## Additional Pi extensions
 
-Read the [extension overview](extensions/README.md) before installing these
+Read the [extension overview](harnesses/pi/extensions/README.md) before installing these
 optional packages. Each package has its own host requirements and known limits.
 
 | Extension | What it adds | Prerequisite or limit |
 |---|---|---|
-| [Herdr prompts](extensions/pi-herdr-prompts/README.md) | Report human-input waits to Herdr. | Requires Herdr's separately installed managed integration. |
-| [MCP mirror](extensions/pi-mcp-mirror/README.md) | A session MCP connector with form elicitation. | Unreleased; keep its elicitation companion beside it and qualify the host setup. |
-| [Elicitation companion](extensions/pi-mcp-elicitation/README.md) | Collect form answers and request separate consent. | Standalone native MCP use needs the pinned source patch; export does not apply it. |
-| [Predictive compaction](extensions/pi-predictive-compaction/README.md) | Prepare checkpoints in the background. | Includes SDK patch-support source, not an applied patch or installation qualification. |
+| [Herdr prompts](harnesses/pi/extensions/pi-herdr-prompts/README.md) | Report human-input waits to Herdr. | Requires Herdr's separately installed managed integration. |
+| [MCP mirror](harnesses/pi/extensions/pi-mcp-mirror/README.md) | A session MCP connector with form elicitation. | Unreleased; keep its elicitation companion beside it and qualify the host setup. |
+| [Elicitation companion](harnesses/pi/extensions/pi-mcp-elicitation/README.md) | Collect form answers and request separate consent. | Standalone native MCP use needs the pinned source patch; export does not apply it. |
 
 Installed Pi files, credentials, server endpoints, and user preferences are not
 included. The export does not install or enable these extensions.
@@ -252,9 +251,7 @@ files. Add `--for <workflow>` to narrow the report. Finding an executable does
 not verify its account, service, or host setup.
 
 The image-assets skill needs a separately installed system imagegen skill and
-tool. The Jev pack needs separately configured judgment tools and a server;
-read its [setup guide](packs/jev/skills/jev/SETUP.md). Choose installations,
-service access, and paid calls explicitly.
+tool. Choose installations, service access, and paid calls explicitly.
 
 ## Privacy and permissions
 
@@ -271,6 +268,6 @@ settings, private research records, and development history are omitted.
 
 AITuning is [MIT licensed](LICENSE). Bundled dependencies and adapted material
 retain their own licenses and credits. Keep the [third-party notices](THIRD_PARTY_NOTICES.md)
-when redistributing it. The [flowstate](skills/README.md#sources-and-licenses),
-[trajectory](trajectory/README.md#sources-and-licences), and
-[knowing](knowing/README.md#sources-and-licences) guides document their sources.
+when redistributing it. The [flowstate](skills/core/README.md#sources-and-licenses),
+[trajectory](skills/trajectory/README.md#sources-and-licences), and
+[knowing](skills/knowing/README.md#sources-and-licences) guides document their sources.

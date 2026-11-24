@@ -5,9 +5,9 @@
   "engines": { "node": ">=24" },
   "scripts": {
     "validate": "node validate.mjs",
-    "triggers": "node triggers.mjs --min-rank1 85",
+    "triggers": "node triggers.mjs",
     "selftest": "node validate.mjs --selftest && node micro.mjs --selftest && node behave.mjs --selftest --no-judge && node ab.mjs --selftest && node route.mjs --selftest && node xreview.mjs --selftest && node propose.mjs --selftest && node trends.mjs --selftest && node --test test/ablation.test.mjs test/routing.test.mjs test/toolkit.test.mjs",
-    "test": "npm run selftest --silent && node validate.mjs && node triggers.mjs --min-rank1 85",
+    "test": "npm run selftest --silent && node validate.mjs && node ../skills/core/engineering/audit/scripts/floor.mjs check --bundle",
     "plan": "node behave.mjs --no-judge",
     "micro:plan": "node micro.mjs examples/wording 5 --plan",
     "ab:plan": "node ab.mjs",

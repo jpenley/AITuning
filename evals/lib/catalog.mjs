@@ -92,25 +92,30 @@ export function sharedBullets(a, b, labels = SHARED_SOURCE_BULLETS) {
   return found;
 }
 
-// The --min-rank1 ratchet is the same in package.json's triggers and test scripts and CONSTRAINTS.md's Enforced table.
-export function minRank1(pkg, constraints) {
-  const value = (s) => s?.match(/--min-rank1\s+(\d+)/)?.[1] ?? null;
-  const enforced = constraints.match(/^## Enforced\b[\s\S]*?(?=^## |(?![\s\S]))/m)?.[0];
-  const seen = [
-    ['evals/package.json scripts.triggers', value(pkg.scripts?.triggers)],
-    ['evals/package.json scripts.test', value(pkg.scripts?.test)],
-    ['CONSTRAINTS.md Enforced table', value(enforced)],
-  ];
-  const found = seen.filter(([, v]) => v === null).map(([where]) => ({ where, msg: 'no --min-rank1 value' }));
-  const values = new Set(seen.map(([, v]) => v).filter((v) => v !== null));
-  if (values.size > 1) found.push({ where: seen.map(([w]) => w).join(', '), msg: `--min-rank1 differs: ${seen.map(([w, v]) => `${w} ${v ?? 'none'}`).join('; ')}` });
+// The trigger rank-1 floor has one home, floor.json's trigger-rank1 ratchet (only the owner's approval moves it):
+// npm test checks it with floor.mjs, CONSTRAINTS.md's Enforced table points there, and no script pins its own copy.
+export function floorRecord(pkg, constraints, floorText) {
+  const found = [];
+  let rec = null;
+  if (floorText === null) found.push({ where: 'floor.json', msg: 'not found; it holds the trigger rank-1 floor' });
+  else {
+    try { rec = JSON.parse(floorText); } catch (e) { found.push({ where: 'floor.json', msg: `invalid JSON: ${e.message}` }); }
+  }
+  const r = rec?.ratchets?.['trigger-rank1'];
+  if (rec && !(r && r.direction === 'min' && Number.isFinite(r.value))) found.push({ where: 'floor.json', msg: 'no trigger-rank1 ratchet with a numeric minimum' });
+  if (!/floor\.mjs check/.test(pkg.scripts?.test ?? '')) found.push({ where: 'evals/package.json scripts.test', msg: "doesn't run floor.mjs check" });
+  const enforced = constraints.match(/^## Enforced\b[\s\S]*?(?=^## |(?![\s\S]))/m)?.[0] ?? '';
+  if (!/floor\.json/.test(enforced)) found.push({ where: 'CONSTRAINTS.md Enforced table', msg: "doesn't point at floor.json for the rank-1 floor" });
+  for (const [where, s] of [['evals/package.json scripts.triggers', pkg.scripts?.triggers], ['evals/package.json scripts.test', pkg.scripts?.test], ['CONSTRAINTS.md Enforced table', enforced]]) {
+    if (/--min-rank1\s+\d/.test(s ?? '')) found.push({ where, msg: 'pins a --min-rank1 value; the rank-1 floor lives in floor.json' });
+  }
   return found;
 }
 
 // Scripts two plugins each need are kept as copies (a plugin can't load another's files); every copy must be
 // byte-identical to the first. copies: [{ where, text }] with text null when the file is missing.
 export const IDENTICAL_COPIES = [
-  ['knowing/skills/understand/scripts/verify-cites.mjs', 'skills/engineering/trace/scripts/verify-cites.mjs'],
+  ['skills/knowing/skills/understand/scripts/verify-cites.mjs', 'skills/core/engineering/trace/scripts/verify-cites.mjs'],
 ];
 export function identicalCopies(copies) {
   const [first, ...rest] = copies;
