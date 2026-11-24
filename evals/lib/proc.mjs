@@ -68,7 +68,7 @@ export function taskkillPath(env = process.env) {
 
 function treePowerShellPath() {
   return [
-    join(homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe'),
+    ...(process.env.POWERSHELL_EXE ? [process.env.POWERSHELL_EXE] : []),
     join(process.env.ProgramFiles ?? 'C:/Program Files', 'PowerShell/7/pwsh.exe'),
   ].find(existsSync) ?? null;
 }

@@ -1,0 +1,14 @@
+{
+  "decisionChain": [],
+  "baseline": "baseline",
+  "engines": {
+    "candidate": {
+      "enabled": false,
+      "kind": "claude"
+    },
+    "baseline": {
+      "enabled": false,
+      "kind": "codex"
+    }
+  }
+}

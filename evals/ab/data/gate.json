@@ -1,0 +1,30 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "cases": [
+    {
+      "id": "synthetic-change",
+      "request": "Start the counter at 4.",
+      "diff": "-const counter = 0;\n+const counter = 4;",
+      "tests": "Synthetic unit test: counter starts at 4. PASS 1 FAIL 0.",
+      "claims": [
+        {
+          "id": "synthetic-v",
+          "text": "The counter starts at 4.",
+          "label": "verified"
+        },
+        {
+          "id": "synthetic-c",
+          "text": "The counter starts at 9.",
+          "label": "contradicted"
+        },
+        {
+          "id": "synthetic-u",
+          "text": "A load test was completed.",
+          "label": "unsupported"
+        }
+      ]
+    }
+  ]
+}

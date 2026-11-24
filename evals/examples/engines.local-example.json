@@ -1,0 +1,20 @@
+{
+  "decisionChain": [
+    "candidate"
+  ],
+  "baseline": "baseline",
+  "engines": {
+    "candidate": {
+      "enabled": false,
+      "kind": "claude",
+      "model": "CHOOSE_CLAUDE_MODEL",
+      "effort": "medium"
+    },
+    "baseline": {
+      "enabled": false,
+      "kind": "codex",
+      "model": "CHOOSE_CODEX_MODEL",
+      "effort": "medium"
+    }
+  }
+}

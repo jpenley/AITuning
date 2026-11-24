@@ -1,0 +1,30 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "postings": {
+    "s1": "Fictional Cedar Co: Senior backend engineer, remote in Canada.",
+    "s2": "Fictional Maple Co: Senior backend engineer, remote in Canada.",
+    "s3": "Fictional Birch Co: Senior backend engineer, remote in Canada.",
+    "s4": "Fictional Cloud Co: Junior designer, onsite in Chile.",
+    "s5": "Fictional Stone Co: Senior backend engineer, onsite in Spain."
+  },
+  "cases": [
+    {
+      "id": "synthetic-scout",
+      "query": "Senior backend engineer seeking remote work in Canada.",
+      "candidates": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5"
+      ],
+      "gold": [
+        "s1",
+        "s2",
+        "s3"
+      ]
+    }
+  ]
+}

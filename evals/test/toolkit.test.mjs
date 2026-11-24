@@ -2,11 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const run = (file, ...args) => spawnSync(process.execPath, [join(root, file), ...args], { cwd: root, encoding: 'utf8', timeout: 30000 });
+
+test('the bundled trigger floor can be checked from outside the distribution', () => {
+  const script = join(root, '../skills/core/engineering/audit/scripts/floor.mjs');
+  const result = spawnSync(process.execPath, [script, 'check', '--bundle'], { cwd: tmpdir(), encoding: 'utf8', timeout: 30000 });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(JSON.parse(result.stdout).status, 'pass');
+});
 
 test('disabled behavior targets produce an offline plan with zero sessions', () => {
   const result = run('behave.mjs', '--case', 'trace-order-flow');

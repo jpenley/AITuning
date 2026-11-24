@@ -8,6 +8,6 @@ These constraints belong to the optional toolkit. They do not supply model choic
 |---|---|---|
 | Checker integrity | Detect the planted invalid inputs and references | `npm run selftest` |
 | Skill structure | Zero errors | `node validate.mjs` |
-| Trigger routing | Rank-1 rate at least 85%; zero collisions | `node triggers.mjs --min-rank1 85` |
+| Trigger routing | The `trigger-rank1` minimum in `floor.json`; zero collisions | `node ../skills/core/engineering/audit/scripts/floor.mjs check --bundle` |
 
 Behavior scores require explicit model execution and review of the raw evidence. Offline structural checks and synthetic fixtures establish no model behavior verdict.

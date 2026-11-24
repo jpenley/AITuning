@@ -6,7 +6,7 @@ import { jsonSafe } from './terminal.mjs';
 
 export const EVALS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const ROOT = resolve(EVALS_DIR, '..');
-export const SKILLS_DIR = join(ROOT, 'skills');
+export const SKILLS_DIR = join(ROOT, 'skills', 'core');
 
 // The frontmatter at the top of a file: { block } is the whole block with its --- lines, { inner } the lines
 // between them. null when the file doesn't open with a closed frontmatter block.
@@ -29,16 +29,19 @@ export function parseFrontmatter(src) {
   return { fm, body: src.slice(m.block.length) };
 }
 
-// Packs are separate plugins: packs/<pack>/.claude-plugin/plugin.json with skills at packs/<pack>/skills/<skill>/.
-// The core pack is the repository root (.claude-plugin/plugin.json, skills at skills/<domain>/<skill>/).
-// A standalone set (another skill set sharing the marketplace, such as trajectory/) has the same shape as a pack
-// but sits at the top level; STANDALONE_SETS names them.
-export const PACKS_DIR = join(ROOT, 'packs');
+// Every skill set lives under skills/. Packs are separate plugins: skills/packs/<pack>/.claude-plugin/plugin.json with
+// skills at skills/packs/<pack>/skills/<skill>/. The core pack's plugin root is skills/core/
+// (skills/core/.claude-plugin/plugin.json, skills at skills/core/<domain>/<skill>/), so the plugin cache copies only the
+// skills, not the whole repository. A standalone set (another skill set sharing the marketplace, such as
+// skills/trajectory/) has the same shape as a pack but sits directly under skills/; STANDALONE_SETS names them.
+export const PACKS_DIR = join(ROOT, 'skills', 'packs');
 export const STANDALONE_SETS = ['trajectory', 'knowing'];
 
 export function listPacks(root = ROOT) {
-  const packs = [{ name: 'core', dir: root, manifest: join(root, '.claude-plugin', 'plugin.json') }];
-  const packsDir = join(root, 'packs');
+  const sets = join(root, 'skills');
+  const core = join(sets, 'core');
+  const packs = [{ name: 'core', dir: core, manifest: join(core, '.claude-plugin', 'plugin.json') }];
+  const packsDir = join(sets, 'packs');
   if (existsSync(packsDir)) {
     for (const p of readdirSync(packsDir).sort()) {
       const dir = join(packsDir, p);
@@ -46,7 +49,7 @@ export function listPacks(root = ROOT) {
     }
   }
   for (const s of STANDALONE_SETS) {
-    const dir = join(root, s);
+    const dir = join(sets, s);
     if (existsSync(join(dir, 'skills'))) packs.push({ name: s, dir, manifest: join(dir, '.claude-plugin', 'plugin.json'), standalone: true });
   }
   return packs;
@@ -71,8 +74,8 @@ function readSkill(dir, name, domain, pack) {
   };
 }
 
-// The core tree (skills/<domain>/<skill>), plus every pack's skills when loading the real repository. withPacks
-// also loads the packs and standalone sets beside another core tree (the repository is root's parent).
+// The core tree (skills/core/<domain>/<skill>), plus every pack's skills when loading the real repository. withPacks
+// also loads the packs and standalone sets beside another core tree (the repository is root's grandparent).
 export function loadSkills(root = SKILLS_DIR, { withPacks = resolve(root) === resolve(SKILLS_DIR) } = {}) {
   const skills = [];
   for (const domain of existsSync(root) ? readdirSync(root) : []) {
@@ -84,7 +87,7 @@ export function loadSkills(root = SKILLS_DIR, { withPacks = resolve(root) === re
     }
   }
   if (withPacks) {
-    for (const p of listPacks(resolve(root, '..')).slice(1)) {
+    for (const p of listPacks(resolve(root, '..', '..')).slice(1)) {
       for (const name of readdirSync(join(p.dir, 'skills'))) {
         const s = readSkill(join(p.dir, 'skills', name), name, p.standalone ? p.name : `packs/${p.name}`, p.name);
         if (s) skills.push(s);

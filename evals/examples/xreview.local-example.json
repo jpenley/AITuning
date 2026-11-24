@@ -1,0 +1,13 @@
+{
+  "claude": {
+    "enabled": false,
+    "model": "CHOOSE_CLAUDE_MODEL",
+    "effort": "medium"
+  },
+  "codex": {
+    "enabled": false,
+    "model": "CHOOSE_CODEX_MODEL",
+    "effort": "medium",
+    "writeBackAuth": false
+  }
+}

@@ -10,7 +10,7 @@ const { join, resolve } = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const ws = process.cwd();
-const script = resolve(__dirname, '..', '..', '..', '..', 'packs', 'diagram', 'skills', 'diagram', 'scripts', 'diagram-check.mjs');
+const script = resolve(__dirname, '..', '..', '..', '..', 'skills', 'packs', 'diagram', 'skills', 'diagram', 'scripts', 'diagram-check.mjs');
 
 function diagrams(dir = ws, out = []) {
   for (const name of readdirSync(dir)) {

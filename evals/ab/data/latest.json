@@ -1,0 +1,38 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "topics": [
+    {
+      "id": "synthetic-latest",
+      "query": "Which notes discuss cache invalidation?",
+      "candidates": [
+        {
+          "id": "s1",
+          "text": "Synthetic cache topic note 1: invalidate a cached value after a write."
+        },
+        {
+          "id": "s2",
+          "text": "Synthetic cache topic note 2: invalidate a cached value after a write."
+        },
+        {
+          "id": "s3",
+          "text": "Synthetic cache topic note 3: invalidate a cached value after a write."
+        },
+        {
+          "id": "s4",
+          "text": "Synthetic unrelated note 4: fold a paper boat."
+        },
+        {
+          "id": "s5",
+          "text": "Synthetic unrelated note 5: fold a paper boat."
+        }
+      ],
+      "gold": [
+        "s1",
+        "s2",
+        "s3"
+      ]
+    }
+  ]
+}

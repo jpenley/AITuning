@@ -1,0 +1,5 @@
+interface:
+  display_name: "Figure"
+  short_description: "Explain how something works as a crafted, interactive isometric drawing"
+policy:
+  allow_implicit_invocation: false
