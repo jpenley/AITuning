@@ -55,8 +55,7 @@ lists all available plugins.
 
 For an agent that reads skill folders, copy the complete skill directories into
 its configured skills directory. Keep `SKILL.md`, `agents/`, and supporting files
-together. Install any skills they load by name too. Code mode has a separate
-[portable companion skill](harnesses/claude/code-mode/skills/code-mode/SKILL.md).
+together. Install any skills they load by name too.
 
 Use [flow](skills/core/productivity/flow/SKILL.md) to choose an engineering skill.
 Skills marked
@@ -171,14 +170,8 @@ These tools are optional and separate from the 72 registered skills.
 | Tool | What it does | Guide |
 |---|---|---|
 | Image zoom | Inspect an image through an overview grid, full-resolution crops, and tiles. | [MCP setup](mcp/image-zoom/README.md) |
-| Code mode | Compose tool calls and filter large intermediate results before they reach the model. | [Setup and routing](CODE_MODE.md) |
 | Readiness | Discover local prerequisites without launching tools or reading client settings or credentials. | [Dependencies by workflow](DEPENDENCIES.md) |
 | Pi task continuation | Nudge unfinished, unblocked tasks within finite limits and record explicit waiting conditions. | [Extension guide](harnesses/pi/extensions/pi-task-continuation/README.md) |
-
-Use code mode when filtering or aggregation saves the model from reading a large
-tool result. For compact results, use direct tools. Code mode does not change
-tool permissions or required delegation. Its guide covers the optional Claude
-Code broker and Pi's native runtime.
 
 Task continuation requires Pi 1.3.0, Node.js 24 or later, and separately supplied
 `rpiv-todo`. Copying or exporting the package does not install or enable it.
