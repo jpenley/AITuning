@@ -1,0 +1,12 @@
+{
+  "name": "flowstate-consult",
+  "version": "0.1.0",
+  "description": "flowstate consult pack: consult (ask the user through a local web page when a decision needs explaining: each question carries markdown, Mermaid diagrams, images or sandboxed HTML, and the answers come back as one JSON object when the page is submitted). Needs Node 24 or later and a browser on the user's machine; bundles Mermaid 11 (MIT).",
+  "author": {
+    "name": "Jason Penley"
+  },
+  "license": "MIT",
+  "skills": [
+    "./skills/consult"
+  ]
+}

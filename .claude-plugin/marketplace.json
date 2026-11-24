@@ -36,6 +36,11 @@
       "description": "Diagram pack (optional): diagram, Mermaid diagrams checked with the Mermaid CLI and tied to source lines."
     },
     {
+      "name": "flowstate-consult",
+      "source": "./packs/consult",
+      "description": "Consult pack: consult, asking the user through a local web page with diagrams and structured answers."
+    },
+    {
       "name": "flowstate-data",
       "source": "./packs/data",
       "description": "Data pack: validate, a verdict on every claim in an analysis before it's shared."

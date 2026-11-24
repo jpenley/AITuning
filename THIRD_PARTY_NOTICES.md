@@ -22,4 +22,6 @@ Sources used for ideas only are identified in the collection READMEs; their code
 is not bundled. Image zoom dependencies are installed separately from the lockfile
 and retain their own licenses.
 
+The consult pack bundles [Mermaid 11.17.2](https://github.com/mermaid-js/mermaid) as `packs/consult/skills/consult/scripts/vendor/mermaid.min.js`, with its [MIT license](packs/consult/skills/consult/scripts/vendor/MERMAID-LICENSE.txt).
+
 The optional Claude code-mode broker bundles [QuickJS](mods/code-mode/dist/QUICKJS-LICENSE) and [quickjs-emscripten-core](mods/code-mode/dist/CORE-LICENSE) with their complete license notices. Development dependencies are pinned in its package lockfile and retain their own licenses.

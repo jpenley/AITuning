@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Consult</title>
+<style>
+  :root { color-scheme: light dark; --fg:#1d2430; --muted:#5b6575; --line:#d4dae3; --accent:#2f6fde; --accent-fg:#fff; --bg:#f5f6f8; --card:#fff; --rec:#12703f; --err:#b3261e; --code:#eef1f5; }
+  @media (prefers-color-scheme: dark) { :root { --fg:#e6e9ee; --muted:#9ba5b3; --line:#343c48; --accent:#6ea0ff; --accent-fg:#0b1220; --bg:#13171d; --card:#1b212a; --rec:#4cc38a; --err:#ff8a80; --code:#262d38; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--fg); background: var(--bg); }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 20px 120px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .pager { color: var(--muted); margin: 0 0 16px; }
+  .q { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin: 16px 0; }
+  .q[hidden] { display: none; }
+  .q legend, .q h2 { font-size: 17px; font-weight: 650; margin: 0 0 8px; padding: 0; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .req { color: var(--err); }
+  .ctx { margin: 6px 0 12px; }
+  .ctx p { margin: 6px 0; } .ctx ul, .ctx ol { margin: 6px 0; padding-left: 22px; }
+  .ctx h3, .ctx h4, .ctx h5, .ctx h6 { margin: 12px 0 4px; font-size: 15px; }
+  .ctx blockquote { margin: 8px 0; padding: 2px 12px; border-left: 3px solid var(--line); color: var(--muted); }
+  .ctx code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  .ctx pre.code { background: var(--code); padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
+  .ctx pre.code code { background: none; padding: 0; }
+  .ctx img { max-width: 100%; border-radius: 6px; display: block; margin: 8px 0; }
+  .ctx a { color: var(--accent); }
+  .mermaid { background: transparent; margin: 8px 0; overflow-x: auto; }
+  .opt { display: grid; grid-template-columns: 22px 1fr; gap: 0 6px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; cursor: pointer; }
+  .opt:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .opt input { margin: 4px 0 0; }
+  .opt .label { font-weight: 600; }
+  .opt .body { grid-column: 2; }
+  .badge { font-size: 11px; font-weight: 650; color: var(--rec); border: 1px solid var(--rec); border-radius: 10px; padding: 0 7px; margin-left: 6px; white-space: nowrap; }
+  .why { color: var(--rec); font-size: 13px; }
+  .detail { color: var(--muted); }
+  .detail .ctx { margin: 4px 0 0; }
+  textarea, input[type=text] { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: inherit; }
+  .other { margin-top: 8px; }
+  .note summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .note textarea { margin-top: 6px; }
+  iframe { width: 100%; height: 60px; border: 1px solid var(--line); border-radius: 6px; background: transparent; display: block; margin: 8px 0; }
+  .err { color: var(--err); font-size: 13px; min-height: 1.2em; margin-top: 6px; }
+  .banner { background: var(--err); color: #fff; padding: 8px 12px; border-radius: 6px; margin: 12px 0; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--line); padding: 12px; display: flex; gap: 8px; justify-content: center; }
+  button { font: inherit; padding: 8px 18px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 600; }
+  button:disabled { opacity: .6; cursor: default; }
+  .done { text-align: center; padding: 90px 20px; font-size: 18px; }
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite">Loading…</main>
+<footer id="nav"></footer>
+<script>
+'use strict';
+const TOKEN = new URLSearchParams(location.search).get('t');
+const withToken = (p) => p + (p.includes('?') ? '&' : '?') + 't=' + encodeURIComponent(TOKEN);
+let spec, answers = {}, pageIx = 0, ended = false, mermaidReady = null;
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// Markdown subset. Source is escaped before any formatting, so raw HTML in markdown shows as text.
+function md(src) {
+  const inline = (s) => {
+    const codes = [];
+    let h = esc(s).replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return '\u0000' + (codes.length - 1) + '\u0000'; });
+    h = h.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*\w])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>')
+      .replace(/(^|\W)_([^_\s][^_]*)_(?=\W|$)/g, '$1<em>$2</em>');
+    return h.replace(/\u0000(\d+)\u0000/g, (_, i) => '<code>' + codes[i] + '</code>');
+  };
+  const out = [];
+  const lines = String(src ?? '').split(/\r?\n/);
+  let para = [], list = null;
+  const flushPara = () => { if (para.length) out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; };
+  const flushList = () => { if (list) out.push('<' + list.tag + '>' + list.items.map((i) => '<li>' + inline(i) + '</li>').join('') + '</' + list.tag + '>'); list = null; };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^```/.test(line)) {
+      flushPara(); flushList();
+      const body = [];
+      while (++i < lines.length && !/^```/.test(lines[i])) body.push(lines[i]);
+      out.push('<pre class="code"><code>' + esc(body.join('\n')) + '</code></pre>');
+      continue;
+    }
+    const h = line.match(/^(#{1,4})\s+(.*)/);
+    const ul = line.match(/^\s*[-*]\s+(.*)/);
+    const ol = line.match(/^\s*\d+[.)]\s+(.*)/);
+    const bq = line.match(/^>\s?(.*)/);
+    if (h) { flushPara(); flushList(); const n = h[1].length + 2; out.push('<h' + n + '>' + inline(h[2]) + '</h' + n + '>'); }
+    else if (ul || ol) {
+      flushPara();
+      const tag = ul ? 'ul' : 'ol';
+      if (list && list.tag !== tag) flushList();
+      if (!list) list = { tag, items: [] };
+      list.items.push((ul || ol)[1]);
+    }
+    else if (bq) { flushPara(); flushList(); out.push('<blockquote>' + inline(bq[1]) + '</blockquote>'); }
+    else if (!line.trim()) { flushPara(); flushList(); }
+    else { flushList(); para.push(line.trim()); }
+  }
+  flushPara(); flushList();
+  return out.join('');
+}
+
+// HTML blocks run in a sandboxed iframe: scripts allowed, opaque origin, no access to this page or the server.
+const FRAME_HEAD = '<meta charset="utf-8"><meta name="color-scheme" content="light dark"><style>html,body{margin:0;background:transparent;font:14px/1.5 system-ui,sans-serif}</style>';
+const FRAME_SIZER = '<script>new ResizeObserver(()=>parent.postMessage({consultHeight:document.documentElement.scrollHeight},"*")).observe(document.documentElement)<\/script>';
+addEventListener('message', (e) => {
+  if (typeof e.data?.consultHeight !== 'number') return;
+  for (const f of document.querySelectorAll('iframe')) if (f.contentWindow === e.source) f.style.height = Math.min(e.data.consultHeight + 2, 2000) + 'px';
+});
+
+function ctx(c) {
+  if (!c) return '';
+  let h = '';
+  if (c.markdown) h += md(c.markdown);
+  if (c.mermaid) h += '<pre class="mermaid">' + esc(c.mermaid) + '</pre>';
+  for (const img of c.images ?? []) h += '<img alt="' + esc(img.alt) + '" src="' + esc(withToken('/image?path=' + encodeURIComponent(img.path))) + '">';
+  if (c.html) h += '<iframe sandbox="allow-scripts" title="Illustration" srcdoc="' + esc(FRAME_HEAD + c.html + FRAME_SIZER) + '"></iframe>';
+  return '<div class="ctx">' + h + '</div>';
+}
+
+const byId = (id) => spec.questions.find((q) => q.id === id);
+function visible(q) {
+  if (!q.showIf) return true;
+  return Object.entries(q.showIf).every(([pid, want]) => visible(byId(pid)) && [].concat(want).some((w) => (answers[pid]?.selected ?? []).includes(w)));
+}
+const allPages = () => spec.pages?.length ? spec.pages : [{ title: null, questions: spec.questions.map((q) => q.id) }];
+const livePages = () => allPages().filter((pg) => pg.questions.some((id) => visible(byId(id))));
+const entry = (id) => (answers[id] ??= { selected: [], other: null, text: null, note: null });
+
+function questionHtml(q) {
+  const a = entry(q.id);
+  const errId = 'err-' + q.id;
+  let h = '<section class="q" data-q="' + esc(q.id) + '"' + (visible(q) ? '' : ' hidden') + '>';
+  if (q.kind === 'text') {
+    h += '<h2 id="h-' + esc(q.id) + '">' + esc(q.prompt) + (q.required ? ' <span class="req" aria-label="required">*</span>' : '') + '</h2>' + ctx(q.context);
+    h += '<textarea rows="3" data-f="text" aria-labelledby="h-' + esc(q.id) + '" aria-describedby="' + esc(errId) + '">' + esc(a.text) + '</textarea>';
+  } else {
+    const type = q.kind === 'single' ? 'radio' : 'checkbox';
+    h += '<fieldset aria-describedby="' + esc(errId) + '"><legend>' + esc(q.prompt) + (q.required ? ' <span class="req" aria-label="required">*</span>' : '') + '</legend>' + ctx(q.context);
+    if (q.kind === 'multi' && (q.min || q.max)) {
+      const parts = [q.min ? 'at least ' + q.min : '', q.max ? 'at most ' + q.max : ''].filter(Boolean);
+      h += '<div class="pager">Choose ' + parts.join(', ') + '.</div>';
+    }
+    for (const o of q.options) {
+      h += '<label class="opt"><input type="' + type + '" name="' + esc(q.id) + '" value="' + esc(o.id) + '"' + (a.selected.includes(o.id) ? ' checked' : '') + '>';
+      h += '<span><span class="label">' + esc(o.label) + '</span>' + (o.recommended ? '<span class="badge">Recommended</span>' : '') + '</span>';
+      if (o.recommended && o.why) h += '<div class="body why">' + esc(o.why) + '</div>';
+      if (o.detail) h += '<div class="body detail">' + ctx(o.detail) + '</div>';
+      h += '</label>';
+    }
+    if (q.allowOther) h += '<input class="other" type="text" data-f="other" aria-label="Other answer for: ' + esc(q.prompt) + '" placeholder="Other (write your own)…" value="' + esc(a.other) + '">';
+    h += '</fieldset>';
+  }
+  h += '<details class="note"' + (a.note ? ' open' : '') + '><summary>Add a note</summary><textarea rows="2" data-f="note" aria-label="Note for: ' + esc(q.prompt) + '">' + esc(a.note) + '</textarea></details>';
+  h += '<div class="err" id="' + esc(errId) + '"></div></section>';
+  return h;
+}
+
+function render() {
+  const pages = livePages();
+  pageIx = Math.max(0, Math.min(pageIx, pages.length - 1));
+  const pg = pages[pageIx];
+  let h = '<h1>' + esc(spec.title ?? 'Consult') + '</h1>';
+  if (pages.length > 1) h += '<div class="pager">Page ' + (pageIx + 1) + ' of ' + pages.length + (pg.title ? ': ' + esc(pg.title) : '') + '</div>';
+  else if (pg.title) h += '<div class="pager">' + esc(pg.title) + '</div>';
+  if (pageIx === 0) h += ctx(spec.context);
+  h += ctx(pg.context);
+  h += pg.questions.map((id) => questionHtml(byId(id))).join('');
+  document.getElementById('app').innerHTML = h;
+  renderNav();
+  drawMermaid();
+}
+
+function renderNav() {
+  const pages = livePages();
+  const last = pageIx >= pages.length - 1;
+  document.getElementById('nav').innerHTML = '<button type="button" id="cancel">Cancel</button>'
+    + (pageIx > 0 ? '<button type="button" id="back">Back</button>' : '')
+    + (last ? '<button type="button" class="primary" id="submit">Submit</button>' : '<button type="button" class="primary" id="next">Next</button>');
+  const pager = document.querySelector('main > .pager');
+  if (pager && pages.length > 1) pager.textContent = 'Page ' + (pageIx + 1) + ' of ' + pages.length + (pages[pageIx].title ? ': ' + pages[pageIx].title : '');
+}
+
+function drawMermaid() {
+  if (!document.querySelector('.mermaid')) return;
+  mermaidReady ??= new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = withToken('/vendor/mermaid.js');
+    s.onload = () => { mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default' }); res(); };
+    s.onerror = rej;
+    document.head.append(s);
+  });
+  mermaidReady.then(() => mermaid.run({ querySelector: '.mermaid:not([data-processed])' })).catch(() => {});
+}
+
+function problemOf(q) {
+  const a = entry(q.id);
+  const n = a.selected.length + (a.other ? 1 : 0);
+  if (q.kind === 'text') return q.required && !a.text ? 'Required.' : '';
+  if (q.required && n === 0) return 'Required.';
+  if (q.kind === 'multi' && n > 0 && q.min && n < q.min) return 'Choose at least ' + q.min + '.';
+  if (q.kind === 'multi' && q.max && n > q.max) return 'Choose at most ' + q.max + '.';
+  return '';
+}
+function showProblems(list) {
+  let first = null;
+  for (const s of document.querySelectorAll('section.q:not([hidden])')) {
+    const p = list ? (list.find((x) => x.id === s.dataset.q)?.problem ?? '') : problemOf(byId(s.dataset.q));
+    s.querySelector('.err').textContent = p;
+    if (p && !first) first = s;
+  }
+  first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  return !first;
+}
+
+let draftTimer;
+const post = (path) => fetch(withToken(path), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(answers) });
+const saveDraft = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => { if (!ended) post('/draft').catch(() => {}); }, 300); };
+
+document.addEventListener('input', (e) => {
+  const s = e.target.closest('section.q');
+  if (!s || ended) return;
+  const q = byId(s.dataset.q);
+  const a = entry(q.id);
+  const f = e.target.dataset.f;
+  if (f) {
+    a[f] = e.target.value.trim() ? e.target.value : null;
+    // A single question takes one answer: typing your own clears the chosen option.
+    if (f === 'other' && q.kind === 'single' && a.other) { a.selected = []; s.querySelectorAll('input[type=radio]').forEach((i) => { i.checked = false; }); }
+  } else {
+    a.selected = [...s.querySelectorAll('input[name]:checked')].map((i) => i.value);
+    if (q.kind === 'single' && a.other) { a.other = null; const o = s.querySelector('[data-f=other]'); if (o) o.value = ''; }
+  }
+  if (f !== 'note' && f !== 'text') {
+    // A selection change can show or hide conditional questions, and with them whole pages.
+    for (const sec of document.querySelectorAll('section.q')) sec.hidden = !visible(byId(sec.dataset.q));
+    renderNav();
+  }
+  s.querySelector('.err').textContent = '';
+  saveDraft();
+});
+
+document.addEventListener('click', async (e) => {
+  const id = e.target.id;
+  if (ended || !['next', 'back', 'submit', 'cancel'].includes(id)) return;
+  if (id === 'next' && showProblems()) { pageIx++; render(); scrollTo(0, 0); }
+  if (id === 'back') { pageIx--; render(); scrollTo(0, 0); }
+  if (id === 'cancel' && confirm('Cancel? Claude will be told you declined to answer.')) await post('/cancel');
+  if (id === 'submit') {
+    const pages = livePages();
+    const bad = pages.findIndex((pg) => pg.questions.some((qid) => { const q = byId(qid); return visible(q) && problemOf(q); }));
+    if (bad > -1) { pageIx = bad; render(); showProblems(); return; }
+    e.target.disabled = true;
+    const r = await post('/submit').catch(() => null);
+    if (r?.status === 422) {
+      const { problems } = await r.json();
+      const target = livePages().findIndex((pg) => pg.questions.some((qid) => problems.some((p) => p.id === qid)));
+      if (target > -1 && target !== pageIx) { pageIx = target; render(); }
+      showProblems(problems);
+      e.target.disabled = false;
+    } else if (!r || !r.ok) {
+      e.target.disabled = false;
+      banner('Could not reach the consult server. If it has stopped, tell Claude in the terminal.');
+    }
+  }
+});
+
+function banner(text) {
+  if (document.querySelector('.banner')) return;
+  const b = document.createElement('div');
+  b.className = 'banner'; b.setAttribute('role', 'alert'); b.textContent = text;
+  document.getElementById('app').prepend(b);
+}
+
+const events = new EventSource(withToken('/events'));
+events.addEventListener('done', (e) => {
+  ended = true;
+  events.close();
+  document.getElementById('nav').remove();
+  const msg = { submitted: 'Answers sent to Claude.', cancelled: 'Cancelled. Claude has been told you declined.', timeout: 'This session timed out.', closed: 'This session has ended.' }[e.data] ?? 'This session has ended.';
+  document.getElementById('app').innerHTML = '<div class="done">' + esc(msg) + '<br>You can close this tab.</div>';
+});
+events.onerror = () => { if (!ended && events.readyState === EventSource.CLOSED) banner('Lost contact with the consult server. Your answers may not reach Claude.'); };
+
+fetch(withToken('/spec')).then((r) => r.json()).then((d) => {
+  spec = d.spec;
+  answers = d.answers ?? {};
+  document.title = spec.title ? spec.title + ' · Consult' : 'Consult';
+  render();
+}).catch(() => banner('Could not load the questions. The session may have ended.'));
+</script>
+</body>
+</html>

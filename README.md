@@ -13,7 +13,7 @@ tool composition while preserving the underlying tool permissions.
 | image zoom | Inspect an image with an overview grid, full-resolution crops, and tiles | [MCP tool](mcp/image-zoom/README.md) |
 
 Trajectory and knowing work independently. Optional flowstate packs add product,
-setup, writing, design, diagram, data, Jev, and language-specific skills.
+setup, writing, design, diagram, consult, data, Jev, and language-specific skills.
 
 
 ## Contents
