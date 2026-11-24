@@ -17,7 +17,7 @@ From this distribution's root:
 ```text
 node tools/readiness.mjs
 node tools/readiness.mjs --for design,diagram
-node tools/readiness.mjs --for image-zoom,jev
+node tools/readiness.mjs --for image-zoom
 node tools/readiness.mjs --for code-mode-claude
 node tools/readiness.mjs --for code-mode-pi
 node tools/readiness.mjs --all
@@ -67,8 +67,6 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 | Firecrawl MCP | none | research | Optional discovery/scraping route; the research skills retain ordinary web fallbacks. |
 | curl | none | research, wizard | Used by source-specific fetches and wizard checks when those paths are selected. |
 | yt-dlp | video | none | Used for caption retrieval. Installation and any download remain explicit actions. |
-| Jev MCP server and provider | jev | none | Use the bundled Jev setup guide, then confirm tools in the client. Registration, credentials and provider calls remain unverified. |
-| npx | none | jev | One upstream server launch route. A separately installed server can use another executable path. |
 | Bash | wizard | evals | Wizard execution requires Bash. Eval shell-syntax coverage is optional and reports its own skipped coverage. |
 | ShellCheck | none | wizard | Optional shell analysis when available. |
 | GitHub CLI | github | wizard | Other forges use their own connectors. This checker never invokes gh or checks authentication. |
@@ -90,7 +88,6 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 - `image-assets`: Built-in image generation route.
 - `image-assets-cli`: Explicitly chosen imagegen API fallback.
 - `image-zoom`: Image zoom MCP server.
-- `jev`: Jev judgment MCP server.
 - `wizard`: Manual setup wizards.
 - `github`: GitHub forge history and operations.
 - `evals`: Optional evaluation toolkit.
@@ -103,6 +100,6 @@ Required and optional columns contain workflow selectors. An asterisk means ever
 
 ## Configure external services
 
-Read [code-mode setup](CODE_MODE.md) for the optional Claude companion, Pi native mode and permission-preserving routing. Read [Jev setup](packs/jev/skills/jev/SETUP.md) for the optional server and provider, [image zoom](mcp/image-zoom/README.md) for its locked environment and MCP registration, and [image assets](packs/design/skills/image-assets/SKILL.md) for the separately installed system imagegen skill and fallback boundaries. Project language packs retain their own tool references.
+Read [code-mode setup](CODE_MODE.md) for the optional Claude companion, Pi native mode and permission-preserving routing, [image zoom](mcp/image-zoom/README.md) for its locked environment and MCP registration, and [image assets](skills/packs/design/skills/image-assets/SKILL.md) for the separately installed system imagegen skill and fallback boundaries. Project language packs retain their own tool references.
 
 Client tool availability requires confirmation in that client. Firecrawl retains a web fallback. Model access is needed only for explicitly requested live evaluations; shipped targets stay disabled. Keep settings and credentials local. The readiness report contains discovery evidence and never certifies an entire machine as ready.

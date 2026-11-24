@@ -812,7 +812,9 @@ if (CLAUDE_MODE === 'hermetic') CLAUDE_HOME = mkdtempSync(join(root, 'claude-con
 OPENCODE_HOME = mkdtempSync(join(root, 'opencode-config-'));
 judgeCache = readJson(JUDGE_CACHE);
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const outDir = join(EVALS_DIR, 'results', `${ABLATION ? 'ablation' : ROUTING ? 'routing' : 'behave'}-${stamp}`);
+const resultsDir = join(EVALS_DIR, 'results');
+mkdirSync(resultsDir, { recursive: true });
+const outDir = mkdtempSync(join(resultsDir, `${ABLATION ? 'ablation' : ROUTING ? 'routing' : 'behave'}-${stamp}-`));
 const codexHome = live.some((t) => t.harness === 'codex' && t.isolate_home !== false) ? makeCodexHome(root) : null;
 
 async function runJob({ c, t, arm, n }) {

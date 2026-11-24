@@ -13,23 +13,23 @@ Use direct tools for compact reads, searches and edits. Use code mode when a scr
 From this checkout, install the optional companion through its separate marketplace:
 
 ```text
-claude plugin marketplace add ./mods
+claude plugin marketplace add ./harnesses/claude
 claude plugin install code-mode@aituning-mods
 ```
 
 Restart Claude Code or run `/reload-plugins`. The mod includes its self-contained QuickJS broker, dependency licenses and the optional `code-mode` skill. It needs Claude Code 2.1.293+ and Node.js 20+ on PATH. Using the prebuilt broker needs no npm install; the distribution's other JavaScript helpers require Node.js 24+.
 
-Read the [mod README](mods/code-mode/README.md) for API examples, resource limits, offline tests and development dependencies. Confirm `mcp__code-mode__execute` in the client before using it. The optional skill adds one description only when installed; it is outside the fourteen family plugins. No installation command changes your global routing policy automatically.
+Read the [mod README](harnesses/claude/code-mode/README.md) for API examples, resource limits, offline tests and development dependencies. Confirm `mcp__code-mode__execute` in the client before using it. The optional skill adds one description only when installed; it is outside the fourteen family plugins. No installation command changes your global routing policy automatically.
 
 ## Pi
 
 Use Pi's native implementation. From the checkout, a single invocation can enable it and load the portable skill explicitly:
 
 ```text
-pi --tools +codemode --skill ./mods/code-mode/skills/code-mode
+pi --tools +codemode --skill ./harnesses/claude/code-mode/skills/code-mode
 ```
 
-For persistent skill discovery, copy the complete `mods/code-mode/skills/code-mode/` folder to `~/.pi/agent/skills/code-mode/` or the consuming project's `.pi/skills/code-mode/`. Keep its reference and metadata files. Review the project skill before granting trust. Pi also supports `.agents/skills/`. The skill does not install or invoke the Claude broker in Pi.
+For persistent skill discovery, copy the complete `harnesses/claude/code-mode/skills/code-mode/` folder to `~/.pi/agent/skills/code-mode/` or the consuming project's `.pi/skills/code-mode/`. Keep its reference and metadata files. Review the project skill before granting trust. Pi also supports `.agents/skills/`. The skill does not install or invoke the Claude broker in Pi.
 
 Merge this setting into an existing Pi configuration if you want native code mode available in later sessions:
 
@@ -48,7 +48,7 @@ See [Pi code mode](https://pi.dev/docs/latest/codemode), [CLI tools](https://git
 
 The root [AGENTS.md](AGENTS.md) contains the shared routing and permission policy. [CLAUDE.md](CLAUDE.md) imports it. These files govern this checkout, not every project where a plugin is installed. For another workspace, merge the Tool composition paragraph into its existing AGENTS.md or global instructions. Preserve the workspace's model, delegation and permission rules. Keep a thin Claude import where needed.
 
-The optional [code-mode skill](mods/code-mode/skills/code-mode/SKILL.md) packages the same policy with an invocation recipe and a complete [runtime reference](mods/code-mode/skills/code-mode/REFERENCE.md). Installing instructions does not make a missing runtime available. Use direct tools if no compatible code-mode tool is present.
+The optional [code-mode skill](harnesses/claude/code-mode/skills/code-mode/SKILL.md) packages the same policy with an invocation recipe and a complete [runtime reference](harnesses/claude/code-mode/skills/code-mode/REFERENCE.md). Installing instructions does not make a missing runtime available. Use direct tools if no compatible code-mode tool is present.
 
 ## Measured tradeoffs
 

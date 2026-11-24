@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "ratchets": {
+    "trigger-rank1": {
+      "command": ["node", "evals/triggers.mjs"],
+      "field": "rank1Rate",
+      "direction": "min",
+      "value": 85
+    }
+  }
+}

@@ -12,3 +12,4 @@ evals/results/
 evals/**/out/
 evals/targets.local.json
 evals/engines.local.json
+evals/*.local.json

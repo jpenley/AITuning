@@ -13,11 +13,11 @@ function fixture(harness = 'opencode') {
   mkdirSync(evals);
   cpSync(join(EVALS_DIR, 'behave.mjs'), join(evals, 'behave.mjs'));
   cpSync(join(EVALS_DIR, 'lib'), join(evals, 'lib'), { recursive: true });
-  mkdirSync(join(root, '.claude-plugin'));
-  const paths = ['alpha', 'beta', 'gamma'].map(name => `./skills/test/${name}`);
-  writeFileSync(join(root, '.claude-plugin', 'plugin.json'), JSON.stringify({ name: 'flowstate', version: '1.0.0', skills: paths }));
+  mkdirSync(join(root, 'skills', 'core', '.claude-plugin'), { recursive: true });
+  const paths = ['alpha', 'beta', 'gamma'].map(name => `./test/${name}`);
+  writeFileSync(join(root, 'skills', 'core', '.claude-plugin', 'plugin.json'),JSON.stringify({ name: 'flowstate', version: '1.0.0', skills: paths }));
   for (const name of ['alpha', 'beta', 'gamma']) {
-    const dir = join(root, 'skills', 'test', name);
+    const dir = join(root, 'skills', 'core', 'test', name);
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'SKILL.md'), `---\nname: ${name}\ndescription: Use when testing ${name}.\n---\n${name} body\n`);
     writeFileSync(join(dir, 'helper.txt'), `${name} helper\n`);
@@ -256,7 +256,7 @@ test('ablation rejects fixture skill catalogs before launching a harness', () =>
 test('ablation rejects participating packs without a manifest or complete membership', () => {
   const f = fixture();
   try {
-    const pack = join(f.root, 'packs', 'extra');
+    const pack = join(f.root, 'skills', 'packs', 'extra');
     const dir = join(pack, 'skills', 'delta');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'SKILL.md'), '---\nname: delta\ndescription: Use when testing delta.\n---\nBody.\n');

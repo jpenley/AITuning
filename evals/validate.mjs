@@ -6,11 +6,11 @@
 // stdout: one JSON object {status, errors[], warnings[]}; stderr: human-readable report.
 
 import { readFileSync, readdirSync, existsSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative, extname, basename } from 'node:path';
+import { join, relative, resolve, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { loadSkills, listPacks, stripFences, finish, frontmatterBlock, ROOT, SKILLS_DIR, EVALS_DIR, STANDALONE_SETS } from './lib/skills.mjs';
-import { flowNames, htmlNames, identicalCopies, IDENTICAL_COPIES, minRank1, pluginDescriptions, readmeIndex, sharedBullets } from './lib/catalog.mjs';
+import { flowNames, htmlNames, identicalCopies, IDENTICAL_COPIES, floorRecord, pluginDescriptions, readmeIndex, sharedBullets } from './lib/catalog.mjs';
 import { scanFences } from './lib/fences.mjs';
 import { scanText, textFiles, TEXT_EXTENSIONS } from './lib/unicode.mjs';
 
@@ -193,6 +193,9 @@ if (!ONLY_SKILLS) {
     for (const l of listed) if (!actual.has(l)) err(rel(manifestPath), `listed path is not a skill folder in this pack: ${l}`);
     const entry = (marketplace?.plugins || []).find((p) => p.name === manifest.name);
     if (marketplace && !entry) err(rel(marketplacePath), `plugin "${manifest.name}" (pack ${pack.name}) is not listed`);
+    // The source is the folder Claude Code copies into its plugin cache, so it must be the pack's own folder:
+    // a parent folder (the repository root, say) would copy everything under it.
+    if (entry && typeof entry.source === 'string' && resolve(ROOT, entry.source) !== resolve(pack.dir)) err(rel(marketplacePath), `plugin "${manifest.name}" has source ${entry.source}; expected ./${rel(pack.dir)}`);
     // Every plugin but the core names each of its skills in both descriptions (the core's is a summary).
     if (pack.name !== 'core') {
       const descriptions = [{ where: rel(manifestPath), text: manifest.description }];
@@ -207,15 +210,15 @@ if (!ONLY_SKILLS) {
   const flowstateNames = skills.filter((s) => !STANDALONE_SETS.includes(s.pack)).map((s) => s.dirName);
   const readText = (p) => (existsSync(join(ROOT, p)) ? readFileSync(join(ROOT, p), 'utf8') : null);
   const catalogue = [
-    ['skills/README.md', (t, w) => readmeIndex(t, flowstateNames, w)],
-    ['skills/productivity/flow/SKILL.md', (t, w) => flowNames(t, flowstateNames, w)],
+    ['skills/core/README.md', (t, w) => readmeIndex(t, flowstateNames, w)],
+    ['skills/core/productivity/flow/SKILL.md', (t, w) => flowNames(t, flowstateNames, w)],
   ];
   for (const [p, check] of catalogue) {
     const t = readText(p);
     if (t === null) err(p, 'not found; it lists the skills by name');
     else for (const f of check(t, p)) err(f.where, f.msg);
   }
-  const [research, investigate] = ['skills/engineering/research/SKILL.md', 'knowing/skills/investigate/SKILL.md'];
+  const [research, investigate] = ['skills/core/engineering/research/SKILL.md', 'skills/knowing/skills/investigate/SKILL.md'];
   if (readText(research) !== null && readText(investigate) !== null) {
     for (const f of sharedBullets({ where: research, text: readText(research) }, { where: investigate, text: readText(investigate) })) err(f.where, f.msg);
   }
@@ -226,11 +229,11 @@ if (!ONLY_SKILLS) {
   }
   const pkgText = readText('evals/package.json');
   const constraintsText = readText('evals/CONSTRAINTS.md');
-  if (pkgText === null || constraintsText === null) err(pkgText === null ? 'evals/package.json' : 'CONSTRAINTS.md', 'not found; it holds the --min-rank1 ratchet');
+  if (pkgText === null || constraintsText === null) err(pkgText === null ? 'evals/package.json' : 'CONSTRAINTS.md', 'not found; it runs or names the rank-1 floor');
   else {
     let pkg = null;
     try { pkg = JSON.parse(pkgText); } catch (e) { err('evals/package.json', `invalid JSON: ${e.message}`); }
-    if (pkg) for (const f of minRank1(pkg, constraintsText)) err(f.where, f.msg);
+    if (pkg) for (const f of floorRecord(pkg, constraintsText, readText('floor.json'))) err(f.where, f.msg);
   }
 
   // Tier 2 coverage: every model-invoked skill has a trigger case file
@@ -295,7 +298,7 @@ if (!ONLY_SKILLS) {
 // Prose tells in skill text (warnings): the writing pack's linter with only its reliable word-level rules.
 // Taste rules (em dashes, colons, title case), structure rules, and the metaphor-noun list stay off: skills
 // use terms like "ratchet" on purpose. Skipped quietly when the writing pack isn't present.
-const LINT_PROSE = join(ROOT, 'packs', 'writing', 'skills', 'prose', 'scripts', 'lint-prose.mjs');
+const LINT_PROSE = join(ROOT, 'skills', 'packs', 'writing', 'skills', 'prose', 'scripts', 'lint-prose.mjs');
 if (!ONLY_SKILLS && existsSync(LINT_PROSE)) {
   const config = join(EVALS_DIR, 'prose-lint.validate.json');
   const files = skills.flatMap((s) => readdirSync(s.dir).filter((f) => f.endsWith('.md')).map((f) => join(s.dir, f)));
@@ -427,39 +430,43 @@ function catalogueSelftest() {
   const bullets = '- **X**: search x.\n  more on x.\n- **Reddit**: blocked.\n- **YouTube**: captions.\n';
   const clean = {
     plugins: [{ plugin: 'flowstate-design', skills: ['image-assets'], descriptions: [{ where: 'plugin.json', text: 'Design pack: image-assets.' }, { where: 'marketplace.json', text: 'Design pack: craft and image-assets.' }] }],
-    readme: '| Skill | Invocation | Folder |\n|---|---|---|\n| tdd | user + model | engineering |\n| image-assets | user + model | packs/design |\n| guards-rust | user + model | packs/rust |\n| seams-rust | user + model | packs/rust |\n',
+    readme: '| Skill | Invocation | Folder |\n|---|---|---|\n| tdd | user + model | engineering |\n| image-assets | user + model | skills/packs/design |\n| guards-rust | user + model | skills/packs/rust |\n| seams-rust | user + model | skills/packs/rust |\n',
     flow: 'Run **`/tdd`**, then `image-assets`; stacks add `guards-<stack>` and `seams-<stack>`.\n',
     html: '<code>/tdd</code> <code>image-assets</code> <code data-stack="Rust">guards-rust</code> <code data-stack="Rust">seams-rust</code>',
     research: `Sources:\n\n${bullets}\nAfter.\n`,
     investigate: `Other intro.\n\n${bullets}`,
-    pkg: { scripts: { triggers: 'node triggers.mjs --min-rank1 85', test: 'npm run selftest && node triggers.mjs --min-rank1 85' } },
+    pkg: { scripts: { triggers: 'node triggers.mjs', test: 'npm run selftest && node ../skills/core/engineering/audit/scripts/floor.mjs check' } },
+    floor: JSON.stringify({ version: 1, ratchets: { 'trigger-rank1': { command: ['node', 'evals/triggers.mjs'], field: 'rank1Rate', direction: 'min', value: 85 } } }),
     copies: [{ where: 'knowing/x.mjs', text: '// one\nrun();\n' }, { where: 'trace/x.mjs', text: '// one\nrun();\n' }],
-    constraints: '## Enforced\n\n| Trigger routing | `node triggers.mjs --min-rank1 85` |\n\n## Other\n\n`--min-rank1 70` outside the table\n',
+    constraints: '## Enforced\n\n| Trigger routing | the `trigger-rank1` floor in `floor.json` |\n\n## Other\n\n`--min-rank1 70` outside the table\n',
   };
   const runAll = (f) => [
     ...pluginDescriptions(f.plugins),
-    ...readmeIndex(f.readme, names, 'skills/README.md'),
+    ...readmeIndex(f.readme, names, 'skills/core/README.md'),
     ...flowNames(f.flow, names, 'flow/SKILL.md'),
     ...htmlNames(f.html, names, 'index.html'),
     ...sharedBullets({ where: 'research/SKILL.md', text: f.research }, { where: 'investigate/SKILL.md', text: f.investigate }),
-    ...minRank1(f.pkg, f.constraints),
+    ...floorRecord(f.pkg, f.constraints, f.floor),
     ...identicalCopies(f.copies),
   ];
   // [planted fault, change to the clean fixture, expected finding]
   const faults = [
     ['a pack description missing a skill', (f) => { f.plugins[0].descriptions[1].text = 'Design pack: craft.'; }, /marketplace\.json: description of plugin "flowstate-design" doesn't name its skill "image-assets"/],
     ['a skill named only inside a longer word', (f) => { f.plugins[0].descriptions[0].text = 'Design pack: image-assets-v2.'; }, /plugin\.json: .*"image-assets"/],
-    ['a README index without a row for a skill', (f) => { f.readme = f.readme.replace('| tdd | user + model | engineering |\n', ''); }, /skills\/README\.md: index table has no row for skill "tdd"/],
+    ['a README index without a row for a skill', (f) => { f.readme = f.readme.replace('| tdd | user + model | engineering |\n', ''); }, /skills\/core\/README\.md: index table has no row for skill "tdd"/],
     ['a flow map missing a skill', (f) => { f.flow = f.flow.replace('**`/tdd`**', 'tdd'); }, /flow\/SKILL\.md: doesn't name skill "tdd"/],
     ['a flow map missing a stack placeholder', (f) => { f.flow = f.flow.replace('`seams-<stack>`', 'seams'); }, /flow\/SKILL\.md: doesn't name `seams-<stack>` \(covers "seams-rust"\)/],
     ['a landing page missing a skill', (f) => { f.html = f.html.replace('<code data-stack="Rust">guards-rust</code>', 'guards-rust'); }, /index\.html: doesn't name skill "guards-rust"/],
     ['a shared bullet edited in one copy', (f) => { f.investigate = f.investigate.replace('  more on x.', '  more on X.'); }, /research\/SKILL\.md and investigate\/SKILL\.md: the "- \*\*X\*\*:" bullets differ/],
     ['a shared bullet missing from one copy', (f) => { f.research = f.research.replace('- **YouTube**: captions.\n', ''); }, /the "- \*\*YouTube\*\*:" bullet is missing from research\/SKILL\.md/],
-    ['a --min-rank1 out of step', (f) => { f.pkg.scripts.test = f.pkg.scripts.test.replace('85', '80'); }, /--min-rank1 differs: .*scripts\.test 80/],
+    ['a script pinning its own rank-1 floor', (f) => { f.pkg.scripts.triggers += ' --min-rank1 80'; }, /scripts\.triggers: pins a --min-rank1 value/],
+    ['npm test not checking the floor', (f) => { f.pkg.scripts.test = 'npm run selftest && node triggers.mjs'; }, /scripts\.test: doesn't run floor\.mjs check/],
+    ['a floor record without the rank-1 ratchet', (f) => { f.floor = JSON.stringify({ version: 1, ratchets: {} }); }, /floor\.json: no trigger-rank1 ratchet/],
+    ['a missing floor record', (f) => { f.floor = null; }, /floor\.json: not found/],
     ['a script copy edited in one plugin', (f) => { f.copies[1].text = f.copies[1].text.replace('run();', 'run(1);'); }, /knowing\/x\.mjs and trace\/x\.mjs: the copies differ \(first at line 2\)/],
     ['a script copy with CRLF line endings', (f) => { f.copies[1].text = f.copies[1].text.replace(/\n/g, '\r\n'); }, /the copies differ \(first at line 1\)/],
     ['a script copy missing', (f) => { f.copies[1].text = null; }, /trace\/x\.mjs: not found; it is a copy of knowing\/x\.mjs/],
-    ['a --min-rank1 missing from the Enforced table', (f) => { f.constraints = f.constraints.replace('--min-rank1 85', ''); }, /CONSTRAINTS\.md Enforced table: no --min-rank1 value/],
+    ['an Enforced table not pointing at the floor record', (f) => { f.constraints = f.constraints.replace('in `floor.json`', 'at 85%'); }, /CONSTRAINTS\.md Enforced table: doesn't point at floor\.json/],
   ];
   const problems = [];
   for (const e of runAll(structuredClone(clean))) problems.push(`false alarm on the clean catalogue: ${e.where}: ${e.msg}`);

@@ -1,0 +1,10 @@
+{
+  "name": "ledgerly",
+  "version": "0.3.0",
+  "private": true,
+  "description": "A small invoicing service for one company's customers.",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/money.test.js test/invoices.test.js"
+  }
+}

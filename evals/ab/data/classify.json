@@ -1,0 +1,56 @@
+{
+  "benchmark": "public-synthetic-v1",
+  "synthetic": true,
+  "about": "Newly constructed demonstration inputs. No real data or recorded runs. Not continuous with private benchmark results.",
+  "purpose": "Classify constructed work notes.",
+  "context": "A parent plan is called Cache project.",
+  "classes": [
+    {
+      "id": "spec",
+      "description": "A multi-step project."
+    },
+    {
+      "id": "ticket",
+      "description": "One task under Cache project."
+    },
+    {
+      "id": "standalone",
+      "description": "One independent task."
+    },
+    {
+      "id": "duplicate",
+      "description": "Repeats an earlier task."
+    },
+    {
+      "id": "skip",
+      "description": "No concrete work."
+    }
+  ],
+  "items": [
+    {
+      "id": "synthetic-spec",
+      "text": "Cache project: design storage, implement expiry, and measure memory.",
+      "want": "spec"
+    },
+    {
+      "id": "synthetic-ticket",
+      "text": "Under Cache project, implement expiry.",
+      "want": "ticket"
+    },
+    {
+      "id": "synthetic-single",
+      "text": "Fix the typo in the help title.",
+      "want": "standalone"
+    },
+    {
+      "id": "synthetic-dupe",
+      "text": "Earlier: fix the typo in the help title. This item repeats that exact typo fix.",
+      "want": "duplicate"
+    },
+    {
+      "id": "synthetic-skip",
+      "text": "Maybe think about the future someday.",
+      "want": "skip"
+    }
+  ]
+}
