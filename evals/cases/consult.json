@@ -1,0 +1,36 @@
+{
+  "skill_name": "consult",
+  "trigger": {
+    "positive": [
+      {
+        "prompt": "Ask me those questions in the browser instead of the terminal, I want to see the options explained on a page"
+      },
+      {
+        "prompt": "There are four related decisions about the deploy pipeline; put them on one page I can answer together"
+      },
+      {
+        "prompt": "Before you choose a caching approach, show me each option and what it costs on a page so I can pick one"
+      },
+      {
+        "prompt": "I can't judge these auth options from one line each, explain them with a picture and let me answer"
+      },
+      {
+        "prompt": "Open a page where I can answer your questions about the schema change"
+      }
+    ],
+    "negative": [
+      {
+        "prompt": "Stress-test my plan to move the invoice export to an event feed before we start",
+        "owner": "grill"
+      },
+      {
+        "prompt": "Draw a sequence diagram of how a login request moves between the browser and the API",
+        "owner": "diagram"
+      },
+      {
+        "prompt": "Mock up two different layouts for the settings page so I can compare them",
+        "owner": "sketch"
+      }
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Consult"
+  short_description: "Ask the user through a local web page with diagrams and structured answers"

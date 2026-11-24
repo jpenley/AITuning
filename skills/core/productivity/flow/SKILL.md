@@ -62,6 +62,7 @@ For small work that fits one session, skip `/spec` and `/ticket`: go from `/gril
 - **`/draft`**: write a new piece with the author from their notes, one block at a time.
 - **`/compose`**, **`/craft`**, **`/critique`**, **`/codify`**, **`/animate`**: the design pack: build or restyle a UI, hold it to a quality floor, review it, keep DESIGN.md tokens, add motion. `image-assets` generates the raster images a UI needs.
 - **`diagram`**: the diagram pack: draw a flow, sequence, state or ER diagram of a system as Mermaid, tied to source lines and checked with the Mermaid CLI.
+- **`consult`**: the consult pack: ask the user through a local web page when a decision needs explaining (diagrams, each option's consequences, related questions together); the answers come back as one JSON object.
 - **`validate`**: the data pack: check an analysis, report, or query result before it's shared, with a verdict on every claim, even when asked only to check the arithmetic.
 - **`/audition`**: several independent attempts at one brief, a blind judge, then the best as the base with the rest's best parts grafted in. For a choice expensive to reverse.
 - **`/harden`**: security while building: threat model, controls, checklist.

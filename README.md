@@ -1,6 +1,6 @@
 # AITuning
 
-**72 skills for coding agents, job searches, and learning.**
+**73 skills for coding agents, job searches, and learning.**
 
 AITuning is a collection of agent skills written in Markdown. Each skill
 describes how to handle a particular task, with scripts and references where
@@ -17,7 +17,7 @@ making a change.
 | [knowing](#knowing-learning-and-research) | Research, lessons, tutoring, and interactive explanations. |
 
 The collections are independent plugins. Flowstate also has
-[10 optional packs](#optional-flowstate-packs) for work such as UI design and
+[11 optional packs](#optional-flowstate-packs) for work such as UI design and
 Python development.
 
 
@@ -115,7 +115,7 @@ The [flowstate guide](skills/core/README.md) explains how they connect.
 
 ### Optional flowstate packs
 
-The packs add **24 skills** to flowstate. The .NET, TypeScript, Python, and Rust
+The packs add **25 skills** to flowstate. The .NET, TypeScript, Python, and Rust
 packs each pair a `guards` skill for project checks with a `seams` skill for
 module boundaries.
 
@@ -126,6 +126,7 @@ module boundaries.
 | Writing | [prose](skills/packs/writing/skills/prose/SKILL.md), [draft](skills/packs/writing/skills/draft/SKILL.md) | Edit for the reader or develop a new piece with its author. |
 | Design | [compose](skills/packs/design/skills/compose/SKILL.md), [craft](skills/packs/design/skills/craft/SKILL.md), [critique](skills/packs/design/skills/critique/SKILL.md), [codify](skills/packs/design/skills/codify/SKILL.md), [animate](skills/packs/design/skills/animate/SKILL.md), [image-assets](skills/packs/design/skills/image-assets/SKILL.md) | Build and review interfaces, define visual rules, add motion, and create image assets. |
 | Diagram | [diagram](skills/packs/diagram/skills/diagram/SKILL.md) | Create diagrams tied to the system or material they explain. |
+| Consult | [consult](skills/packs/consult/skills/consult/SKILL.md) | Ask the user through a local web page when a decision needs diagrams or explained options. |
 | Data | [validate](skills/packs/data/skills/validate/SKILL.md) | Check an analysis, its calculations, and whether its conclusions follow. |
 | .NET | [guards-dotnet](skills/packs/dotnet/skills/guards-dotnet/SKILL.md), [seams-dotnet](skills/packs/dotnet/skills/seams-dotnet/SKILL.md) | Enforce C# and .NET checks, project boundaries, and architecture rules. |
 | TypeScript | [guards-typescript](skills/packs/typescript/skills/guards-typescript/SKILL.md), [seams-typescript](skills/packs/typescript/skills/seams-typescript/SKILL.md) | Enforce Node and TypeScript checks, package boundaries, and import rules. |
@@ -165,7 +166,7 @@ explains the learner folder and sources.
 
 ## Tools
 
-These tools are optional and separate from the 72 registered skills.
+These tools are optional and separate from the 73 registered skills.
 
 | Tool | What it does | Guide |
 |---|---|---|

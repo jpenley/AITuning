@@ -74,6 +74,7 @@ Engineering skills for planning, implementation, review, and release.
 | animate | user + model | skills/packs/design |
 | image-assets | user + model | skills/packs/design |
 | diagram | user + model | skills/packs/diagram |
+| consult | user + model | skills/packs/consult |
 | validate | user + model | skills/packs/data |
 | guards-dotnet | user + model | skills/packs/dotnet |
 | seams-dotnet | user + model | skills/packs/dotnet |

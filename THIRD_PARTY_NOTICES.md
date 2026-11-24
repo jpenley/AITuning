@@ -21,4 +21,6 @@ Sources used for ideas only are identified in the collection READMEs; their code
 is not bundled. Image zoom dependencies are installed separately from the lockfile
 and retain their own licenses.
 
+The consult pack bundles [Mermaid 11.17.2](https://github.com/mermaid-js/mermaid) as `skills/packs/consult/skills/consult/scripts/vendor/mermaid.min.js`, with its [MIT license](skills/packs/consult/skills/consult/scripts/vendor/MERMAID-LICENSE.txt).
+
 The Pi MCP mirror and native elicitation patch retain the [native Pi MIT license](LICENSES/pi-native.txt). The mirror keeps embedded notices, including the Sindre Sorhus MIT notice in its ANSI helper. Owned contributions and the process-cleanup helper are distributed under the repository MIT license with owner-confirmed rights. Herdr managed integration, RPIV and installed Pi/dependency packages are not bundled and retain their own licenses.
