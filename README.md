@@ -55,7 +55,31 @@ lists all available plugins.
 
 For an agent that reads skill folders, copy the complete skill directories into
 its configured skills directory. Keep `SKILL.md`, `agents/`, and supporting files
-together. Install any skills they load by name too.
+together. Install any skills they load by name too. Skills that link
+`../../shared/` read plain references from their collection's `shared/` folder.
+Copy that folder next to the skills directory: skills in `~/.claude/skills/`
+read it from `~/.claude/shared/`. The [no plugin install](#no-plugin-install)
+handles this for you.
+
+### No plugin install
+
+Where Claude Code allows custom skills but not plugins, build a zip that
+installs chosen skills into `~/.claude/skills` instead:
+
+```text
+node tools/no-plugin/build.mjs
+```
+
+The [manifest](tools/no-plugin/manifest.json) names the skills and groups to
+package and which groups start ticked. The build adds every skill those skills
+load or link to, the eval toolkit and readiness checker, and an installer, then
+writes `tools/no-plugin/dist/<name>-<version>.zip`. Whoever receives the zip
+unzips it, starts `claude` in that folder, and asks Claude to install the skills
+by following its README. Claude opens a [consult](skills/packs/consult/skills/consult/SKILL.md)
+page in the browser for choosing skills, then installs the selection. An
+existing skill folder is backed up first, and the selection is validated
+before anything is copied. The [package README](tools/no-plugin/package/README.md)
+covers the details.
 
 Use [flow](skills/core/productivity/flow/SKILL.md) to choose an engineering skill.
 Skills marked

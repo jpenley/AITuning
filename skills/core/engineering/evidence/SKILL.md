@@ -17,13 +17,13 @@ First identify the requested outcome and the artifacts actually changed. Apply p
 
 When the task changes no implementation artifacts, an application build, test suite, typecheck, dependency install, worktree or code audit is outside its verification scope unless explicitly requested. Loading this skill supplies an evidence standard, not another assignment. Select the smallest check that can disprove the claim, then stop when it establishes the requested outcome.
 
-For multi-step implementation, review fixes or integration, read [Verification cadence](CHECKS.md) before choosing when to run checks. Reuse must account for all relevant inputs, not just whether source code changed.
+For multi-step implementation, review fixes or integration, read [Verification cadence](../../shared/CHECKS.md) before choosing when to run checks. Reuse must account for all relevant inputs, not just whether source code changed.
 
 ## What proves what
 
 | Claim | Proof | Not proof |
 |---|---|---|
-| Tests pass | A run in this task, output read: 0 failures, with still-valid inputs under [Verification cadence](CHECKS.md) | Stale or unbound earlier output, "should pass" |
+| Tests pass | A run in this task, output read: 0 failures, with still-valid inputs under [Verification cadence](../../shared/CHECKS.md) | Stale or unbound earlier output, "should pass" |
 | Build succeeds | The build command, exit code 0 | A clean linter run, logs that look fine |
 | Typecheck is clean | The typecheck command's output | The editor showing no errors |
 | Bug fixed | The original symptom re-tested and gone | The code changed |
@@ -40,7 +40,7 @@ When `docs/agents/rig/` doesn't exist and getting the app running to check a cha
 
 ## Select proof by what changed
 
-When reporting specs or tickets, use [Capabilities and deltas](../spec/CAPABILITIES.md) and [Course correction](../spec/REVISION.md). Preserve the original baseline and completed-work evidence. Advance current capability records only for verified landed parts; keep unimplemented or retired target entries separate. A cancelled idea records a decision, not a passing acceptance check.
+When reporting specs or tickets, use [Capabilities and deltas](../../shared/CAPABILITIES.md) and [Course correction](../../shared/REVISION.md). Preserve the original baseline and completed-work evidence. Advance current capability records only for verified landed parts; keep unimplemented or retired target entries separate. A cancelled idea records a decision, not a passing acceptance check.
 
 Use the project's verification policy and the file's consumer. Prose-only documentation and agent instructions need diff, links, referenced paths, ownership/status, and whitespace checks; skills also need frontmatter, metadata, references, and representative routing or behavior checks. They do not require an application build, test suite, host launch, or smoke run merely because future acceptance commands appear in the text. Scripts, CI configuration, dependency manifests, and runtime-consumed fixtures need the affected parser or behavior check regardless of file extension. Run the required integration or release chain only when its scope applies. A failed gate blocks the claim it supports; report unrelated failures separately and preserve failed observations after a passing retry.
 

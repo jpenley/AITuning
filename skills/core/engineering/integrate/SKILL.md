@@ -10,9 +10,9 @@ Get finished work into its base branch. Integration is the user's decision; this
 
 ## 1. Verify
 
-Read [Verification cadence](../evidence/CHECKS.md). Establish passing evidence for the project's full test suite (and typecheck, if the project has one) on the branch as it stands, running missing or invalidated checks rather than repeating still-valid ones merely to enter this skill, and check the work against the Definition of Done in the `evidence` skill (Correctness, Quality, Integration, Documentation). Report the result with evidence. If anything fails, show the failures and stop: the options come after a green suite.
+Read [Verification cadence](../../shared/CHECKS.md). Establish passing evidence for the project's full test suite (and typecheck, if the project has one) on the branch as it stands, running missing or invalidated checks rather than repeating still-valid ones merely to enter this skill, and check the work against the Definition of Done in the `evidence` skill (Correctness, Quality, Integration, Documentation). Report the result with evidence. If anything fails, show the failures and stop: the options come after a green suite.
 
-Read [Capabilities and deltas](../spec/CAPABILITIES.md) and [Course correction](../spec/REVISION.md). Recheck the approved revision, active ticket dispositions, preserved invariants, removal checks, and actual prerequisite delivery. Stale work or a cancelled blocker does not become valid because tests pass. Reconcile it before offering integration.
+Read [Capabilities and deltas](../../shared/CAPABILITIES.md) and [Course correction](../../shared/REVISION.md). Recheck the approved revision, active ticket dispositions, preserved invariants, removal checks, and actual prerequisite delivery. Stale work or a cancelled blocker does not become valid because tests pass. Reconcile it before offering integration.
 
 ## 2. Offer to refine
 

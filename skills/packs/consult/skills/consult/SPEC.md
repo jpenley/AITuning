@@ -49,6 +49,7 @@ When a block has several keys, they render in the order markdown, mermaid, image
 | `options` | single, multi | Non-empty array of options |
 | `allowOther` | single, multi | Adds an "Other" text box. On a single question, writing your own clears the chosen option, and the reverse. |
 | `min`, `max` | multi | Bounds on the number of choices, "Other" counting as one. `min` applies once anything is chosen; add `required` to force a choice. |
+| `default` | single, multi | Option ids ticked when the page opens (at most one on a single question, at most `max` on a multi). The user can untick them; the answer reports what was submitted. |
 | `showIf` | all | See [Conditional questions](#conditional-questions) |
 
 Every question also gets an optional note box.

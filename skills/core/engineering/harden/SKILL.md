@@ -55,7 +55,7 @@ For any agent that controls a browser (a DevTools MCP server, a browser extensio
 
 ## 6. When done
 
-To verify a security finding before acting on it, yours or a reviewer's, use the `audit` skill's [VERIFY.md](../audit/VERIFY.md).
+To verify a security finding before acting on it, yours or a reviewer's, use the shared [VERIFY.md](../../shared/VERIFY.md).
 
 
 Report which checklist sections applied and their status, with evidence as the `evidence` skill describes. Anything deferred gets a reason and a review date.

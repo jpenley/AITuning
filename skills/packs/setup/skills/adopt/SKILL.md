@@ -16,7 +16,7 @@ Convert a project's **sources** (plans, docs, and tracker items that predate the
 
 **Grill unit**: a spec together with its tickets, or a standalone ticket. A spec's tickets are grilled with it, never on their own. A unit is `needs-grill` while any of its files is.
 
-After locating the core install as above, read its plain `spec/IDENTIFIERS.md`, `spec/CAPABILITIES.md`, `spec/REVISION.md`, and `ticket/REVISION.md` directly alongside the two skill files. Distinguish observed capability evidence from intended changes; a roadmap does not establish implemented behavior. Reconcile active plans against their approved revision and preserve retired intent, aliases, and completed evidence. Reserve IDs in the authoritative planning location before publication; historical IDs stay unchanged unless the approved mapping explicitly migrates active items.
+In the core collection, read the plain `shared/IDENTIFIERS.md`, `shared/CAPABILITIES.md`, and `shared/REVISION.md`, and the `ticket` skill's `REVISION.md`, directly alongside the two skill files. Distinguish observed capability evidence from intended changes; a roadmap does not establish implemented behavior. Reconcile active plans against their approved revision and preserve retired intent, aliases, and completed evidence. Reserve IDs in the authoritative planning location before publication; historical IDs stay unchanged unless the approved mapping explicitly migrates active items.
 
 ## Choose the mode
 

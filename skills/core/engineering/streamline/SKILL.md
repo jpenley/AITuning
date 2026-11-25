@@ -12,7 +12,7 @@ Every ticket can pass its own checks while the set of them still can't finish: a
 
 **Formats**: new specs follow the `spec` skill's template and tickets the `ticket` skill's format. Both skills are user-invoked, so read their `SKILL.md` files directly: they sit in the folders beside this skill's (`../spec/SKILL.md`, `../ticket/SKILL.md`).
 
-**Shared contracts**: read [IDENTIFIERS.md](../spec/IDENTIFIERS.md) for reservations/aliases and [CAPABILITIES.md](../spec/CAPABILITIES.md) for capability evidence, baseline, target, and Delta meanings.
+**Shared contracts**: read [IDENTIFIERS.md](../../shared/IDENTIFIERS.md) for reservations/aliases and [CAPABILITIES.md](../../shared/CAPABILITIES.md) for capability evidence, baseline, target, and Delta meanings.
 
 **Scope**: `streamline` reviews the whole flow. `streamline <spec>` reviews that spec and its tickets, plus every item they block or are blocked by.
 
@@ -22,7 +22,7 @@ Read every spec and ticket in scope, and the work list, including relevant close
 
 Note these as you go; each is a finding:
 
-- a blocker that resolves to nothing, or whose closure or disposition doesn't satisfy its edge as [IDENTIFIERS.md](../spec/IDENTIFIERS.md) (*Satisfying a blocking edge*) defines;
+- a blocker that resolves to nothing, or whose closure or disposition doesn't satisfy its edge as [IDENTIFIERS.md](../../shared/IDENTIFIERS.md) (*Satisfying a blocking edge*) defines;
 - a cycle among blockers;
 - a ticket whose spec doesn't exist, and a spec with no tickets that isn't itself the work;
 - an open work-list entry with no spec, ticket, or recorded disposition.
@@ -69,7 +69,7 @@ Record each ruling in the table. Then show the whole report; it is approved when
 Apply the rulings in dependency order, so a new ticket exists before an edit names it:
 
 - **Edits** to existing items change only what the ruling says.
-- **Corrections** follow the course-correction contract ([REVISION.md](../spec/REVISION.md)) and the ticket dispositions (`../ticket/REVISION.md`). A ruling that cancels work also repairs its consumers; it does not authorize deletion of partial implementation or historical artifacts.
+- **Corrections** follow the course-correction contract ([REVISION.md](../../shared/REVISION.md)) and the ticket dispositions (`../ticket/REVISION.md`). A ruling that cancels work also repairs its consumers; it does not authorize deletion of partial implementation or historical artifacts.
 - **New tickets** pass the `ticket` skill's *Per-ticket checks* and get `ready-for-agent`. One that can't yet pass gets `needs-grill` and its `## Gaps` section, as the `ticket` skill's *Status* says.
 - **New specs** follow the `spec` skill's template and checks the same way.
 - **The work list** gains a pointer to every new item, in the format its existing entries use.

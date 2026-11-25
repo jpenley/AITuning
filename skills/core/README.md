@@ -19,6 +19,7 @@ Engineering skills for planning, implementation, review, and release.
 - **Harness-neutral**: skills load each other with "load the `x` skill with your skill tool"; user-only skills are suggested to the user, never loaded; context moves, sub-agents, background agents, and worktrees are described as concepts with a fallback where a harness lacks them. Full rules: [`tune/MECHANICS.md`](productivity/tune/MECHANICS.md).
 - **Invocation markers**: user-only skills carry `disable-model-invocation: true` (Claude Code) and `agents/openai.yaml` with `allow_implicit_invocation: false` (Codex), kept in sync.
 - **Line endings**: LF everywhere; shell scripts fail under CRLF.
+- **Shared references**: a plain reference that more than one skill reads lives in its collection's `shared/` folder, not inside one of those skills, and skills link it as `../../shared/<FILE>.md`. A skill links into another skill's folder only to reuse that skill's capability (learn and tutor follow figure's workflow; ticket uses spec's template; retro reads tune's preservation rules); that is a declared dependency.
 
 ## Index
 
@@ -88,7 +89,7 @@ Engineering skills for planning, implementation, review, and release.
 ## Project files the skills use
 
 - `CONTEXT.md`, `docs/adr/`: written by `domain`.
-- `docs/capabilities/<slug>.md` (lazy, or an established equivalent): observed current capabilities and scoped evidence; maintained as verified work lands. Change specs retain their baseline, target, and final Delta. See [capability contracts](engineering/spec/CAPABILITIES.md), [identifiers](engineering/spec/IDENTIFIERS.md), and [revision procedure](engineering/spec/REVISION.md).
+- `docs/capabilities/<slug>.md` (lazy, or an established equivalent): observed current capabilities and scoped evidence; maintained as verified work lands. Change specs retain their baseline, target, and final Delta. See [capability contracts](shared/CAPABILITIES.md), [identifiers](shared/IDENTIFIERS.md), and [revision procedure](shared/REVISION.md).
 - `docs/agents/issue-tracker.md` (optional): how to reach the tracker. Without it, specs and tickets are local files under `.scratch/<feature-slug>/`.
 - `docs/agents/model-ladder.md`: the models `build`'s sub-agents work and promote through, and `doubt` reviews on; `setup` or `build` writes it from [`build/TASK-MODELS.md`](engineering/build/TASK-MODELS.md).
 - `docs/agents/definition-of-done.md` (optional): the project's tailored Definition of Done, overriding `evidence/DONE.md`.
@@ -159,7 +160,7 @@ shipped in this distribution.
 - **lllllllama/RigorPilot-Skills** — https://github.com/lllllllama/RigorPilot-Skills — MIT License, Copyright (c) 2026 Chengkun Rao. Ideas only, re-expressed; no programs or tooling imported.
   In `optimize`: completed outcomes require observed execution; candidate evidence and pending actions stay separate from the completed attempt table. Broader research/optimization additions were tested and rejected as redundant.
 - **vercel-labs/web-interface-guidelines** — https://github.com/vercel-labs/web-interface-guidelines — MIT License, Copyright (c) 2025 Vercel Labs. Ideas only, re-expressed.
-  In the design pack: `craft/INTERACTIONS.md`, shared with `critique`, covers form behavior, asynchronous feedback, navigation and drafts, keyboard and gesture alternatives, loading, locale/hydration, mobile overlays, and dark themes. Project style stays in DESIGN.md; interaction evidence is reported separately from visual checks.
+  In the design pack: `shared/INTERACTIONS.md`, read by `craft` and `critique`, covers form behavior, asynchronous feedback, navigation and drafts, keyboard and gesture alternatives, loading, locale/hydration, mobile overlays, and dark themes. Project style stays in DESIGN.md; interaction evidence is reported separately from visual checks.
 
 - **Installed Claude Code plugins, reviewed 2026-10-07** (record: a private development record). Ideas only, re-expressed; no text copied.
   - **chrome-devtools-mcp** (Apache License 2.0, Google): `diagnose/PERF.md`'s heap-diff loop for memory that keeps growing (`memory-leak-debugging`); five `craft` detect rules (`a11y-debugging` and `debug-optimize-lcp` snippets).
@@ -173,5 +174,5 @@ shipped in this distribution.
   In `evals/behave.mjs`: selective skill removal with unchanged neighbors, content inventories, and recognized load-set diagnostics; `tune/TESTING.md` points to these controls. See the tested intake record (private development record omitted).
 - **ibelick/ui-skills** — [source at ebf5f26](https://github.com/ibelick/ui-skills/tree/ebf5f26cd275b1412be8a2c8784c4f8da628e7c2) — MIT License, Copyright (c) 2026 Julien Thibeaut. Ideas only, re-expressed.
   Its focused motion-maintenance approach informed `animate`'s distinction between new motion and preserving an existing design while reducing implementation cost, including offscreen suspension. Proposed metadata and broader performance additions were redundant in the tested intake (private development record omitted); no upstream skill or CLI was installed.
-- **Project-specific adaptations**: scope-aware proof in `evidence`; semantic console bridge guidance in `rig/CONSOLE.md`; isolated numerical probes, independent accuracy/cost gates, resolution controls, and reproducible negative results in `optimize/PROBES.md` (shared with `tdd`); domain-write scope and the Markdown questionnaire branch in `domain` and `survey`.
+- **Project-specific adaptations**: scope-aware proof in `evidence`; semantic console bridge guidance in `rig/CONSOLE.md`; isolated numerical probes, independent accuracy/cost gates, resolution controls, and reproducible negative results in `shared/PROBES.md` (read by `optimize` and `tdd`); domain-write scope and the Markdown questionnaire branch in `domain` and `survey`.
 - **hardikpandya/stop-slop** — [MIT License](../packs/writing/skills/prose/STOP-SLOP-LICENSE.txt), Copyright (c) 2025 Hardik Pandya. The reviewed local adaptation's protected technical literals and claim-scope safeguards are incorporated into `prose`; pattern catalogs remain review signals rather than universal bans.

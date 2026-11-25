@@ -11,7 +11,7 @@ Read `CONTEXT.md` (if present) so test names and interface vocabulary match the 
 
 ## Discover the stack first
 
-Find how *this* repo runs tests before writing one: the checked-in wrappers (`./gradlew`, `make test`, a repo script) before global tools; the command that runs one focused test and the one that runs the full suite; where tests live and how neighbouring tests are written; and what the README, CONTRIBUTING, and CI actually run. Use the focused command during the loop and the full suite before finishing. Read [Verification cadence](../evidence/CHECKS.md) for reuse, invalidation and delivery gates; red-before-green remains mandatory. Never assume a default command.
+Find how *this* repo runs tests before writing one: the checked-in wrappers (`./gradlew`, `make test`, a repo script) before global tools; the command that runs one focused test and the one that runs the full suite; where tests live and how neighbouring tests are written; and what the README, CONTRIBUTING, and CI actually run. Use the focused command during the loop and the full suite before finishing. Read [Verification cadence](../../shared/CHECKS.md) for reuse, invalidation and delivery gates; red-before-green remains mandatory. Never assume a default command.
 
 ## Seams: where tests go
 
@@ -28,7 +28,7 @@ When the shape of the interface itself is in question (how deep the module is, w
 - **Refactoring waits for review.** Cleanup belongs to the review stage (the `audit` skill finds it, the `refine` skill does it), outside the red-green cycle.
 - **Adding tests to existing code:** the implementation is read-only while you write them. A test that exposes a bug stays failing and the bug is reported; never weaken the assertion to match what the code does.
 
-For numerical algorithms or solvers, read the probe procedure in [PROBES.md](../optimize/PROBES.md) before selecting assertions or changing the production implementation.
+For numerical algorithms or solvers, read the probe procedure in [PROBES.md](../../shared/PROBES.md) before selecting assertions or changing the production implementation.
 
 ## Property-based tests
 

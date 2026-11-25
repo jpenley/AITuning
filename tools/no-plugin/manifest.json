@@ -1,0 +1,53 @@
+{
+  "name": "aituning-no-plugin",
+  "title": "AITuning skills: no plugin install",
+  "version": "1.0.0",
+  "install": {
+    "skillsDir": "~/.claude/skills",
+    "toolsDir": "~/.claude/aituning",
+    "backupDir": "~/.claude/skills-backup",
+    "dependencies": "auto",
+    "existing": "backup",
+    "validateAfterInstall": true
+  },
+  "tools": ["evals", "readiness"],
+  "groups": [
+    { "id": "plan", "title": "Plan and build", "page": "Core skills", "default": true, "skills": ["grill", "refine"] },
+    { "id": "review", "title": "Review and safety", "page": "Core skills", "default": true, "skills": ["audit", "doubt", "harden", "proof", "evidence", "feedback", "audition"] },
+    { "id": "debug", "title": "Debug and understand", "page": "Core skills", "default": true, "skills": ["diagnose", "trace", "dig", "research", "optimize"] },
+    { "id": "practice", "title": "Engineering practice", "page": "Core skills", "default": true, "skills": ["tdd", "modules", "gates", "domain", "merge", "pr", "wizard"] },
+    { "id": "agent", "title": "Working with the agent", "page": "Core skills", "default": true, "skills": ["tune", "retro", "handoff", "survey", "what", "task-talk"] },
+    { "id": "product", "title": "Product", "page": "Packs", "skills": ["discover", "ideate", "sketch"] },
+    { "id": "writing", "title": "Writing", "page": "Packs", "skills": ["prose", "draft"] },
+    { "id": "visual", "title": "Diagrams and browser questions", "page": "Packs", "skills": ["diagram", "consult"] },
+    { "id": "data", "title": "Data", "page": "Packs", "skills": ["validate"] },
+    { "id": "dotnet", "title": ".NET", "page": "Packs", "skills": ["guards-dotnet", "seams-dotnet"] },
+    { "id": "typescript", "title": "TypeScript", "page": "Packs", "skills": ["guards-typescript", "seams-typescript"] },
+    { "id": "knowing", "title": "Learning and research", "page": "Learning and research", "skills": ["understand", "investigate", "latest", "learn", "tutor", "figure"] }
+  ],
+  "needs": {
+    "craft": { "text": "Chrome, Edge or Chromium for page screenshots and audits.", "readiness": ["design"] },
+    "sketch": { "text": "Loads craft, which uses a browser for UI sketches.", "readiness": ["design"] },
+    "diagram": { "text": "Mermaid CLI (npm install -g @mermaid-js/mermaid-cli) to render; static checks run without it.", "readiness": ["diagram"] },
+    "pr": { "text": "Loads diagram for PR diagrams; Mermaid CLI optional." },
+    "consult": { "text": "A browser on the same machine. Bundles Mermaid." },
+    "figure": { "text": "Chrome, Edge or Chromium.", "readiness": ["design"] },
+    "research": { "text": "Web search and fetch tools in the client.", "readiness": ["research"] },
+    "latest": { "text": "Web search and fetch tools in the client.", "readiness": ["research"] },
+    "investigate": { "text": "Web search and fetch tools in the client.", "readiness": ["research"] },
+    "wizard": { "text": "Bash for the scripts it generates.", "readiness": ["wizard"] },
+    "guards-dotnet": { "text": ".NET SDK.", "readiness": ["dotnet"] },
+    "seams-dotnet": { "text": ".NET SDK.", "readiness": ["dotnet"] },
+    "guards-typescript": { "text": "Node and the project's package manager.", "readiness": ["typescript"] },
+    "seams-typescript": { "text": "Node and the project's package manager.", "readiness": ["typescript"] }
+  },
+  "rewrites": [
+    {
+      "skill": "tune",
+      "file": "TESTING.md",
+      "from": "](../../../../evals/README.md)",
+      "to": "]({toolsDirFromFile}/evals/README.md)",
+      "why": "tune points at the eval toolkit by its repository path; installed, the toolkit lives in the tools folder."
+    }
+  ]
+}

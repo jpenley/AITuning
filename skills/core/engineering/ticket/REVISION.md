@@ -1,6 +1,6 @@
 # Reconciling tickets after a correction
 
-Use for `ticket revise <ID>` after the changed target is approved. Read the owning spec/revision, its preserved prior intent, correction record, pinned baseline, Delta, and actual delivery evidence. Use the shared [identifiers](../spec/IDENTIFIERS.md), [capability contract](../spec/CAPABILITIES.md), and [course correction](../spec/REVISION.md). The course correction owns pausing and rebriefing workers, preserving prior intent, and recording later verification; this file owns the ticket dispositions and the graph repair.
+Use for `ticket revise <ID>` after the changed target is approved. Read the owning spec/revision, its preserved prior intent, correction record, pinned baseline, Delta, and actual delivery evidence. Use the shared [identifiers](../../shared/IDENTIFIERS.md), [capability contract](../../shared/CAPABILITIES.md), and [course correction](../../shared/REVISION.md). The course correction owns pausing and rebriefing workers, preserving prior intent, and recording later verification; this file owns the ticket dispositions and the graph repair.
 
 ## 1. Inventory and coordinate
 
@@ -27,7 +27,7 @@ Correction disposition describes how intent is treated, separately from lifecycl
 
 ## 3. Repair the graph
 
-For every affected edge, identify the delivered prerequisite and its evidence; a cancelled or superseded blocker does not unblock its consumer ([identifiers](../spec/IDENTIFIERS.md), *Satisfying a blocking edge*). Point the consumer to a replacement that guarantees the prerequisite, or record the approved removal/change of that prerequisite and edge.
+For every affected edge, identify the delivered prerequisite and its evidence; a cancelled or superseded blocker does not unblock its consumer ([identifiers](../../shared/IDENTIFIERS.md), *Satisfying a blocking edge*). Point the consumer to a replacement that guarantees the prerequisite, or record the approved removal/change of that prerequisite and edge.
 
 Repair incoming/outgoing blockers, coverage, checkpoints, work-list pointers, aliases, and capability-baseline ordering. Map replacement Delta rows and preserve checks to live tickets. Resolve overlapping capability requirements or moved baselines before readiness; another change's old baseline cannot be assumed current.
 

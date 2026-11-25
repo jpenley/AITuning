@@ -12,7 +12,7 @@ A reviewer from the same engine as the author shares its blind spots. `crosschec
 
 Take the path the user gave. With none, use the spec written or discussed in this session; with none of those, ask which file. **Done when** you hold one file path.
 
-For a changed plan, the review criteria are *Reviewing a revised plan* in [Course correction](../spec/REVISION.md), with [Capabilities and deltas](../spec/CAPABILITIES.md). Name the active approved revision.
+For a changed plan, the review criteria are *Reviewing a revised plan* in [Course correction](../../shared/REVISION.md), with [Capabilities and deltas](../../shared/CAPABILITIES.md). Name the active approved revision.
 
 ## 2. Run
 

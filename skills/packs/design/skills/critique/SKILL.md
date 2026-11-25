@@ -15,7 +15,7 @@ Reviews an interface the way a demanding design lead would: measured where it ca
 - Run `craft`'s check on the rendered page (its step 3, including the no-browser fallback): the findings name the element, and the screenshots give both widths to look at.
 - Read the `DESIGN.md` if there is one: departures from it are findings.
 - Look at the screenshots at each width, then the code for states you can't see (hover, focus, disabled, error, empty, loading).
-- For interactive web surfaces, use [craft's interaction checks](../craft/INTERACTIONS.md). Keep observed defects and unverified behavior distinct; include `file:line` when code supports a finding.
+- For interactive web surfaces, use [the shared interaction checks](../../shared/INTERACTIONS.md). Keep observed defects and unverified behavior distinct; include `file:line` when code supports a finding.
 
 ## 2. Look everywhere
 

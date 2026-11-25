@@ -10,13 +10,13 @@ Break a spec, plan, or conversation into **tickets**: tracer-bullet vertical sli
 
 **Tracker**: if `docs/agents/issue-tracker.md` exists, publish the way it says. Otherwise tickets are local files at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, one per ticket. `<NN>` is the ticket's allocated number: a first breakdown allocates them in dependency order, blockers first, and later tickets take the next free number without renumbering.
 
-**ID**: allocate tickets under the shared [IDENTIFIERS.md](../spec/IDENTIFIERS.md) contract. Titles, Spec fields, blocker lists, breakdowns, and handoffs carry short IDs; native tracker keys and legacy IDs remain aliases.
+**ID**: allocate tickets under the shared [IDENTIFIERS.md](../../shared/IDENTIFIERS.md) contract. Titles, Spec fields, blocker lists, breakdowns, and handoffs carry short IDs; native tracker keys and legacy IDs remain aliases.
 
 **Status**: a ticket is `ready-for-agent` when its bound intent and the *Per-ticket checks* (step 4) hold. One that fails a check is `needs-grill`, with a `## Gaps` section listing each failing check and where it fails; the setup pack's `adopt <item>` finishes these when it's installed, otherwise settle the gaps with `grill` and rerun the checks. A ticket is `done` only with its named delivery evidence at its stated boundary.
 
 **Existing open tickets**: inspect conflicting ownership, active workers, shared baselines, and overlapping delivery contracts. Pause or coordinate affected workers before changing their work, and preserve their state. Unrelated open work alone does not halt this planning.
 
-**Revision mode**: `ticket revise <ID>` follows [REVISION.md](REVISION.md) to reconcile execution with approved changed intent. Current behavior, pinned baselines, and Delta meanings follow [CAPABILITIES.md](../spec/CAPABILITIES.md).
+**Revision mode**: `ticket revise <ID>` follows [REVISION.md](REVISION.md) to reconcile execution with approved changed intent. Current behavior, pinned baselines, and Delta meanings follow [CAPABILITIES.md](../../shared/CAPABILITIES.md).
 
 ## 1. Gather context
 
@@ -46,7 +46,7 @@ If you haven't already, explore enough to know the current state of the code. Us
 - **Contract first**: when several tickets share an API or interface, a ticket that defines the contract blocks them all, so they can proceed in parallel against it.
 - **Risk first**: within what the dependencies allow, put the riskiest tickets early, so the riskiest assumption fails fast.
 
-Give each ticket its **blocking edges**: the delivered prerequisites it needs and the tickets that supply them. An edge is satisfied only as [IDENTIFIERS.md](../spec/IDENTIFIERS.md) (*Satisfying a blocking edge*) says; closed cancelled work never satisfies one. A ticket with no unsatisfied edge can start immediately.
+Give each ticket its **blocking edges**: the delivered prerequisites it needs and the tickets that supply them. An edge is satisfied only as [IDENTIFIERS.md](../../shared/IDENTIFIERS.md) (*Satisfying a blocking edge*) says; closed cancelled work never satisfies one. A ticket with no unsatisfied edge can start immediately.
 
 **Wide refactors are the exception.** When one mechanical change (renaming a symbol, retyping a shared type) fans out across the codebase so no vertical slice can land green, sequence it as **expand, migrate, contract**: add the new form beside the old; migrate call sites in batches sized by blast radius (per package or directory), each its own ticket blocked by the expand; then delete the old form in a ticket blocked by every batch. If even the batches can't stay green alone, keep the sequence on one integration branch, and add a final integrate-and-verify ticket blocked by all of them.
 

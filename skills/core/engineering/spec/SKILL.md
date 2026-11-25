@@ -8,15 +8,15 @@ disable-model-invocation: true
 
 Turn the current conversation and your understanding of the codebase into a spec, usually straight after a `grill` session. Synthesise what you already know; this is not an interview.
 
-**Tracker**: if `docs/agents/issue-tracker.md` exists, publish the way it says. Otherwise a change spec is a local file at `.scratch/<feature-slug>/spec.md`; capability placement follows [CAPABILITIES.md](CAPABILITIES.md).
+**Tracker**: if `docs/agents/issue-tracker.md` exists, publish the way it says. Otherwise a change spec is a local file at `.scratch/<feature-slug>/spec.md`; capability placement follows [CAPABILITIES.md](../../shared/CAPABILITIES.md).
 
-**ID**: reserve the spec's identity under [IDENTIFIERS.md](IDENTIFIERS.md) before publishing. Put it in the title and references; retain native tracker keys and legacy IDs as aliases. Capability-map module filenames can stay `.scratch/<feature-slug>/<module-id>.md`.
+**ID**: reserve the spec's identity under [IDENTIFIERS.md](../../shared/IDENTIFIERS.md) before publishing. Put it in the title and references; retain native tracker keys and legacy IDs as aliases. Capability-map module filenames can stay `.scratch/<feature-slug>/<module-id>.md`.
 
-**Modes**: ordinary `spec` synthesises a change from the conversation. `spec capability <scope>` records observed current behavior using [CAPABILITIES.md](CAPABILITIES.md), without a planned-target or readiness claim. `spec revise <ID>` follows [REVISION.md](REVISION.md) when intended behavior changes or retires. Repairs within accepted intent keep that intent and revision.
+**Modes**: ordinary `spec` synthesises a change from the conversation. `spec capability <scope>` records observed current behavior using [CAPABILITIES.md](../../shared/CAPABILITIES.md), without a planned-target or readiness claim. `spec revise <ID>` follows [REVISION.md](../../shared/REVISION.md) when intended behavior changes or retires. Repairs within accepted intent keep that intent and revision.
 
 ## Process
 
-1. **Explore** the repo to understand the current state of the code, if you haven't already. Use the project's `CONTEXT.md` vocabulary throughout and respect ADRs in the area. Read [CAPABILITIES.md](CAPABILITIES.md) and capture only the affected baseline, with immutable source/evidence references, limits, and unknowns. Keep observation separate from the requested target.
+1. **Explore** the repo to understand the current state of the code, if you haven't already. Use the project's `CONTEXT.md` vocabulary throughout and respect ADRs in the area. Read [CAPABILITIES.md](../../shared/CAPABILITIES.md) and capture only the affected baseline, with immutable source/evidence references, limits, and unknowns. Keep observation separate from the requested target.
 2. **Scope check.** If the conversation covers several capabilities that could each ship and be verified on their own (distinct consumers or data, acceptance criteria that cluster into separate groups, one capability replaceable without rewriting the others), propose a **capability map** before writing anything:
 
    ```markdown
@@ -123,7 +123,7 @@ Anything else.
 | <add / modify / remove / rename / preserve> | <capability / stable key> | <baseline> | <target requirement> | <handling and affected consumers> | <named check and intended owner> |
 ```
 
-Delta is the final section, written before implementation under [CAPABILITIES.md](CAPABILITIES.md). It references the authoritative target requirements; tickets bind the executable rows and preserve checks to owners before work starts.
+Delta is the final section, written before implementation under [CAPABILITIES.md](../../shared/CAPABILITIES.md). It references the authoritative target requirements; tickets bind the executable rows and preserve checks to owners before work starts.
 
 A standalone ticket needs a thin owning change spec: fill these same target sections concisely, use explicit inapplicable entries where needed, and retain the baseline, measurable criteria, inherited constraints/boundaries, tests, and final Delta. Small work without a ticket keeps the existing short path.
 

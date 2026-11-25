@@ -77,7 +77,7 @@ The reviewer's output is data, not a verdict: re-read the artifact against each 
 1. **Contract misread**: the contract was unclear or incomplete. Fix the contract, then review again.
 2. **Valid and actionable**: change the artifact, then loop.
 3. **Valid trade-off**: real, but fixing costs more than accepting. Record it so the user sees it (as a ruling, inside `build`).
-4. **Noise**: correct under context the reviewer lacked. Note it, and ask whether a better contract would have prevented it. For a claimed security issue, name the dismissal test that applies (the list is in the `audit` skill's `VERIFY.md`).
+4. **Noise**: correct under context the reviewer lacked. Note it, and ask whether a better contract would have prevented it. For a claimed security issue, name the dismissal test that applies (the list is in the shared [VERIFY.md](../../shared/VERIFY.md)).
 
 ### 5. Stop
 

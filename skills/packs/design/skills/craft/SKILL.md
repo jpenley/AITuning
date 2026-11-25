@@ -25,7 +25,7 @@ The quality floor for any interface you touch, and the tools that check it on th
 | Layout | No sideways scroll at 390px or 320px wide (WCAG 1.4.10 reflow: 320px is a 1280px screen at 400% zoom), and nothing clipped or overlapping at 200% zoom (1280px shown at 640px); tap targets 24×24px minimum (44 comfortable); `100dvh`/`svh` instead of `100vh` |
 | Motion | Transform and opacity only; durations by job as in the `animate` skill's table; ease-out; a `prefers-reduced-motion` path; content visible if the script never runs |
 
-For web surfaces with forms, navigation, asynchronous feedback, gestures, media, locale formatting, or themes, read [INTERACTIONS.md](INTERACTIONS.md) and check the applicable rows alongside the floor.
+For web surfaces with forms, navigation, asynchronous feedback, gestures, media, locale formatting, or themes, read [INTERACTIONS.md](../../shared/INTERACTIONS.md) and check the applicable rows alongside the floor.
 
 ## 3. Check the rendered page
 

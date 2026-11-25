@@ -9,7 +9,7 @@ Make one algorithm cheaper on one metric while its output stays identical. The m
 
 A slowdown that appeared recently is a regression: that's the `diagnose` skill's job. Load it with your skill tool instead.
 
-For numerical algorithms and solvers, read [PROBES.md](PROBES.md) before changing production. It distinguishes output-preserving optimization from an intentional model change and keeps probe accuracy and cost gates independent.
+For numerical algorithms and solvers, read [PROBES.md](../../shared/PROBES.md) before changing production. It distinguishes output-preserving optimization from an intentional model change and keeps probe accuracy and cost gates independent.
 
 ## Phase 1: Pin the goal
 

@@ -49,6 +49,6 @@ Before deploying, write down:
 
 ## 6. After deploying
 
-Use [Capabilities and deltas](../spec/CAPABILITIES.md) to update deployment evidence for the capabilities actually verified in this release. Keep source/integration evidence distinct from runtime or production observations; do not promote every planned Delta entry with the version tag. A removal or rename needs its own consumer/migration verification.
+Use [Capabilities and deltas](../../shared/CAPABILITIES.md) to update deployment evidence for the capabilities actually verified in this release. Keep source/integration evidence distinct from runtime or production observations; do not promote every planned Delta entry with the version tag. A removal or rename needs its own consumer/migration verification.
 
 Watch a fixed window after deploying (30 minutes, or each canary step) and compare against the baseline. Verify with evidence: the health check responds, no new error types appear, latency hasn't regressed, the critical user flow works, logs are flowing, and the rollback path is ready. Report the release: version, tag, changelog section, the rollback plan, and the verification results.

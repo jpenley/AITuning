@@ -79,7 +79,7 @@ export function validateSpec(spec, specDir) {
   const seen = new Map();
   spec.questions.forEach((q, qi) => {
     const p = `questions[${qi}]`;
-    if (!keys(q, p, ['id', 'kind', 'prompt', 'context', 'options', 'allowOther', 'required', 'min', 'max', 'showIf'])) return;
+    if (!keys(q, p, ['id', 'kind', 'prompt', 'context', 'options', 'allowOther', 'required', 'min', 'max', 'showIf', 'default'])) return;
     if (typeof q.id !== 'string' || !ID.test(q.id)) bad(`${p}.id`, 'must match [A-Za-z0-9][A-Za-z0-9_.-]*');
     else if (seen.has(q.id)) bad(`${p}.id`, `duplicate question id "${q.id}"`);
     if (!KINDS.includes(q.kind)) bad(`${p}.kind`, `must be one of ${KINDS.join(', ')}`);
@@ -113,7 +113,16 @@ export function validateSpec(spec, specDir) {
         if (Number.isInteger(q.min) && Number.isInteger(q.max) && q.min > q.max) bad(`${p}.min`, 'must not exceed max');
         if (Number.isInteger(q.min) && q.min > choices) bad(`${p}.min`, `exceeds the ${choices} available choices`);
       }
+      if (q.default !== undefined) {
+        if (!Array.isArray(q.default)) bad(`${p}.default`, 'must be an array of option ids');
+        else {
+          for (const id of q.default) if (!(q.options ?? []).some((o) => o?.id === id)) bad(`${p}.default`, `no option "${id}"`);
+          if (q.kind === 'single' && q.default.length > 1) bad(`${p}.default`, 'a single question can preselect at most one option');
+          if (q.kind === 'multi' && Number.isInteger(q.max) && q.default.length > q.max) bad(`${p}.default`, `preselects more than max (${q.max})`);
+        }
+      }
     }
+    if (q.kind === 'text' && q.default !== undefined) bad(`${p}.default`, 'not allowed on a text question');
 
     if (q.showIf !== undefined) {
       const ok = q.showIf && typeof q.showIf === 'object' && !Array.isArray(q.showIf);
@@ -241,7 +250,8 @@ export function runSession(spec, specPath, opts = {}) {
   const token = randomBytes(24).toString('hex');
   const page = readFileSync(join(HERE, 'page.html'), 'utf8');
   const usesMermaid = JSON.stringify(spec).includes('"mermaid"');
-  let answers = {};
+  // The page opens with each question's default options ticked; the first draft replaces them.
+  let answers = sanitize(spec, Object.fromEntries(spec.questions.filter((q) => q.default).map((q) => [q.id, { selected: q.default }])));
   const clients = new Set();
   let graceTimer = null;
   let timeoutTimer = null;
@@ -420,7 +430,7 @@ async function selftest() {
         { id: 'store', kind: 'single', prompt: 'Where?', required: true, allowOther: true, context: { mermaid: 'graph LR; A-->B', images: [{ path: 'pic.png', alt: 'pic' }] },
           options: [{ id: 'mem', label: 'Memory' }, { id: 'redis', label: 'Redis', recommended: true, why: 'shared' }] },
         { id: 'ttl', kind: 'single', prompt: 'TTL?', showIf: { store: 'redis' }, options: [{ id: '5m', label: '5 min', recommended: true }, { id: '1h', label: '1 hour' }] },
-        { id: 'inv', kind: 'multi', prompt: 'Invalidate on?', min: 1, max: 2, options: [{ id: 'etl', label: 'ETL', recommended: true }, { id: 'edit', label: 'Edit' }, { id: 'manual', label: 'Manual' }] },
+        { id: 'inv', kind: 'multi', prompt: 'Invalidate on?', min: 1, max: 2, default: ['etl'], options: [{ id: 'etl', label: 'ETL', recommended: true }, { id: 'edit', label: 'Edit' }, { id: 'manual', label: 'Manual' }] },
         { id: 'notes', kind: 'text', prompt: 'Anything else?' },
       ],
     };
@@ -438,6 +448,11 @@ async function selftest() {
       check(p.some((x) => x.includes(needle)), `reports ${name}`);
     }
     check(validateSpec({ questions: [{ id: 'a', kind: 'single', prompt: 'A', options: [{ id: 'x', label: 'X', why: 'no' }] }] }, dir).some((x) => x.includes('only allowed on a recommended')), 'why needs recommended');
+    const withDefault = (q) => validateSpec({ questions: [{ id: 'a', prompt: 'A', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }], ...q }] }, dir);
+    check(withDefault({ kind: 'multi', default: ['x', 'y'] }).length === 0, 'multi default valid');
+    check(withDefault({ kind: 'single', default: ['x', 'y'] }).some((x) => x.includes('at most one')), 'single default limited to one');
+    check(withDefault({ kind: 'multi', default: ['z'] }).some((x) => x.includes('no option "z"')), 'default needs real option');
+    check(withDefault({ kind: 'multi', max: 1, default: ['x', 'y'] }).some((x) => x.includes('more than max')), 'default within max');
 
     const raw = { store: { selected: ['redis', 'bogus'] }, ttl: { selected: ['1h', '5m'] }, inv: { selected: ['etl'] }, notes: { text: '  keep it  ', selected: ['x'] } };
     const a = sanitize(spec, raw);
@@ -476,6 +491,7 @@ async function selftest() {
     check((await req(`/image?${t}&path=..%2Fx.png`)).status === 404, 'image escape rejected');
     check((await req(`/image?${t}&path=pic.png`)).status === 200, 'image served');
     check((await req(`/?${t}`)).body.includes('<main'), 'page served');
+    check(JSON.parse((await req(`/spec?${t}`)).body).answers.inv?.selected.join() === 'etl', 'defaults preselected');
     check((await req(`/vendor/mermaid.js?${t}`)).status === 200, 'mermaid served');
     const post = (path, obj) => req(`${path}?${t}`, { method: 'POST', headers: { origin, 'content-type': 'application/json' }, body: JSON.stringify(obj) });
     check((await post('/submit', {})).status === 422, 'invalid submit rejected');
